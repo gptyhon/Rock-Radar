@@ -1,0 +1,252 @@
+{
+  "CONFIG": {
+    "RADAR_SCALE": 1,
+    "RADAR_GRID_LEVELS": 5,
+    "RADAR_GRID_LINE_WIDTH": 3,
+    "RADAR_GRID_LINE_OPACITY": 0.2,
+    "PARTICLE_OPACITY_MULT": 2,
+    "PARTICLE_SIZE_MULT": 2,
+    "VERTEX_COUNT": 6,
+    "INTRO_WAIT_TIME": 1000,
+    "DIM_NAMES": [
+      "创新性",
+      "旋律",
+      "歌词",
+      "影响力",
+      "主唱",
+      "乐器"
+    ],
+    "BASE_MAX_SCORES": [
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+    ],
+    "MIN_SCORES": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "ANIM_DURATION": 1500,
+    "ENABLE_SPECIAL_FORMAT": true,
+    "DEFAULT_DURATION": 5000,
+    "SHOW_DESC": true,
+    "IMAGE_SCALE": 1.2,
+    "USE_PERCENTAGE": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "LABEL_MARGIN": 80,
+    "USE_AUTO_PRECISION": true,
+    "SHOW_SCORE_UNDER_NAME": false,
+    "BEST_COLOR": "#ffd700",
+    "BEST_LABEL_FONT": "italic 700 36px \"Cormorant Garamond\", \"Times New Roman\", serif",
+    "BEST_VALUE_FONT": "italic 700 34px \"Cormorant Garamond\", \"Times New Roman\", serif",
+    "BEST_FONT": "italic 700 42px \"Cormorant Garamond\", \"Times New Roman\", serif",
+    "GACHA_ANIM_DURATION": 2000,
+    "GACHA_ANIM_TYPE": 2,
+    "GACHA_FONT_STYLE": 0
+  },
+  "COLOR_PRESETS": [
+    {
+      "color": "#00ffff",
+      "bg1": "#001a1a",
+      "bg2": "#000d0d"
+    },
+    {
+      "color": "#ff00ff",
+      "bg1": "#1a001a",
+      "bg2": "#0d000d"
+    },
+    {
+      "color": "#ffff00",
+      "bg1": "#1a1a00",
+      "bg2": "#0d0d00"
+    },
+    {
+      "color": "#00ff00",
+      "bg1": "#001a00",
+      "bg2": "#000d00"
+    },
+    {
+      "color": "#ff4500",
+      "bg1": "#1a0700",
+      "bg2": "#0d0300"
+    },
+    {
+      "color": "#1e90ff",
+      "bg1": "#000f1a",
+      "bg2": "#00070d"
+    },
+    {
+      "color": "#ff0040",
+      "bg1": "#1a0006",
+      "bg2": "#0d0003"
+    },
+    {
+      "color": "#7cfc00",
+      "bg1": "#0c1a00",
+      "bg2": "#060d00"
+    },
+    {
+      "color": "#ba55d3",
+      "bg1": "#13091a",
+      "bg2": "#09040d"
+    },
+    {
+      "color": "#40e0d0",
+      "bg1": "#061a18",
+      "bg2": "#030d0c"
+    },
+    {
+      "color": "#f08080",
+      "bg1": "#1a0e0e",
+      "bg2": "#0d0707"
+    },
+    {
+      "color": "#00fa9a",
+      "bg1": "#001a10",
+      "bg2": "#000d08"
+    },
+    {
+      "color": "#ff8c00",
+      "bg1": "#1a0e00",
+      "bg2": "#0d0700"
+    },
+    {
+      "color": "#9370db",
+      "bg1": "#0f0b1a",
+      "bg2": "#07050d"
+    },
+    {
+      "color": "#00ced1",
+      "bg1": "#00151a",
+      "bg2": "#000a0d"
+    },
+    {
+      "color": "#ff1493",
+      "bg1": "#1a0210",
+      "bg2": "#0d0108"
+    },
+    {
+      "color": "#adff2f",
+      "bg1": "#111a03",
+      "bg2": "#080d01"
+    },
+    {
+      "color": "#b0c4de",
+      "bg1": "#12141a",
+      "bg2": "#090a0d"
+    },
+    {
+      "color": "#eea2ad",
+      "bg1": "#1a1112",
+      "bg2": "#0d0809"
+    },
+    {
+      "color": "#00bfff",
+      "bg1": "#00131a",
+      "bg2": "#00090d"
+    }
+  ],
+  "mvplist": [
+    "白厄"
+  ],
+  "IMAGE_META": {
+    "best_白厄.png": {
+      "fit": "cover",
+      "scale": 0.99,
+      "x": 27.7,
+      "y": 0
+    },
+    "best_昔涟.png": {
+      "fit": "cover",
+      "scale": 1,
+      "x": 55.28,
+      "y": 3.2000000000000046
+    },
+    "best_遐蝶.webp": {
+      "fit": "cover",
+      "scale": 1,
+      "x": 54.440000000000005,
+      "y": 20.240000000000002
+    },
+    "best_风堇.png": {
+      "fit": "cover",
+      "scale": 1,
+      "x": 49.88,
+      "y": 18.200000000000003
+    },
+    "白厄1.png": {
+      "fit": "contain",
+      "scale": 1.58,
+      "x": 8.9,
+      "y": 57.3
+    }
+  },
+  "namelist": [
+    {
+      "name": "遐蝶",
+      "points": [
+        5,
+        7,
+        8,
+        9,
+        2,
+        7
+      ],
+      "desc": "无需多言",
+      "colorIndex": 12,
+      "duration": 6000,
+      "gacha": false
+    },
+    {
+      "name": "白厄",
+      "points": [
+        9,
+        7.8,
+        9,
+        12,
+        4,
+        7
+      ],
+      "desc": "xqcl",
+      "gacha": false
+    },
+    {
+      "name": "风堇",
+      "points": [
+        13,
+        8,
+        9,
+        10,
+        8,
+        12
+      ],
+      "desc": "rym亲爹。我一直是idm粉丝啊",
+      "gacha": true
+    },
+    {
+      "name": "昔涟",
+      "points": [
+        14,
+        4,
+        15,
+        14,
+        1,
+        2
+      ],
+      "desc": "诺贝尔文学奖得主的含金量，要歌词有歌词，唱功有歌词",
+      "gacha": true
+    }
+  ]
+}

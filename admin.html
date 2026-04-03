@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Radar - 管理面板</title>
+    <style>
+        :root { --accent: #00bcd4; --bg: #1a1a2e; --card: #16213e; --text: #e0e0e0; --border: #2a2a4a; --danger: #e74c3c; --success: #2ecc71; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "HarmonyOS Sans SC", "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        
+        .topbar { background: #0f3460; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; }
+        .topbar h1 { font-size: 1.2rem; color: var(--accent); letter-spacing: 2px; }
+        .topbar-actions { display: flex; gap: 10px; }
+        
+        .btn { padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-primary:hover { background: #00e5ff; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { background: #c0392b; }
+        .btn-success { background: var(--success); color: #000; }
+        .btn-success:hover { background: #27ae60; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-sm { padding: 4px 12px; font-size: 0.8rem; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 0; }
+        .tab { padding: 10px 20px; cursor: pointer; border-radius: 6px 6px 0 0; background: transparent; color: var(--text); border: 1px solid transparent; border-bottom: none; transition: all 0.2s; font-weight: 500; }
+        .tab:hover { background: rgba(0,188,212,0.1); }
+        .tab.active { background: var(--card); color: var(--accent); border-color: var(--border); position: relative; }
+        .tab.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--card); }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .card { background: var(--card); border-radius: 10px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); }
+        .card h3 { color: var(--accent); margin-bottom: 12px; font-size: 1rem; }
+
+        .form-row { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-size: 0.8rem; color: #888; }
+        .form-group input, .form-group select, .form-group textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: var(--text); font-size: 0.9rem; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+
+        .band-card { display: flex; gap: 16px; align-items: flex-start; }
+        .band-card-main { flex: 1; }
+        .band-card-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+        .band-index { background: var(--accent); color: #000; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
+
+        .points-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 8px 0; }
+        .points-grid .form-group input { width: 100%; text-align: center; }
+        .points-grid .form-group label { text-align: center; font-size: 0.75rem; }
+
+        .color-dot { width: 20px; height: 20px; border-radius: 50%; display: inline-block; border: 2px solid rgba(255,255,255,0.3); vertical-align: middle; }
+
+        .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+        .special-image-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 16px; }
+        .special-image-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .special-image-preview { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; background: linear-gradient(135deg, #0d1220, #11192d); display: flex; align-items: center; justify-content: center; color: #7b86a5; font-size: 0.85rem; }
+        .special-image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .special-image-preview-btn { width: 100%; height: 100%; border: none; background: transparent; color: inherit; cursor: pointer; padding: 0; text-align: center; transition: transform 0.18s ease, filter 0.18s ease, border-color 0.18s ease; }
+        .special-image-preview-btn:hover { transform: scale(1.015); filter: brightness(1.05); }
+        .special-image-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .image-item { background: var(--bg); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); position: relative; }
+        .image-item img { width: 100%; height: 120px; object-fit: cover; }
+        .image-item .image-info { padding: 8px; font-size: 0.75rem; word-break: break-all; }
+        .image-item .image-del { position: absolute; top: 4px; right: 4px; background: rgba(231,76,60,0.9); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
+        .image-rename { padding: 0 8px 8px; display: flex; gap: 6px; }
+        .image-rename input { flex: 1; min-width: 0; background: #101424; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; color: var(--text); font-size: 0.75rem; }
+        .image-tools { padding: 0 8px 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .image-badge { font-size: 0.72rem; color: var(--accent); }
+
+        .upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+        .upload-zone:hover { border-color: var(--accent); background: rgba(0,188,212,0.05); }
+        .upload-zone input { display: none; }
+
+        .toast { position: fixed; top: 20px; right: 20px; padding: 12px 24px; border-radius: 8px; color: #fff; font-weight: 600; z-index: 1000; transform: translateX(120%); transition: transform 0.3s ease; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+
+        .checkbox-row { display: flex; align-items: center; gap: 8px; }
+        .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+
+        .drag-handle { cursor: grab; color: #555; font-size: 1.2rem; user-select: none; }
+        .drag-handle:active { cursor: grabbing; }
+
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.68); display: none; align-items: center; justify-content: center; z-index: 1500; padding: 20px; }
+        .modal-backdrop.show { display: flex; }
+        .modal-card { width: min(920px, 96vw); background: #111a30; border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+        .modal-grid { display: grid; grid-template-columns: minmax(320px, 420px) 1fr; gap: 20px; align-items: start; }
+        .crop-stage { position: relative; width: 100%; aspect-ratio: 1 / 1; background: linear-gradient(135deg, #0f1627, #090d18); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; cursor: grab; }
+        .crop-stage.door-preview,
+        .crop-stage.mvp-preview { aspect-ratio: 16 / 9; }
+        .crop-stage.dragging { cursor: grabbing; }
+        .crop-stage::before { content: ''; position: absolute; inset: 0; background:
+            linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 33.333% 33.333%;
+            pointer-events: none;
+        }
+        .crop-stage::after { content: ''; position: absolute; inset: 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; box-shadow: inset 0 0 80px rgba(0,0,0,0.35); pointer-events: none; }
+        .crop-stage.door-left::after {
+            background: linear-gradient(90deg, rgba(255,214,102,0.16) 0 50%, rgba(8,12,24,0.38) 50% 100%);
+        }
+        .crop-stage.door-right::after {
+            background: linear-gradient(90deg, rgba(8,12,24,0.38) 0 50%, rgba(255,214,102,0.16) 50% 100%);
+        }
+        .crop-stage.mvp-preview::after {
+            background:
+                linear-gradient(90deg, rgba(255,214,102,0.12) 0%, rgba(255,214,102,0.08) 22%, rgba(8,12,24,0.04) 46%, rgba(8,12,24,0.28) 100%);
+        }
+        .crop-preview-image { width: 100%; height: 100%; object-position: center; user-select: none; pointer-events: none; will-change: transform, object-position; }
+        .crop-stage.mvp-preview .crop-preview-image {
+            -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.72) 26%, rgba(0,0,0,0.28) 48%, rgba(0,0,0,0.02) 66%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.72) 26%, rgba(0,0,0,0.28) 48%, rgba(0,0,0,0.02) 66%, rgba(0,0,0,0) 100%);
+        }
+        .crop-visible-window {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            border: 2px solid rgba(255,214,102,0.68);
+            background: linear-gradient(180deg, rgba(255,214,102,0.08), rgba(255,214,102,0.02));
+            box-shadow: inset 0 0 36px rgba(255,214,102,0.12), 0 0 18px rgba(255,214,102,0.12);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .crop-visible-window::before {
+            content: '实际可见区域';
+            position: absolute;
+            top: 10px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            color: #f8d37e;
+            background: rgba(8,12,24,0.75);
+            border: 1px solid rgba(248,211,126,0.28);
+            letter-spacing: 1px;
+        }
+        .crop-stage.door-preview .crop-visible-window { opacity: 1; }
+        .crop-stage.door-left .crop-visible-window { left: 0; border-right: none; }
+        .crop-stage.door-left .crop-visible-window::before { left: 10px; }
+        .crop-stage.door-right .crop-visible-window { right: 0; border-left: none; }
+        .crop-stage.door-right .crop-visible-window::before { right: 10px; }
+        .crop-stage.mvp-preview .crop-visible-window {
+            opacity: 1;
+            left: 0;
+            width: 58%;
+            border-right: none;
+            background: linear-gradient(90deg, rgba(255,214,102,0.14), rgba(255,214,102,0.04));
+        }
+        .crop-stage.mvp-preview .crop-visible-window::before {
+            content: 'MVP 左侧渐隐显示区';
+            left: 10px;
+        }
+        .crop-side { display: flex; flex-direction: column; gap: 14px; }
+        .range-group { display: flex; flex-direction: column; gap: 6px; }
+        .range-group input[type="range"] { width: 100%; }
+        .range-row { display: flex; align-items: center; gap: 10px; }
+        .range-row output { min-width: 52px; color: var(--accent); font-size: 0.82rem; text-align: right; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+        .hint { font-size: 0.8rem; color: #8892b0; line-height: 1.5; }
+
+        @media (max-width: 760px) {
+            .modal-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <h1>⚡ ROCK RADAR 管理面板</h1>
+        <div class="topbar-actions">
+            <a href="/radar" target="_blank" class="btn btn-outline">打开雷达展示 ↗</a>
+            <button class="btn btn-primary" onclick="saveAll()">💾 保存全部</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="bands">选手管理</div>
+            <div class="tab" data-tab="config">全局配置</div>
+            <div class="tab" data-tab="colors">颜色方案</div>
+            <div class="tab" data-tab="images">图片管理</div>
+        </div>
+
+        <!-- 选手管理 -->
+        <div class="panel active" id="panel-bands">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h2 style="color:var(--accent)">选手列表</h2>
+                <button class="btn btn-success" onclick="addBand()">＋ 添加选手</button>
+            </div>
+            <div id="bandList"></div>
+        </div>
+
+        <!-- 全局配置 -->
+        <div class="panel" id="panel-config">
+            <div class="card">
+                <h3>雷达图设置</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>缩放比例</label><input type="number" id="cfg-RADAR_SCALE" step="0.1" min="0.1"></div>
+                    <div class="form-group"><label>网格层数</label><input type="number" id="cfg-RADAR_GRID_LEVELS" min="1" max="20"></div>
+                    <div class="form-group"><label>网格线宽</label><input type="number" id="cfg-RADAR_GRID_LINE_WIDTH" step="0.5" min="0.5"></div>
+                    <div class="form-group"><label>网格透明度</label><input type="number" id="cfg-RADAR_GRID_LINE_OPACITY" step="0.05" min="0" max="1"></div>
+                    <div class="form-group"><label>顶点数</label><input type="number" id="cfg-VERTEX_COUNT" min="3" max="20"></div>
+                    <div class="form-group"><label>标签边距</label><input type="number" id="cfg-LABEL_MARGIN" min="0"></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>动画 & 时间</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>数值动画时长(ms)</label><input type="number" id="cfg-ANIM_DURATION" step="100"></div>
+                    <div class="form-group"><label>默认展示时长(ms)</label><input type="number" id="cfg-DEFAULT_DURATION" step="500"></div>
+                    <div class="form-group"><label>开场等待(ms)</label><input type="number" id="cfg-INTRO_WAIT_TIME" step="100"></div>
+                    <div class="form-group"><label>图片缩放</label><input type="number" id="cfg-IMAGE_SCALE" step="0.1" min="0.1"></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>粒子效果</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>透明度倍率</label><input type="number" id="cfg-PARTICLE_OPACITY_MULT" step="0.1" min="0"></div>
+                    <div class="form-group"><label>大小倍率</label><input type="number" id="cfg-PARTICLE_SIZE_MULT" step="0.1" min="0"></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>显示选项</h3>
+                <div class="form-row">
+                    <div class="checkbox-row"><input type="checkbox" id="cfg-SHOW_DESC"><label>显示乐评描述</label></div>
+                    <div class="checkbox-row"><input type="checkbox" id="cfg-ENABLE_SPECIAL_FORMAT"><label>启用 10+ 特殊格式</label></div>
+                    <div class="checkbox-row"><input type="checkbox" id="cfg-USE_AUTO_PRECISION"><label>自动精度控制</label></div>
+                    <div class="checkbox-row"><input type="checkbox" id="cfg-SHOW_SCORE_UNDER_NAME"><label>分数显示在名称下方</label></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Best 标记</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>颜色</label><input type="color" id="cfg-BEST_COLOR" style="width:60px;height:36px;padding:2px;"></div>
+                    <div class="form-group"><label>字体 CSS</label><input type="text" id="cfg-BEST_FONT" style="width:350px;"></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>抽卡出金动画</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>动画时长(ms)</label><input type="number" id="cfg-GACHA_ANIM_DURATION" step="100"></div>
+                    <div class="form-group">
+                        <label>动画风格</label>
+                        <input type="text" value="固定为 故障神启" disabled style="width:180px;opacity:0.8;">
+                    </div>
+                    <div class="form-group">
+                        <label>艺术字风格</label>
+                        <select id="cfg-GACHA_FONT_STYLE">
+                            <option value="0">0 - 金色辉光</option>
+                            <option value="1">1 - 白蓝渐变</option>
+                            <option value="2">2 - 霓虹灯</option>
+                            <option value="3">3 - 故障效果</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>维度设置</h3>
+                <div id="dimSettings"></div>
+            </div>
+            <div class="card">
+                <h3>MVP 列表</h3>
+                <div class="form-group">
+                    <label>MVP 名称（逗号分隔）</label>
+                    <input type="text" id="cfg-mvplist" style="width:100%;">
+                </div>
+            </div>
+        </div>
+
+        <!-- 颜色方案 -->
+        <div class="panel" id="panel-colors">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h2 style="color:var(--accent)">颜色方案 (COLOR_PRESETS)</h2>
+                <button class="btn btn-success" onclick="addColor()">＋ 添加配色</button>
+            </div>
+            <div id="colorList"></div>
+        </div>
+
+        <!-- 图片管理 -->
+        <div class="panel" id="panel-images">
+            <div class="card">
+                <h3>抽卡开门图片</h3>
+                <div class="hint" style="margin-bottom:12px;">这里管理开门动画左右两边的图片。上传后可直接点“取景”，最后点顶部“保存全部”。</div>
+                <div class="special-image-grid" id="specialImageGrid"></div>
+            </div>
+            <div class="card">
+                <h3>上传图片</h3>
+                <div class="form-row" style="margin-bottom:12px;">
+                    <div class="form-group">
+                        <label>文件名（含扩展名）</label>
+                        <input type="text" id="uploadFilename" placeholder="例: castorice.webp" style="width:250px;">
+                    </div>
+                    <div style="font-size:0.8rem;color:#888;">支持中文；不写扩展名时会自动保留原扩展名</div>
+                </div>
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept="image/*" onchange="uploadFile(this.files[0])">
+                    <p>📁 点击选择或拖拽图片到此处</p>
+                    <p style="font-size:0.8rem;color:#666;margin-top:8px;">支持 jpg / png / webp / gif / svg，最大 20MB</p>
+                </div>
+            </div>
+            <div class="card">
+                <h3>已有图片</h3>
+                <div class="image-grid" id="imageGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="modal-backdrop" id="imageEditorModal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div>
+                    <h3 style="color:var(--accent);margin-bottom:4px;">图片取景</h3>
+                    <div id="editorImageName" style="font-size:0.82rem;color:#8892b0;"></div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="closeImageEditor()">关闭</button>
+            </div>
+            <div class="modal-grid">
+                <div class="crop-stage" id="cropStage">
+                    <img id="cropPreviewImage" class="crop-preview-image" src="" alt="">
+                    <div class="crop-visible-window" id="cropVisibleWindow"></div>
+                </div>
+                <div class="crop-side">
+                    <div class="form-group">
+                        <label>显示模式</label>
+                        <select id="cropFitMode">
+                            <option value="contain">完整显示</option>
+                            <option value="cover">铺满裁切</option>
+                        </select>
+                    </div>
+                    <div class="range-group">
+                        <label>缩放</label>
+                        <div class="range-row">
+                            <input type="range" id="cropScale" min="0.5" max="2.5" step="0.01">
+                            <output id="cropScaleOut">1.00x</output>
+                        </div>
+                    </div>
+                    <div class="range-group">
+                        <label>水平焦点</label>
+                        <div class="range-row">
+                            <input type="range" id="cropX" min="0" max="100" step="0.1">
+                            <output id="cropXOut">50%</output>
+                        </div>
+                    </div>
+                    <div class="range-group">
+                        <label>垂直焦点</label>
+                        <div class="range-row">
+                            <input type="range" id="cropY" min="0" max="100" step="0.1">
+                            <output id="cropYOut">50%</output>
+                        </div>
+                    </div>
+                    <div class="hint">
+                        拖动预览图可直接选取画面区域。<br>
+                        改完点“应用取景”，最后再点顶部“保存全部”写入 `data.json`。
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="resetImageEditor()">重置</button>
+                <button class="btn btn-primary" onclick="saveImageEditor()">应用取景</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let appData = null;
+        let currentImageEditor = null;
+        let cropDraft = null;
+        let latestImages = [];
+        const specialImageSlots = [
+            { id: 'door_left', title: '左门图片', baseName: 'gacha_door_left' },
+            { id: 'door_right', title: '右门图片', baseName: 'gacha_door_right' }
+        ];
+
+        // ===== 初始化 =====
+        async function init() {
+            const res = await fetch('/api/data');
+            appData = await res.json();
+            appData.IMAGE_META = appData.IMAGE_META || {};
+            renderBands();
+            renderConfig();
+            renderColors();
+            loadImages();
+        }
+
+        function imageBaseName(name) {
+            return String(name || '').replace(/\.[^.]+$/, '');
+        }
+
+        function getSpecialImages(slotId, images = latestImages) {
+            const slot = specialImageSlots.find(item => item.id === slotId);
+            if (!slot) return [];
+            return (images || [])
+                .filter(img => imageBaseName(img.name) === slot.baseName || String(img.name || '').startsWith(`${slot.baseName}.`))
+                .sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        function findSpecialImage(slotId, images = latestImages) {
+            return getSpecialImages(slotId, images)[0] || null;
+        }
+
+        async function refreshLatestImages() {
+            const res = await fetch('/api/images');
+            latestImages = await res.json();
+            return latestImages;
+        }
+
+        function renderSpecialImages() {
+            const el = document.getElementById('specialImageGrid');
+            if (!el) return;
+            el.innerHTML = specialImageSlots.map(slot => {
+                const img = findSpecialImage(slot.id);
+                const preview = img
+                    ? `<button type="button" class="special-image-preview special-image-preview-btn" onclick="openSpecialImageEditor(${jsonAttr(slot.id)})"><img src="${img.url}" alt="${escAttr(slot.title)}"></button>`
+                    : `<button type="button" class="special-image-preview special-image-preview-btn" onclick="triggerSpecialUpload(${jsonAttr(slot.id)})"><div>未上传 ${esc(slot.title)}<br><span style="font-size:0.78rem;color:#93a0c6;">点击先上传图片</span></div></button>`;
+                const badge = img
+                    ? `<span class="image-badge">${esc(img.name)}</span>`
+                    : `<span class="image-badge" style="color:#667;">使用默认纯色门板</span>`;
+                return `
+                    <div class="special-image-card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                            <strong style="color:var(--accent)">${esc(slot.title)}</strong>
+                            ${badge}
+                        </div>
+                        <div class="special-image-preview">${preview}</div>
+                        <div class="special-image-actions">
+                            <button class="btn btn-outline btn-sm" onclick="triggerSpecialUpload(${jsonAttr(slot.id)})">${img ? '更换图片' : '上传图片'}</button>
+                            <button class="btn btn-outline btn-sm" onclick="openSpecialImageEditor(${jsonAttr(slot.id)})">${img ? '取景' : '上传后取景'}</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== Tab 切换 =====
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+            });
+        });
+
+        // ===== 选手管理 =====
+        function renderBands() {
+            const list = document.getElementById('bandList');
+            list.innerHTML = appData.namelist.map((b, idx) => `
+                <div class="card band-card" data-idx="${idx}">
+                    <div class="band-index">${idx + 1}</div>
+                    <div class="band-card-main">
+                        <div class="form-row">
+                            <div class="form-group"><label>名称</label><input type="text" value="${esc(b.name)}" onchange="updateBand(${idx},'name',this.value)"></div>
+                            <div class="form-group"><label>描述</label><input type="text" value="${esc(b.desc || '')}" onchange="updateBand(${idx},'desc',this.value)" style="width:300px;"></div>
+                            <div class="form-group"><label>配色索引</label><input type="number" value="${b.colorIndex !== undefined ? b.colorIndex : ''}" min="0" max="19" onchange="updateBand(${idx},'colorIndex',this.value===''?undefined:+this.value)" style="width:80px;"></div>
+                            <div class="form-group"><label>时长(ms)</label><input type="number" value="${b.duration || ''}" step="500" onchange="updateBand(${idx},'duration',this.value?+this.value:undefined)" style="width:100px;"></div>
+                            <div class="checkbox-row" style="margin-top:18px;"><input type="checkbox" ${b.gacha ? 'checked' : ''} onchange="updateBand(${idx},'gacha',this.checked)"><label>抽卡出金</label></div>
+                        </div>
+                        <div class="points-grid">
+                            ${(appData.CONFIG.DIM_NAMES || []).map((dim, di) => `
+                                <div class="form-group">
+                                    <label>${esc(dim)}</label>
+                                    <input type="number" value="${b.points[di] !== undefined ? b.points[di] : 0}" step="0.1" onchange="updatePoint(${idx},${di},+this.value)">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="band-card-actions">
+                        ${idx > 0 ? `<button class="btn btn-outline btn-sm" onclick="moveBand(${idx},-1)">↑</button>` : ''}
+                        ${idx < appData.namelist.length - 1 ? `<button class="btn btn-outline btn-sm" onclick="moveBand(${idx},1)">↓</button>` : ''}
+                        <button class="btn btn-danger btn-sm" onclick="removeBand(${idx})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateBand(idx, key, val) { appData.namelist[idx][key] = val; }
+        function updatePoint(idx, dim, val) { appData.namelist[idx].points[dim] = val; }
+
+        function addBand() {
+            const vc = appData.CONFIG.VERTEX_COUNT || 6;
+            appData.namelist.push({ name: "New", points: Array(vc).fill(5), desc: "" });
+            renderBands();
+        }
+
+        function removeBand(idx) {
+            if (!confirm(`确认删除 "${appData.namelist[idx].name}"？`)) return;
+            appData.namelist.splice(idx, 1);
+            renderBands();
+        }
+
+        function moveBand(idx, dir) {
+            const target = idx + dir;
+            [appData.namelist[idx], appData.namelist[target]] = [appData.namelist[target], appData.namelist[idx]];
+            renderBands();
+        }
+
+        // ===== 全局配置 =====
+        function renderConfig() {
+            const C = appData.CONFIG;
+            // 数字/文本字段
+            ['RADAR_SCALE','RADAR_GRID_LEVELS','RADAR_GRID_LINE_WIDTH','RADAR_GRID_LINE_OPACITY',
+             'VERTEX_COUNT','LABEL_MARGIN','ANIM_DURATION','DEFAULT_DURATION','INTRO_WAIT_TIME',
+             'IMAGE_SCALE','PARTICLE_OPACITY_MULT','PARTICLE_SIZE_MULT','GACHA_ANIM_DURATION','BEST_FONT'].forEach(k => {
+                const el = document.getElementById(`cfg-${k}`);
+                if (el) el.value = C[k] !== undefined ? C[k] : '';
+            });
+            // 复选框
+            ['SHOW_DESC','ENABLE_SPECIAL_FORMAT','USE_AUTO_PRECISION','SHOW_SCORE_UNDER_NAME'].forEach(k => {
+                const el = document.getElementById(`cfg-${k}`);
+                if (el) el.checked = !!C[k];
+            });
+            // 颜色
+            const bestColorEl = document.getElementById('cfg-BEST_COLOR');
+            if (bestColorEl) bestColorEl.value = C.BEST_COLOR || '#FFD700';
+            // 下拉
+            const gachaStyle = document.getElementById('cfg-GACHA_FONT_STYLE');
+            if (gachaStyle) gachaStyle.value = C.GACHA_FONT_STYLE || 0;
+            // MVP
+            document.getElementById('cfg-mvplist').value = (appData.mvplist || []).join(', ');
+            // 维度设置
+            renderDimSettings();
+        }
+
+        function renderDimSettings() {
+            const C = appData.CONFIG;
+            const vc = C.VERTEX_COUNT || 6;
+            let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">';
+            for (let i = 0; i < vc; i++) {
+                html += `<div class="card" style="padding:12px;">
+                    <div class="form-group"><label>维度 ${i + 1} 名称</label><input type="text" value="${esc(C.DIM_NAMES[i] || '')}" onchange="appData.CONFIG.DIM_NAMES[${i}]=this.value" style="width:100%;"></div>
+                    <div class="form-group"><label>满分</label><input type="number" value="${C.BASE_MAX_SCORES[i] || 10}" step="1" onchange="appData.CONFIG.BASE_MAX_SCORES[${i}]=+this.value" style="width:100%;"></div>
+                    <div class="form-group"><label>最低分</label><input type="number" value="${C.MIN_SCORES[i] || 0}" step="1" onchange="appData.CONFIG.MIN_SCORES[${i}]=+this.value" style="width:100%;"></div>
+                    <div class="checkbox-row"><input type="checkbox" ${C.USE_PERCENTAGE[i] ? 'checked' : ''} onchange="appData.CONFIG.USE_PERCENTAGE[${i}]=this.checked"><label>百分比</label></div>
+                </div>`;
+            }
+            html += '</div>';
+            document.getElementById('dimSettings').innerHTML = html;
+        }
+
+        function collectConfig() {
+            const C = appData.CONFIG;
+            ['RADAR_SCALE','RADAR_GRID_LINE_WIDTH','RADAR_GRID_LINE_OPACITY','IMAGE_SCALE','PARTICLE_OPACITY_MULT','PARTICLE_SIZE_MULT'].forEach(k => {
+                const el = document.getElementById(`cfg-${k}`);
+                if (el) C[k] = parseFloat(el.value) || 0;
+            });
+            ['RADAR_GRID_LEVELS','VERTEX_COUNT','LABEL_MARGIN','ANIM_DURATION','DEFAULT_DURATION','INTRO_WAIT_TIME','GACHA_ANIM_DURATION'].forEach(k => {
+                const el = document.getElementById(`cfg-${k}`);
+                if (el) C[k] = parseInt(el.value) || 0;
+            });
+            ['SHOW_DESC','ENABLE_SPECIAL_FORMAT','USE_AUTO_PRECISION','SHOW_SCORE_UNDER_NAME'].forEach(k => {
+                const el = document.getElementById(`cfg-${k}`);
+                if (el) C[k] = el.checked;
+            });
+            C.BEST_COLOR = document.getElementById('cfg-BEST_COLOR').value;
+            C.BEST_FONT = document.getElementById('cfg-BEST_FONT').value;
+            C.GACHA_ANIM_TYPE = 2;
+            C.GACHA_FONT_STYLE = parseInt(document.getElementById('cfg-GACHA_FONT_STYLE').value);
+            // MVP list
+            appData.mvplist = document.getElementById('cfg-mvplist').value.split(',').map(s => s.trim()).filter(Boolean);
+        }
+
+        // ===== 颜色方案 =====
+        function renderColors() {
+            const list = document.getElementById('colorList');
+            list.innerHTML = appData.COLOR_PRESETS.map((c, idx) => `
+                <div class="card" style="display:flex;align-items:center;gap:16px;padding:12px 20px;">
+                    <span style="color:#666;width:30px;">#${idx}</span>
+                    <div class="color-dot" style="background:${c.color};"></div>
+                    <div class="form-group"><label>主色</label><input type="color" value="${c.color}" onchange="appData.COLOR_PRESETS[${idx}].color=this.value;this.previousElementSibling&&renderColors()" style="width:50px;height:30px;padding:1px;"></div>
+                    <div class="form-group"><label>背景1</label><input type="color" value="${c.bg1}" onchange="appData.COLOR_PRESETS[${idx}].bg1=this.value" style="width:50px;height:30px;padding:1px;"></div>
+                    <div class="form-group"><label>背景2</label><input type="color" value="${c.bg2}" onchange="appData.COLOR_PRESETS[${idx}].bg2=this.value" style="width:50px;height:30px;padding:1px;"></div>
+                    <button class="btn btn-danger btn-sm" onclick="removeColor(${idx})" style="margin-left:auto;">删除</button>
+                </div>
+            `).join('');
+        }
+
+        function addColor() {
+            appData.COLOR_PRESETS.push({ color: "#ffffff", bg1: "#1a1a1a", bg2: "#0d0d0d" });
+            renderColors();
+        }
+        function removeColor(idx) {
+            appData.COLOR_PRESETS.splice(idx, 1);
+            renderColors();
+        }
+
+        // ===== 图片管理 =====
+        async function loadImages() {
+            const images = await refreshLatestImages();
+            renderSpecialImages();
+            const grid = document.getElementById('imageGrid');
+            grid.innerHTML = images.map(img => `
+                <div class="image-item">
+                    <img src="${img.url}" loading="lazy" alt="${esc(img.name)}">
+                    <button class="image-del" onclick='deleteImage(${jsonAttr(img.name)})' title="删除">✕</button>
+                    <div class="image-info">${esc(img.name)}<br><span style="color:#666">${(img.size / 1024).toFixed(1)} KB</span></div>
+                    <div class="image-rename">
+                        <input type="text" id="rename-${imageInputKey(img.name)}" value="${escAttr(img.name)}" placeholder="新文件名">
+                        <button class="btn btn-outline btn-sm" onclick='renameImage(${jsonAttr(img.name)})'>改名</button>
+                    </div>
+                    <div class="image-tools">
+                        <button class="btn btn-outline btn-sm" onclick='openImageEditor(${jsonAttr(img.name)}, ${jsonAttr(img.url)})'>取景</button>
+                        ${appData.IMAGE_META && appData.IMAGE_META[img.name] ? '<span class="image-badge">已设置取景</span>' : '<span class="image-badge" style="color:#667;">默认</span>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function triggerSpecialUpload(slotId) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.style.display = 'none';
+            input.addEventListener('change', () => {
+                const file = input.files && input.files[0];
+                if (file) uploadSpecialFile(slotId, file);
+                input.remove();
+            }, { once: true });
+            document.body.appendChild(input);
+            input.click();
+        }
+
+        async function uploadSpecialFile(slotId, file) {
+            const slot = specialImageSlots.find(item => item.id === slotId);
+            if (!slot || !file) return;
+            const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+            const formData = new FormData();
+            formData.append('filename', `${slot.baseName}.${ext}`);
+            formData.append('image', file);
+            try {
+                console.debug('[door-upload] start', { slotId, filename: `${slot.baseName}.${ext}`, originalName: file.name, size: file.size });
+                showToast(`正在上传${slot.title}...`, 'success');
+                const res = await fetch(`/api/upload-slot/${encodeURIComponent(slotId)}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                console.debug('[door-upload] response', { slotId, ok: res.ok, status: res.status, data });
+                if (data.success) {
+                    showToast(`${slot.title}上传成功`, 'success');
+                    await loadImages();
+                } else {
+                    showToast(data.error || '上传失败', 'error');
+                }
+            } catch (e) {
+                console.error('[door-upload] error', { slotId, error: e });
+                showToast('上传出错', 'error');
+            }
+        }
+
+        async function openSpecialImageEditor(slotId) {
+            let img = findSpecialImage(slotId);
+            if (!img) {
+                await refreshLatestImages();
+                renderSpecialImages();
+                img = findSpecialImage(slotId);
+            }
+            if (!img) {
+                showToast('请先上传图片', 'error');
+                return;
+            }
+            openImageEditor(img.name, img.url);
+        }
+
+        async function uploadFile(file) {
+            if (!file) return;
+            const formData = new FormData();
+            const customName = document.getElementById('uploadFilename').value.trim();
+            if (customName) formData.append('filename', customName);
+            formData.append('image', file);
+            try {
+                const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`上传成功: ${data.filename}`, 'success');
+                    loadImages();
+                    document.getElementById('uploadFilename').value = '';
+                } else {
+                    showToast(data.error || '上传失败', 'error');
+                }
+            } catch (e) {
+                showToast('上传出错', 'error');
+            }
+        }
+
+        async function deleteImage(name) {
+            if (!confirm(`确认删除图片 "${name}"？`)) return;
+            try {
+                const res = await fetch(`/api/images/${encodeURIComponent(name)}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    delete appData.IMAGE_META?.[name];
+                    showToast('已删除', 'success');
+                    loadImages();
+                } else {
+                    showToast(data.error || '删除失败', 'error');
+                }
+            } catch (e) {
+                showToast('删除出错', 'error');
+            }
+        }
+
+        async function renameImage(oldName) {
+            const input = document.getElementById(`rename-${imageInputKey(oldName)}`);
+            if (!input) return;
+            const filename = input.value.trim();
+            if (!filename) {
+                showToast('文件名不能为空', 'error');
+                return;
+            }
+            try {
+                const res = await fetch(`/api/images/${encodeURIComponent(oldName)}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (appData.IMAGE_META && appData.IMAGE_META[oldName]) {
+                        appData.IMAGE_META[data.filename] = appData.IMAGE_META[oldName];
+                        delete appData.IMAGE_META[oldName];
+                    }
+                    showToast(`已改名为: ${data.filename}`, 'success');
+                    loadImages();
+                } else {
+                    showToast(data.error || '改名失败', 'error');
+                }
+            } catch (e) {
+                showToast('改名出错', 'error');
+            }
+        }
+
+        function getImageMeta(name) {
+            appData.IMAGE_META = appData.IMAGE_META || {};
+            return {
+                fit: 'contain',
+                scale: 1,
+                x: 50,
+                y: 50,
+                ...(appData.IMAGE_META[name] || {})
+            };
+        }
+
+        function getImagePlacement(name) {
+            const base = imageBaseName(name);
+            if (base === 'gacha_door_left') return 'left-half';
+            if (base === 'gacha_door_right') return 'right-half';
+            if (base.endsWith('1')) return 'mvp-left-fade';
+            return '';
+        }
+
+        function remapImageMetaForPlacement(meta, placement = '') {
+            const next = { ...meta };
+            if (placement === 'left-half') {
+                next.x = (meta.x ?? 50) / 2;
+            } else if (placement === 'right-half') {
+                next.x = 50 + ((meta.x ?? 50) / 2);
+            }
+            return next;
+        }
+
+        function openImageEditor(name, url) {
+            currentImageEditor = { name, url, placement: getImagePlacement(name) };
+            cropDraft = { ...getImageMeta(name) };
+            document.getElementById('editorImageName').textContent = name;
+            document.getElementById('cropPreviewImage').src = url;
+            cropStage.classList.toggle('door-preview', currentImageEditor.placement === 'left-half' || currentImageEditor.placement === 'right-half');
+            cropStage.classList.toggle('mvp-preview', currentImageEditor.placement === 'mvp-left-fade');
+            cropStage.classList.toggle('door-left', currentImageEditor.placement === 'left-half');
+            cropStage.classList.toggle('door-right', currentImageEditor.placement === 'right-half');
+            document.getElementById('imageEditorModal').classList.add('show');
+            syncImageEditorControls();
+            renderImageEditorPreview();
+        }
+
+        function closeImageEditor() {
+            document.getElementById('imageEditorModal').classList.remove('show');
+            cropStage.classList.remove('door-preview', 'mvp-preview', 'door-left', 'door-right');
+            currentImageEditor = null;
+            cropDraft = null;
+        }
+
+        function resetImageEditor() {
+            if (!currentImageEditor) return;
+            cropDraft = { fit: 'contain', scale: 1, x: 50, y: 50 };
+            syncImageEditorControls();
+            renderImageEditorPreview();
+        }
+
+        function saveImageEditor() {
+            if (!currentImageEditor || !cropDraft) return;
+            appData.IMAGE_META[currentImageEditor.name] = { ...cropDraft };
+            showToast(`已更新取景: ${currentImageEditor.name}`, 'success');
+            closeImageEditor();
+            loadImages();
+        }
+
+        function syncImageEditorControls() {
+            if (!cropDraft) return;
+            document.getElementById('cropFitMode').value = cropDraft.fit;
+            document.getElementById('cropScale').value = cropDraft.scale;
+            document.getElementById('cropX').value = cropDraft.x;
+            document.getElementById('cropY').value = cropDraft.y;
+            document.getElementById('cropScaleOut').textContent = `${Number(cropDraft.scale).toFixed(2)}x`;
+            document.getElementById('cropXOut').textContent = `${Number(cropDraft.x).toFixed(1)}%`;
+            document.getElementById('cropYOut').textContent = `${Number(cropDraft.y).toFixed(1)}%`;
+        }
+
+        function renderImageEditorPreview() {
+            if (!cropDraft) return;
+            const img = document.getElementById('cropPreviewImage');
+            const displayMeta = remapImageMetaForPlacement(cropDraft, currentImageEditor?.placement || '');
+            img.style.objectFit = displayMeta.fit;
+            img.style.objectPosition = `${displayMeta.x}% ${displayMeta.y}%`;
+            img.style.transform = `scale(${cropDraft.scale})`;
+            if (currentImageEditor?.placement === 'left-half') {
+                img.style.clipPath = 'inset(0 50% 0 0)';
+                img.style.webkitClipPath = 'inset(0 50% 0 0)';
+            } else if (currentImageEditor?.placement === 'right-half') {
+                img.style.clipPath = 'inset(0 0 0 50%)';
+                img.style.webkitClipPath = 'inset(0 0 0 50%)';
+            } else {
+                img.style.clipPath = 'none';
+                img.style.webkitClipPath = 'none';
+            }
+        }
+
+        // 拖拽上传
+        const uploadZone = document.getElementById('uploadZone');
+        uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor = 'var(--accent)'; });
+        uploadZone.addEventListener('dragleave', () => { uploadZone.style.borderColor = ''; });
+        uploadZone.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '';
+            if (e.dataTransfer.files.length > 0) uploadFile(e.dataTransfer.files[0]);
+        });
+
+        const cropStage = document.getElementById('cropStage');
+        const cropFitMode = document.getElementById('cropFitMode');
+        const cropScale = document.getElementById('cropScale');
+        const cropX = document.getElementById('cropX');
+        const cropY = document.getElementById('cropY');
+        let cropDragState = null;
+
+        cropFitMode.addEventListener('change', () => {
+            if (!cropDraft) return;
+            cropDraft.fit = cropFitMode.value;
+            syncImageEditorControls();
+            renderImageEditorPreview();
+        });
+
+        cropScale.addEventListener('input', () => {
+            if (!cropDraft) return;
+            cropDraft.scale = parseFloat(cropScale.value);
+            syncImageEditorControls();
+            renderImageEditorPreview();
+        });
+
+        cropX.addEventListener('input', () => {
+            if (!cropDraft) return;
+            cropDraft.x = parseFloat(cropX.value);
+            syncImageEditorControls();
+            renderImageEditorPreview();
+        });
+
+        cropY.addEventListener('input', () => {
+            if (!cropDraft) return;
+            cropDraft.y = parseFloat(cropY.value);
+            syncImageEditorControls();
+            renderImageEditorPreview();
+        });
+
+        cropStage.addEventListener('mousedown', e => {
+            if (!cropDraft) return;
+            cropDragState = {
+                startX: e.clientX,
+                startY: e.clientY,
+                baseX: cropDraft.x,
+                baseY: cropDraft.y
+            };
+            cropStage.classList.add('dragging');
+        });
+
+        window.addEventListener('mousemove', e => {
+            if (!cropDragState || !cropDraft) return;
+            const dx = e.clientX - cropDragState.startX;
+            const dy = e.clientY - cropDragState.startY;
+            cropDraft.x = clamp(cropDragState.baseX - dx * 0.12, 0, 100);
+            cropDraft.y = clamp(cropDragState.baseY - dy * 0.12, 0, 100);
+            syncImageEditorControls();
+            renderImageEditorPreview();
+        });
+
+        window.addEventListener('mouseup', () => {
+            cropDragState = null;
+            cropStage.classList.remove('dragging');
+        });
+
+        document.getElementById('imageEditorModal').addEventListener('mousedown', e => {
+            if (e.target.id === 'imageEditorModal') closeImageEditor();
+        });
+
+        // ===== 保存 =====
+        async function saveAll() {
+            collectConfig();
+            try {
+                const res = await fetch('/api/data', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appData)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('保存成功！刷新雷达页生效', 'success');
+                } else {
+                    showToast(data.error || '保存失败', 'error');
+                }
+            } catch (e) {
+                showToast('保存出错', 'error');
+            }
+        }
+
+        // ===== 工具函数 =====
+        function esc(str) {
+            if (str === undefined || str === null) return '';
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        function escAttr(str) {
+            return esc(str).replace(/"/g, '&quot;');
+        }
+
+        function jsonAttr(value) {
+            return JSON.stringify(String(value)).replace(/'/g, '&#39;');
+        }
+
+        function imageInputKey(name) {
+            return encodeURIComponent(String(name)).replace(/%/g, '_');
+        }
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
