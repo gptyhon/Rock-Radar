@@ -327,12 +327,67 @@
             overflow: hidden;
         }
 
+        .mvp-bg-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                radial-gradient(circle at 16% 24%, rgba(255,231,166,0.34) 0%, rgba(255,231,166,0) 28%),
+                radial-gradient(circle at 20% 62%, rgba(255,197,74,0.24) 0%, rgba(255,197,74,0) 34%),
+                linear-gradient(90deg, rgba(255,205,92,0.24) 0%, rgba(255,205,92,0.12) 16%, rgba(255,205,92,0) 48%),
+                linear-gradient(135deg, rgba(255,245,210,0.18), rgba(0,0,0,0) 58%);
+            mix-blend-mode: screen;
+            transition: opacity 0.5s ease;
+        }
+
+        .mvp-bg-container::after {
+            content: 'MVP';
+            position: absolute;
+            top: 28px;
+            left: 28px;
+            z-index: 3;
+            pointer-events: none;
+            opacity: 0;
+            padding: 9px 18px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(248,211,126,0.78);
+            background:
+                linear-gradient(180deg, rgba(14,10,4,0.92), rgba(8,6,2,0.88)),
+                linear-gradient(90deg, rgba(255,224,142,0.16), rgba(255,224,142,0));
+            color: #f8d37e;
+            font-family: "Orbitron", "HarmonyOS Sans SC", sans-serif;
+            font-size: 1.08rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px rgba(248,211,126,0.32);
+            box-shadow:
+                0 0 0 1px rgba(62,40,7,0.42) inset,
+                0 0 18px rgba(248,211,126,0.16),
+                0 10px 28px rgba(0,0,0,0.24);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            transform: translate3d(-10px, 0, 0);
+        }
+
+        .mvp-bg-container.mvp-active::before {
+            opacity: 1;
+            animation: mvpGoldAura 3.6s ease-in-out infinite alternate;
+        }
+
+        .mvp-bg-container.mvp-active::after {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+
         .mvp-bg-image {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            z-index: 1;
             object-fit: contain; /* 改为 contain，防止裁切 */
             object-position: left center; /* 靠左对齐 */
             -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0) 100%);
@@ -341,6 +396,7 @@
             transform: translateX(-100%) scale(var(--user-image-scale, 1)); /* 初始在左侧外部 */
             transform-origin: left center;
             opacity: 0;
+            filter: saturate(1.02) brightness(0.98);
         }
 
         .mvp-bg-image.active {
@@ -348,9 +404,33 @@
             transform: translateX(0) scale(var(--user-image-scale, 1)); /* 滑动到原位即左侧对齐 */
         }
 
+        .mvp-bg-container.mvp-active .mvp-bg-image.active {
+            filter:
+                sepia(0.2)
+                saturate(1.18)
+                brightness(0.96)
+                drop-shadow(0 0 18px rgba(248,211,126,0.16))
+                drop-shadow(0 0 54px rgba(219,160,42,0.14));
+        }
+
         .mvp-bg-image.exit {
             transform: translateX(0) scale(var(--user-image-scale, 1)); /* 退出时不移动位置 */
             opacity: 0; /* 仅逐渐消失 */
+        }
+
+        @keyframes mvpGoldAura {
+            0% {
+                filter: blur(0px) brightness(1);
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+            50% {
+                filter: blur(1px) brightness(1.06);
+                transform: translate3d(1.2vw, -1vh, 0) scale(1.015);
+            }
+            100% {
+                filter: blur(0px) brightness(1.02);
+                transform: translate3d(-0.8vw, 0.8vh, 0) scale(1.01);
+            }
         }
 
         /* ===== 抽卡出金动画 CSS ===== */
@@ -2588,6 +2668,7 @@
             // MVP 底图逻辑
             const isMvp = mvplist.includes(band.name);
             const oldMvpImg = mvpContainer.querySelector(".mvp-bg-image.active");
+            mvpContainer.classList.toggle("mvp-active", isMvp);
             
             if (oldMvpImg) {
                 oldMvpImg.classList.remove("active");

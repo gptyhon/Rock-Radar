@@ -1,93 +1,228 @@
-# Rock Radar - 战力雷达图 / 动态评级面板
+# Rock Radar
 
-类似jojo面板的战力评级展示系统。通过高度自定义的六维雷达图、粒子动画和流畅的视觉过渡效果，生动呈现不同角色的各项能力数值。
+一个本地运行的雷达图展示项目，包含：
 
-介绍视频：https://www.bilibili.com/video/BV1vpckzhEJJ?vd_source=e933b15469ba782736f46bb7dfec1577
-![example](https://github.com/user-attachments/assets/1a9f31da-f0da-4b42-9bad-c443429b0344)
+- 管理面板：维护选手、配色、图片、取景和全局配置
+- 展示页：播放动态雷达图、人物图、MVP 底图和抽卡开门动画
 
-## 核心特性
+当前版本已经不是单纯编辑 `index.html` 的静态页面，而是以 `server.js + data.json + admin.html` 为主工作流。
 
-- 🎨 **高度通用的雷达图**：默认支持六维展示，可通过配置修改任意能力项名称。
-- 📱 **全屏以制作视频**：全屏自动隐藏鼠标和进度条，录屏即可发视频
-- ⚙️ **灵活的 CONFIG 模式**：通过简单的代码配置即可修改项目核心逻辑。
-- 🎵 **视听同步控制**：系统支持背景音乐关联播放，并配有全局时间轴进度条，可自由跳转播放位置。
-- ✨ **粒子背景交互**：内置高性能 Canvas 粒子库，渲染出富有科技感和动感的视觉背景。
+## 功能概览
 
+- 可配置维度名称、维度数、各轴满分、最小值、动画时长、默认展示时长
+- 雷达图支持平滑过渡、Best 高亮、超出基准值的延展显示
+- 支持背景音乐、全局时间轴、全屏录屏展示
+- 管理面板支持图片上传、改名、删除、取景裁切
+- 支持特殊图片槽位：
+  - 抽卡背景图
+  - 左右开门图
+  - MVP 底图
+- `MVP` 条目可触发左侧专属底图和金色强化特效
+- 抽卡出场为定制化动画，并支持门图取景
 
-## 快速自定义指南
+## 运行方式
 
-### 1. 基础全局配置
-在 `index.html` 的 `CONFIG` 对象中，你可以修改以下参数：
+先安装依赖：
 
-```javascript
-const CONFIG = {
-    RADAR_SCALE: 1.0,            // 雷达图底图大小缩放比例 (默认 1.0)
-    RADAR_GRID_LEVELS: 5,        // 雷达图底图行数（圈数）
-    RADAR_GRID_LINE_WIDTH: 3,    // 雷达图底图线条粗细
-    RADAR_GRID_LINE_OPACITY: 0.2, // 雷达图底图线条透明度
-    PARTICLE_OPACITY_MULT: 2.0,  // 背景粒子特效透明度倍率
-    PARTICLE_SIZE_MULT: 2.0,     // 背景粒子特效大小倍率
-    VERTEX_COUNT: 6,             // 雷达图顶点数（默认为 6 边形，可改为 8 边形等）,一定要把DIM_NAMES等数组内容也改成对应的个数!
-    INTRO_WAIT_TIME: 5000,       // 开场页面的等待时间（毫秒）
-    
-    // 维度名称：修改这里可改变雷达图的各个能力节点名称
-    DIM_NAMES: ["创新性", "旋律", "歌词", "影响力", "主唱", "乐器"],
-    // 满分基准：设置雷达图内圈各轴建议的最大值
-    BASE_MAX_SCORES: [10, 10, 10, 10, 10, 10], 
-    // 下限设定：限制各轴显示的最低分（通常设为 0）
-    MIN_SCORES: [0, 0, 0, 0, 0, 0], 
-    // 切换显示时，雷达各项数值生长动画的过渡时间 (ms)
-    ANIM_DURATION: 1500, 
-    // 是否启用特殊的数值格式化（如雷达图的实际值在 11-19 时显示为 "10+"）
-    ENABLE_SPECIAL_FORMAT: true, 
-    // 默认每页的的展示时长 (ms)
-    DEFAULT_DURATION: 5000, 
-    // 是否显示描述文字(乐评)
-    SHOW_DESC: true,
-    // 图片默认缩放比例 (1.0 为原始大小)
-    IMAGE_SCALE: 1.0, 
-    // 哪些维度显示为百分数（例如 0.7 变为 70%）。数组长度需与顶点数对应，true 表示显示为百分数，false 表示显示为普通数字
-    USE_PERCENTAGE: [false, false, false, false, false, false],
-    // 维度名称距离雷达图外圈的距离 (px)，默认 80
-    LABEL_MARGIN: 80, 
-    // 是否根据 points 中写的小数位数自动控制显示的小数精度
-    USE_AUTO_PRECISION: true, 
-    // 是否将评分数值显示在维度名称下方
-    SHOW_SCORE_UNDER_NAME: true, 
-};
+```bash
+npm install
 ```
 
-### 2. 添加数据（角色/乐队/项目）
-在 `index.html` 中搜索并修改 `const bands = [...]`。每个对象代表一个展示页：
+启动服务：
 
-```javascript
+```bash
+npm start
+```
+
+启动后默认地址：
+
+- 管理面板：`http://localhost:3003/`
+- 展示页：`http://localhost:3003/radar`
+
+## 推荐工作流
+
+1. 打开管理面板
+2. 在“选手管理”里编辑名称、分数、描述、时长、是否触发抽卡
+3. 在“全局配置”里调整雷达图、动画、粒子、Best、MVP 等参数
+4. 在“图片管理”里上传图片并设置取景
+5. 点击顶部“保存全部”
+6. 刷新展示页查看效果
+
+如果你更习惯手改配置，也可以直接编辑 `data.json`。
+
+## 数据文件说明
+
+项目的主要数据保存在 `data.json` 中，核心字段包括：
+
+- `CONFIG`：全局配置
+- `COLOR_PRESETS`：配色池
+- `mvplist`：MVP 名单
+- `IMAGE_META`：图片取景与缩放信息
+- `namelist`：选手列表
+
+一个选手对象大致长这样：
+
+```json
 {
-    name: "展示名称",
-    scores: [10, 8, 9, 7, 8, 8], // 对应的六个维度分值
-    desc: "关于此项的详细描述文字",
-    colorIndex: 0, // 背景粒子的颜色，对应 COLOR_PRESETS 索引 (0-19)
-    duration: 5000  // 停留显示的时长（毫秒），不填则使用 CONFIG.DEFAULT_DURATION，默认为5000毫秒
+  "name": "白厄",
+  "points": [9, 7.8, 9, 12, 4, 7],
+  "desc": "xqcl",
+  "colorIndex": 12,
+  "duration": 6000,
+  "gacha": true
 }
 ```
+
+字段说明：
+
+- `name`：展示名称，同时也是图片命名基准
+- `points`：雷达图各维度分数
+- `desc`：右侧描述文字
+- `colorIndex`：使用 `COLOR_PRESETS` 中的第几个配色
+- `duration`：该条目停留时间，单位毫秒
+- `gacha`：是否触发抽卡出场动画
+
+## 图片命名规则
+
+所有图片放在 `pic/` 目录下，支持 `jpg / jpeg / png / gif / webp / svg`。
+
+### 1. 普通人物图
+
+用于右侧人物图：
+
+```text
+<名字>.<扩展名>
+```
+
 示例：
-```javascript
-{ name: "The Beatles", points: [15, 15, 10, 20, 10, 10], desc: "无需多言", colorIndex: 12 ,duration: 6000 },
+
+```text
+白厄.png
+风堇.webp
 ```
 
-### 3. 高级视觉自定义 (CSS 变量)
-在 `index.html` 的 `:root` 选择器中，你可以通过修改颜色变量快速切换主题色：
-- `--theme-color`: 主亮色（辉光色）
-- `--bg-color-1` / `--bg-color-2`: 渐变背景的起始与结束色
-- `mvplist` 见视频介绍
+### 2. 抽卡背景大图
 
-## 文件夹结构
+用于抽卡开门后的背景图：
+
+```text
+best_<名字>.<扩展名>
 ```
-📁 根目录
-│
-├── 📁 pic
-│   └──  🖼️ 角色图片
-├── 📄 index.html
-└── 🎵 music.mp3
+
+示例：
+
+```text
+best_白厄.png
+best_风堇.png
 ```
-- **如何添加图片？** 根目录下创建一个pic目录，然后把图片命名为（角色/乐队/项目）名并放进去就行了。
-- **如何添加音乐？** 自行添加music.mp3。
+
+### 3. MVP 底图
+
+用于左侧 MVP 专属底图：
+
+```text
+<名字>1.<扩展名>
+```
+
+示例：
+
+```text
+白厄1.png
+```
+
+同时还需要把该名字加入 `mvplist`，否则不会触发 MVP 底图。
+
+### 4. 左右开门图
+
+抽卡动画左右门板使用固定文件名：
+
+```text
+gacha_door_left.<扩展名>
+gacha_door_right.<扩展名>
+```
+
+这两张图建议直接通过管理面板上传，不要手动乱改文件名。
+
+### 5. 其他素材
+
+- 背景音乐：根目录 `music.mp3`
+- 抽卡 Logo：`pic/hsr_logo.webp`
+
+## 取景说明
+
+管理面板里的“取景”会把结果保存到 `data.json -> IMAGE_META`。
+
+支持保存的内容包括：
+
+- `fit`：`contain` 或 `cover`
+- `scale`：缩放
+- `x` / `y`：焦点位置
+
+当前项目里，以下图片都支持独立取景：
+
+- 普通人物图
+- `best_名字.*` 抽卡背景图
+- `名字1.*` MVP 底图
+- `gacha_door_left.*` / `gacha_door_right.*` 左右门图
+
+图片改名时会尽量保留对应的取景数据。
+
+## MVP 机制
+
+`mvplist` 是 MVP 名单，不是分数配置。
+
+当某个选手名字出现在 `mvplist` 中时：
+
+- 展示页会尝试加载 `名字1.*`
+- 左侧会出现专属 MVP 底图
+- 底图会附带固定金色背景强化特效
+- 左上角会出现 `MVP` 标识
+
+## 主要配置项
+
+常用的 `CONFIG` 项包括：
+
+- `RADAR_SCALE`
+- `RADAR_GRID_LEVELS`
+- `RADAR_GRID_LINE_WIDTH`
+- `RADAR_GRID_LINE_OPACITY`
+- `VERTEX_COUNT`
+- `DIM_NAMES`
+- `BASE_MAX_SCORES`
+- `MIN_SCORES`
+- `ANIM_DURATION`
+- `DEFAULT_DURATION`
+- `INTRO_WAIT_TIME`
+- `IMAGE_SCALE`
+- `PARTICLE_OPACITY_MULT`
+- `PARTICLE_SIZE_MULT`
+- `SHOW_DESC`
+- `ENABLE_SPECIAL_FORMAT`
+- `USE_AUTO_PRECISION`
+- `SHOW_SCORE_UNDER_NAME`
+- `BEST_COLOR`
+- `BEST_FONT`
+- `GACHA_ANIM_DURATION`
+- `GACHA_FONT_STYLE`
+
+这些配置都可以直接在管理面板里改，不需要手动进代码。
+
+## 文件结构
+
+```text
+.
+├─ admin.html          管理面板
+├─ index.html          展示页
+├─ server.js           Express 服务与图片接口
+├─ data.json           配置与数据持久化
+├─ pic/                所有图片素材
+├─ music.mp3           背景音乐（可选）
+├─ package.json
+└─ LICENSE
+```
+
+## 说明
+
+- 本项目默认端口为 `3003`
+- 图片上传、改名、删除、门图上传都通过本地接口处理
+- 如果改了配置但展示页没变化，先确认已经点过“保存全部”，再刷新 `/radar`
