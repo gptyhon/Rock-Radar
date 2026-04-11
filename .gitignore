@@ -28,7 +28,8 @@ ending-*.mp4
 ending-*.webm
 outro*.mp4
 outro*.webm
-
+*.mp3
 # Local image assets
 pic/**
 !pic/.gitkeep
+hktv.html
