@@ -1,2 +1,34 @@
 node_modules/
+
+# Logs
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Runtime / temp
+tmp_*.js
+_tmp_*.js
+_tmp_*.py
+bands-*.csv
+
+# Local media (large files, usually not for git)
+ending.mp4
+ending-*.mp4
+ending-*.webm
+outro*.mp4
+outro*.webm
+
+# Local image assets
+pic/**
+!pic/.gitkeep

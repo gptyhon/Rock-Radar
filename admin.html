@@ -95,7 +95,8 @@
         .modal-grid { display: grid; grid-template-columns: minmax(320px, 420px) 1fr; gap: 20px; align-items: start; }
         .crop-stage { position: relative; width: 100%; aspect-ratio: 1 / 1; background: linear-gradient(135deg, #0f1627, #090d18); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; cursor: grab; }
         .crop-stage.door-preview,
-        .crop-stage.mvp-preview { aspect-ratio: 16 / 9; }
+        .crop-stage.mvp-preview,
+        .crop-stage.best-preview { aspect-ratio: 16 / 9; }
         .crop-stage.dragging { cursor: grabbing; }
         .crop-stage::before { content: ''; position: absolute; inset: 0; background:
             linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
@@ -113,6 +114,11 @@
         .crop-stage.mvp-preview::after {
             background:
                 linear-gradient(90deg, rgba(255,214,102,0.12) 0%, rgba(255,214,102,0.08) 22%, rgba(8,12,24,0.04) 46%, rgba(8,12,24,0.28) 100%);
+        }
+        .crop-stage.best-preview::after {
+            background:
+                linear-gradient(180deg, rgba(255,214,102,0.12), rgba(255,214,102,0.04)),
+                linear-gradient(90deg, rgba(8,12,24,0.12), rgba(8,12,24,0) 16%, rgba(8,12,24,0) 84%, rgba(8,12,24,0.12));
         }
         .crop-preview-image { width: 100%; height: 100%; object-position: center; user-select: none; pointer-events: none; will-change: transform, object-position; }
         .crop-stage.mvp-preview .crop-preview-image {
@@ -159,6 +165,20 @@
             content: 'MVP 左侧渐隐显示区';
             left: 10px;
         }
+        .crop-stage.best-preview .crop-visible-window {
+            opacity: 1;
+            left: 10px;
+            right: 10px;
+            top: 10px;
+            bottom: 10px;
+            width: auto;
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255,214,102,0.08), rgba(255,214,102,0.02));
+        }
+        .crop-stage.best-preview .crop-visible-window::before {
+            content: '出金背景显示区';
+            left: 10px;
+        }
         .crop-side { display: flex; flex-direction: column; gap: 14px; }
         .range-group { display: flex; flex-direction: column; gap: 6px; }
         .range-group input[type="range"] { width: 100%; }
@@ -166,9 +186,33 @@
         .range-row output { min-width: 52px; color: var(--accent); font-size: 0.82rem; text-align: right; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
         .hint { font-size: 0.8rem; color: #8892b0; line-height: 1.5; }
+        .sort-modal-card { width: min(980px, 96vw); max-height: min(88vh, 980px); display: flex; flex-direction: column; }
+        .sort-table-shell { border: 1px solid rgba(127, 194, 255, 0.18); border-radius: 14px; overflow: hidden; background:
+            linear-gradient(180deg, rgba(14, 24, 48, 0.96), rgba(9, 15, 30, 0.94)); }
+        .sort-table-head,
+        .sort-row { display: grid; grid-template-columns: 62px 86px minmax(180px, 1.1fr) minmax(220px, 1.3fr); gap: 14px; align-items: center; }
+        .sort-table-head { padding: 12px 16px; background: linear-gradient(90deg, rgba(40, 82, 148, 0.34), rgba(19, 34, 64, 0.88)); color: #9fc8ff; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
+        .sort-table-body { max-height: min(68vh, 760px); overflow: auto; }
+        .sort-row { position: relative; padding: 13px 16px; border-top: 1px solid rgba(127, 194, 255, 0.08); background: rgba(8, 13, 28, 0.42); transition: background 140ms ease, transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease; user-select: none; }
+        .sort-row:nth-child(odd) { background: rgba(13, 20, 38, 0.56); }
+        .sort-row:hover { background: rgba(28, 43, 78, 0.72); }
+        .sort-row.dragging { opacity: 0.42; transform: scale(0.992); }
+        .sort-row.drag-over-top { box-shadow: inset 0 3px 0 #6fc7ff; }
+        .sort-row.drag-over-bottom { box-shadow: inset 0 -3px 0 #6fc7ff; }
+        .sort-handle { color: #7fc2ff; font-size: 1.05rem; letter-spacing: 0.18em; cursor: grab; font-weight: 700; }
+        .sort-rank { color: #dcecff; font-weight: 700; font-variant-numeric: tabular-nums; }
+        .sort-name { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .sort-name-text { font-weight: 700; color: #f4f7ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sort-badge { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; border: 1px solid rgba(255, 215, 122, 0.28); color: #ffd87d; background: rgba(255, 196, 72, 0.08); font-size: 0.72rem; letter-spacing: 0.05em; }
+        .sort-desc { color: #8da2c8; font-size: 0.84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sort-empty { padding: 26px 18px; color: #8da2c8; text-align: center; }
 
         @media (max-width: 760px) {
             .modal-grid { grid-template-columns: 1fr; }
+            .sort-table-head,
+            .sort-row { grid-template-columns: 52px 72px minmax(140px, 1fr); }
+            .sort-table-head .sort-col-desc,
+            .sort-row .sort-desc { display: none; }
         }
     </style>
 </head>
@@ -193,9 +237,41 @@
         <div class="panel active" id="panel-bands">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                 <h2 style="color:var(--accent)">选手列表</h2>
-                <button class="btn btn-success" onclick="addBand()">＋ 添加选手</button>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="btn btn-outline" onclick="openBandSortModal()">拖拽排序</button>
+                    <button class="btn btn-outline" onclick="exportBandsCsv()">导出 CSV</button>
+                    <button class="btn btn-outline" onclick="triggerImportBandsCsv()">导入 CSV</button>
+                    <button class="btn btn-success" onclick="addBand()">＋ 添加选手</button>
+                </div>
+            </div>
+            <input type="file" id="bandCsvFile" accept=".csv,text/csv" style="display:none;">
+            <div class="card" style="margin-bottom:14px;">
+                <div class="form-row" style="align-items:flex-end;">
+                    <div class="form-group" style="min-width:260px;">
+                        <label>搜索（名称/描述）</label>
+                        <input type="text" id="bandSearch" placeholder="输入关键词快速定位">
+                    </div>
+                    <div class="checkbox-row" style="margin-top:18px;">
+                        <input type="checkbox" id="bandOnlyGacha">
+                        <label>仅显示抽卡出金</label>
+                    </div>
+                    <div class="form-group" style="min-width:120px;">
+                        <label>每页条数</label>
+                        <select id="bandPageSize">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="min-width:220px;">
+                        <label>筛选统计</label>
+                        <div id="bandCount" style="height:38px;display:flex;align-items:center;padding:0 12px;border:1px solid #30363d;border-radius:6px;background:#0d1117;color:#9fb6ff;">共 0 条</div>
+                    </div>
+                </div>
             </div>
             <div id="bandList"></div>
+            <div id="bandPager" style="margin-top:14px;"></div>
         </div>
 
         <!-- 全局配置 -->
@@ -204,6 +280,7 @@
                 <h3>雷达图设置</h3>
                 <div class="form-row">
                     <div class="form-group"><label>缩放比例</label><input type="number" id="cfg-RADAR_SCALE" step="0.1" min="0.1"></div>
+                    <div class="checkbox-row" style="margin-top:18px;"><input type="checkbox" id="cfg-RADAR_AUTO_OFFSET"><label>按形状自动平移中心</label></div>
                     <div class="form-group"><label>网格层数</label><input type="number" id="cfg-RADAR_GRID_LEVELS" min="1" max="20"></div>
                     <div class="form-group"><label>网格线宽</label><input type="number" id="cfg-RADAR_GRID_LINE_WIDTH" step="0.5" min="0.5"></div>
                     <div class="form-group"><label>网格透明度</label><input type="number" id="cfg-RADAR_GRID_LINE_OPACITY" step="0.05" min="0" max="1"></div>
@@ -216,7 +293,9 @@
                 <div class="form-row">
                     <div class="form-group"><label>数值动画时长(ms)</label><input type="number" id="cfg-ANIM_DURATION" step="100"></div>
                     <div class="form-group"><label>默认展示时长(ms)</label><input type="number" id="cfg-DEFAULT_DURATION" step="500"></div>
-                    <div class="form-group"><label>开场等待(ms)</label><input type="number" id="cfg-INTRO_WAIT_TIME" step="100"></div>
+                    <div class="form-group"><label>蓝色前奏(ms)</label><input type="number" id="cfg-INTRO_WAIT_TIME" step="100"></div>
+                    <div class="form-group"><label>音乐音量(0-1)</label><input type="number" id="cfg-MUSIC_VOLUME" step="0.01" min="0" max="1"></div>
+                    <div class="form-group" style="min-width:340px;"><label>音乐列表（逗号分隔）</label><input type="text" id="cfg-MUSIC_TRACKS" placeholder="music.mp3,music2.mp3"></div>
                     <div class="form-group"><label>图片缩放</label><input type="number" id="cfg-IMAGE_SCALE" step="0.1" min="0.1"></div>
                 </div>
             </div>
@@ -225,6 +304,24 @@
                 <div class="form-row">
                     <div class="form-group"><label>透明度倍率</label><input type="number" id="cfg-PARTICLE_OPACITY_MULT" step="0.1" min="0"></div>
                     <div class="form-group"><label>大小倍率</label><input type="number" id="cfg-PARTICLE_SIZE_MULT" step="0.1" min="0"></div>
+                    <div class="form-group">
+                        <label>性能档位</label>
+                        <select id="cfg-PERFORMANCE_MODE">
+                            <option value="high">高画质</option>
+                            <option value="balanced">均衡</option>
+                            <option value="smooth">流畅</option>
+                        </select>
+                    </div>
+                    <div class="checkbox-row" style="margin-top:18px;"><input type="checkbox" id="cfg-ADAPTIVE_PERF"><label>动态降级</label></div>
+                    <div class="checkbox-row" style="margin-top:18px;"><input type="checkbox" id="cfg-PHOTO_FX_ENABLED"><label>角色图后层粒子</label></div>
+                    <div class="form-group">
+                        <label>后层粒子强度</label>
+                        <select id="cfg-PHOTO_FX_INTENSITY">
+                            <option value="0.75">低</option>
+                            <option value="1">中</option>
+                            <option value="1.35">高</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="card">
@@ -247,6 +344,8 @@
                 <h3>抽卡出金动画</h3>
                 <div class="form-row">
                     <div class="form-group"><label>动画时长(ms)</label><input type="number" id="cfg-GACHA_ANIM_DURATION" step="100"></div>
+                    <div class="form-group"><label>Logo 出现时间(ms)</label><input type="number" id="cfg-GACHA_LOGO_ON_TIME" step="10" min="0"></div>
+                    <div class="form-group"><label>Logo 停留时长(ms)</label><input type="number" id="cfg-GACHA_LOGO_DURATION" step="10" min="0"></div>
                     <div class="form-group">
                         <label>动画风格</label>
                         <input type="text" value="固定为 故障神启" disabled style="width:180px;opacity:0.8;">
@@ -371,11 +470,44 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="bandSortModal">
+        <div class="modal-card sort-modal-card">
+            <div class="modal-head">
+                <div>
+                    <h3 style="color:var(--accent);margin-bottom:4px;">拖拽排序</h3>
+                    <div class="hint">
+                        这里专门调整全部角色的顺序。拖动左侧手柄即可重新排序，改完后再点顶部“保存全部”写入 `data.json`。
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div id="bandSortSummary" style="font-size:0.82rem;color:#9fb6ff;"></div>
+                    <button class="btn btn-outline btn-sm" onclick="closeBandSortModal()">关闭</button>
+                </div>
+            </div>
+            <div class="sort-table-shell">
+                <div class="sort-table-head">
+                    <div>拖动</div>
+                    <div>顺位</div>
+                    <div>角色</div>
+                    <div class="sort-col-desc">说明</div>
+                </div>
+                <div class="sort-table-body" id="bandSortTable"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let appData = null;
         let currentImageEditor = null;
         let cropDraft = null;
         let latestImages = [];
+        let bandSortDragState = null;
+        let bandViewState = {
+            keyword: '',
+            gachaOnly: false,
+            page: 1,
+            pageSize: 20
+        };
         const specialImageSlots = [
             { id: 'door_left', title: '左门图片', baseName: 'gacha_door_left' },
             { id: 'door_right', title: '右门图片', baseName: 'gacha_door_right' }
@@ -386,10 +518,242 @@
             const res = await fetch('/api/data');
             appData = await res.json();
             appData.IMAGE_META = appData.IMAGE_META || {};
+            bindBandControls();
+            bindBandCsvTools();
             renderBands();
             renderConfig();
             renderColors();
             loadImages();
+        }
+
+        function bindBandControls() {
+            const searchEl = document.getElementById('bandSearch');
+            const gachaEl = document.getElementById('bandOnlyGacha');
+            const pageSizeEl = document.getElementById('bandPageSize');
+
+            if (searchEl) {
+                searchEl.addEventListener('input', e => {
+                    bandViewState.keyword = (e.target.value || '').trim();
+                    bandViewState.page = 1;
+                    renderBands();
+                });
+            }
+            if (gachaEl) {
+                gachaEl.addEventListener('change', e => {
+                    bandViewState.gachaOnly = !!e.target.checked;
+                    bandViewState.page = 1;
+                    renderBands();
+                });
+            }
+            if (pageSizeEl) {
+                pageSizeEl.addEventListener('change', e => {
+                    const n = parseInt(e.target.value, 10);
+                    bandViewState.pageSize = Number.isFinite(n) && n > 0 ? n : 20;
+                    bandViewState.page = 1;
+                    renderBands();
+                });
+            }
+        }
+
+        function bindBandCsvTools() {
+            const fileEl = document.getElementById('bandCsvFile');
+            if (!fileEl) return;
+            fileEl.addEventListener('change', importBandsCsv);
+        }
+
+        function getBandCsvHeaders() {
+            const dimNames = (appData.CONFIG.DIM_NAMES || []).map((d, i) => String(d || `dim${i + 1}`).trim() || `dim${i + 1}`);
+            return ['name', 'desc', 'duration', 'colorIndex', 'gacha', ...dimNames];
+        }
+
+        function escapeCsvCell(value) {
+            const text = value === undefined || value === null ? '' : String(value);
+            if (!/[",\r\n]/.test(text)) return text;
+            return `"${text.replace(/"/g, '""')}"`;
+        }
+
+        function exportBandsCsv() {
+            const headers = getBandCsvHeaders();
+            const dimCount = Math.max(0, headers.length - 5);
+            const lines = [headers.map(escapeCsvCell).join(',')];
+
+            appData.namelist.forEach(b => {
+                const row = [
+                    b.name || '',
+                    b.desc || '',
+                    b.duration ?? '',
+                    b.colorIndex ?? '',
+                    b.gacha ? '1' : '0'
+                ];
+                for (let i = 0; i < dimCount; i++) {
+                    row.push((b.points && b.points[i] !== undefined) ? b.points[i] : '');
+                }
+                lines.push(row.map(escapeCsvCell).join(','));
+            });
+
+            const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const t = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+            a.href = url;
+            a.download = `bands-${t}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('CSV 已导出，可用 Excel 编辑后再导入', 'success');
+        }
+
+        function triggerImportBandsCsv() {
+            const fileEl = document.getElementById('bandCsvFile');
+            if (!fileEl) return;
+            fileEl.value = '';
+            fileEl.click();
+        }
+
+        function parseCsv(text) {
+            const rows = [];
+            let row = [];
+            let cell = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                const next = text[i + 1];
+
+                if (inQuotes) {
+                    if (ch === '"' && next === '"') {
+                        cell += '"';
+                        i++;
+                    } else if (ch === '"') {
+                        inQuotes = false;
+                    } else {
+                        cell += ch;
+                    }
+                    continue;
+                }
+
+                if (ch === '"') {
+                    inQuotes = true;
+                } else if (ch === ',') {
+                    row.push(cell);
+                    cell = '';
+                } else if (ch === '\n') {
+                    row.push(cell);
+                    rows.push(row);
+                    row = [];
+                    cell = '';
+                } else if (ch === '\r') {
+                    // skip
+                } else {
+                    cell += ch;
+                }
+            }
+            if (cell.length > 0 || row.length > 0) {
+                row.push(cell);
+                rows.push(row);
+            }
+            return rows;
+        }
+
+        function toNumberOrDefault(v, fallback = 0) {
+            const n = Number(v);
+            return Number.isFinite(n) ? n : fallback;
+        }
+
+        function toOptionalNumber(v) {
+            if (v === undefined || v === null || String(v).trim() === '') return undefined;
+            const n = Number(v);
+            return Number.isFinite(n) ? n : undefined;
+        }
+
+        function toBool(v) {
+            const s = String(v || '').trim().toLowerCase();
+            return s === '1' || s === 'true' || s === 'yes' || s === 'y' || s === '是';
+        }
+
+        async function importBandsCsv(event) {
+            const fileEl = event.target;
+            const file = fileEl.files && fileEl.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const rows = parseCsv(text).filter(r => r.some(c => String(c || '').trim() !== ''));
+                if (rows.length < 2) {
+                    showToast('CSV 内容为空或缺少数据行', 'error');
+                    return;
+                }
+
+                const headers = rows[0].map(h => String(h || '').trim());
+                const lowered = headers.map(h => h.toLowerCase());
+                const findHeader = aliases => lowered.findIndex(h => aliases.includes(h));
+                const nameIdx = findHeader(['name', '名称']);
+                if (nameIdx < 0) {
+                    showToast('CSV 缺少 name/名称 列', 'error');
+                    return;
+                }
+
+                const descIdx = findHeader(['desc', 'description', '描述']);
+                const durationIdx = findHeader(['duration', '时长', 'duration(ms)']);
+                const colorIdx = findHeader(['colorindex', '配色索引']);
+                const gachaIdx = findHeader(['gacha', '抽卡出金']);
+                const dimNames = appData.CONFIG.DIM_NAMES || [];
+                const dimIndexes = dimNames.map((dim, i) => {
+                    const exact = headers.findIndex(h => h === dim);
+                    if (exact >= 0) return exact;
+                    const lower = lowered.findIndex(h => h === String(dim || '').toLowerCase());
+                    if (lower >= 0) return lower;
+                    const fallback = findHeader([`dim${i + 1}`, `point${i + 1}`, `维度${i + 1}`]);
+                    return fallback;
+                });
+
+                const imported = [];
+                for (let r = 1; r < rows.length; r++) {
+                    const row = rows[r];
+                    const name = String(row[nameIdx] || '').trim();
+                    if (!name) continue;
+                    const band = {
+                        name,
+                        desc: descIdx >= 0 ? String(row[descIdx] || '').trim() : '',
+                        points: dimIndexes.map(idx => idx >= 0 ? toNumberOrDefault(row[idx], 0) : 0)
+                    };
+                    const duration = durationIdx >= 0 ? toOptionalNumber(row[durationIdx]) : undefined;
+                    const colorIndex = colorIdx >= 0 ? toOptionalNumber(row[colorIdx]) : undefined;
+                    if (duration !== undefined) band.duration = Math.max(0, duration);
+                    if (colorIndex !== undefined) band.colorIndex = Math.max(0, Math.floor(colorIndex));
+                    if (gachaIdx >= 0) band.gacha = toBool(row[gachaIdx]);
+                    imported.push(band);
+                }
+
+                if (!imported.length) {
+                    showToast('CSV 没有可导入的选手数据', 'error');
+                    return;
+                }
+
+                const replaceAll = confirm('导入模式：确定=覆盖全部选手，取消=按名称更新/新增');
+                if (replaceAll) {
+                    appData.namelist = imported;
+                } else {
+                    const merged = appData.namelist.map(b => ({
+                        ...b,
+                        points: Array.isArray(b.points) ? [...b.points] : []
+                    }));
+                    imported.forEach(nextBand => {
+                        const idx = merged.findIndex(b => String(b.name || '').trim() === nextBand.name);
+                        if (idx >= 0) merged[idx] = { ...merged[idx], ...nextBand, points: nextBand.points };
+                        else merged.push(nextBand);
+                    });
+                    appData.namelist = merged;
+                }
+
+                bandViewState.page = 1;
+                refreshBandViews();
+                showToast(`CSV 导入完成：${imported.length} 条`, 'success');
+            } catch (err) {
+                showToast('CSV 导入失败，请检查格式', 'error');
+            } finally {
+                fileEl.value = '';
+            }
         }
 
         function imageBaseName(name) {
@@ -452,9 +816,138 @@
         });
 
         // ===== 选手管理 =====
+        function getFilteredBandEntries() {
+            const keyword = (bandViewState.keyword || '').toLowerCase();
+            return appData.namelist
+                .map((b, idx) => ({ b, idx }))
+                .filter(({ b }) => {
+                    if (bandViewState.gachaOnly && !b.gacha) return false;
+                    if (!keyword) return true;
+                    const name = String(b.name || '').toLowerCase();
+                    const desc = String(b.desc || '').toLowerCase();
+                    return name.includes(keyword) || desc.includes(keyword);
+                });
+        }
+
+        function renderBandPager(total, totalPages, start, shownCount) {
+            const pager = document.getElementById('bandPager');
+            if (!pager) return;
+            if (total === 0) {
+                pager.innerHTML = '';
+                return;
+            }
+            pager.innerHTML = `
+                <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;">
+                    <div style="color:#9fb6ff;font-size:0.9rem;">
+                        显示第 ${start + 1} - ${start + shownCount} 条（筛选后共 ${total} 条）
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <button class="btn btn-outline btn-sm" ${bandViewState.page <= 1 ? 'disabled' : ''} onclick="changeBandPage(-1)">上一页</button>
+                        <span style="min-width:70px;text-align:center;color:#e6edf3;">${bandViewState.page} / ${totalPages}</span>
+                        <button class="btn btn-outline btn-sm" ${bandViewState.page >= totalPages ? 'disabled' : ''} onclick="changeBandPage(1)">下一页</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function changeBandPage(delta) {
+            const entries = getFilteredBandEntries();
+            const totalPages = Math.max(1, Math.ceil(entries.length / bandViewState.pageSize));
+            const next = Math.max(1, Math.min(totalPages, bandViewState.page + delta));
+            if (next === bandViewState.page) return;
+            bandViewState.page = next;
+            renderBands();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function isBandSortModalOpen() {
+            const modal = document.getElementById('bandSortModal');
+            return !!modal && modal.classList.contains('show');
+        }
+
+        function refreshBandViews() {
+            renderBands();
+            if (isBandSortModalOpen()) renderBandSortTable();
+        }
+
+        function openBandSortModal() {
+            renderBandSortTable();
+            document.getElementById('bandSortModal').classList.add('show');
+        }
+
+        function closeBandSortModal() {
+            clearBandSortHoverState();
+            bandSortDragState = null;
+            document.getElementById('bandSortModal').classList.remove('show');
+        }
+
+        function clearBandSortHoverState() {
+            const table = document.getElementById('bandSortTable');
+            if (!table) return;
+            table.querySelectorAll('.drag-over-top, .drag-over-bottom').forEach(row => {
+                row.classList.remove('drag-over-top', 'drag-over-bottom');
+            });
+        }
+
+        function renderBandSortTable() {
+            const table = document.getElementById('bandSortTable');
+            const summary = document.getElementById('bandSortSummary');
+            if (!table || !appData) return;
+            if (summary) summary.textContent = `共 ${appData.namelist.length} 个角色`;
+            if (!appData.namelist.length) {
+                table.innerHTML = `<div class="sort-empty">当前没有角色可排序。</div>`;
+                return;
+            }
+            table.innerHTML = appData.namelist.map((band, idx) => `
+                <div class="sort-row" data-idx="${idx}" draggable="true">
+                    <div class="sort-handle" title="拖动排序">⋮⋮</div>
+                    <div class="sort-rank">#${idx + 1}</div>
+                    <div class="sort-name">
+                        <span class="sort-name-text">${esc(band.name || `角色 ${idx + 1}`)}</span>
+                        ${band.gacha ? '<span class="sort-badge">出金</span>' : ''}
+                    </div>
+                    <div class="sort-desc">${esc(band.desc || ' ')}</div>
+                </div>
+            `).join('');
+        }
+
+        function reorderBandByDrag(fromIdx, toIdx, insertAfter) {
+            const list = appData.namelist;
+            if (!Array.isArray(list)) return;
+            if (fromIdx === toIdx) return;
+            if (fromIdx < 0 || toIdx < 0 || fromIdx >= list.length || toIdx >= list.length) return;
+
+            const [item] = list.splice(fromIdx, 1);
+            let insertAt = toIdx;
+            if (insertAfter) {
+                insertAt = fromIdx < toIdx ? toIdx : toIdx + 1;
+            } else if (fromIdx < toIdx) {
+                insertAt = toIdx - 1;
+            }
+            insertAt = Math.max(0, Math.min(list.length, insertAt));
+            list.splice(insertAt, 0, item);
+            refreshBandViews();
+        }
+
         function renderBands() {
             const list = document.getElementById('bandList');
-            list.innerHTML = appData.namelist.map((b, idx) => `
+            const countEl = document.getElementById('bandCount');
+            const entries = getFilteredBandEntries();
+            const total = entries.length;
+            const totalPages = Math.max(1, Math.ceil(total / bandViewState.pageSize));
+            if (bandViewState.page > totalPages) bandViewState.page = totalPages;
+            const start = (bandViewState.page - 1) * bandViewState.pageSize;
+            const pageEntries = entries.slice(start, start + bandViewState.pageSize);
+
+            if (countEl) countEl.textContent = `共 ${appData.namelist.length} 条，筛选后 ${total} 条`;
+            renderBandPager(total, totalPages, start, pageEntries.length);
+
+            if (!pageEntries.length) {
+                list.innerHTML = `<div class="card" style="padding:18px;color:#9fb6ff;">没有匹配的选手，试试清空搜索或取消筛选。</div>`;
+                return;
+            }
+
+            list.innerHTML = pageEntries.map(({ b, idx }) => `
                 <div class="card band-card" data-idx="${idx}">
                     <div class="band-index">${idx + 1}</div>
                     <div class="band-card-main">
@@ -475,8 +968,14 @@
                         </div>
                     </div>
                     <div class="band-card-actions">
+                        ${idx > 0 ? `<button class="btn btn-outline btn-sm" onclick="moveBandTo(${idx},0)">⤒</button>` : ''}
                         ${idx > 0 ? `<button class="btn btn-outline btn-sm" onclick="moveBand(${idx},-1)">↑</button>` : ''}
                         ${idx < appData.namelist.length - 1 ? `<button class="btn btn-outline btn-sm" onclick="moveBand(${idx},1)">↓</button>` : ''}
+                        ${idx < appData.namelist.length - 1 ? `<button class="btn btn-outline btn-sm" onclick="moveBandTo(${idx},${appData.namelist.length - 1})">⤓</button>` : ''}
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" id="band-pos-${idx}" min="1" max="${appData.namelist.length}" value="${idx + 1}" style="width:64px;text-align:center;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);">
+                            <button class="btn btn-outline btn-sm" onclick="jumpBandTo(${idx})">跳转</button>
+                        </div>
                         <button class="btn btn-danger btn-sm" onclick="removeBand(${idx})">删除</button>
                     </div>
                 </div>
@@ -489,33 +988,60 @@
         function addBand() {
             const vc = appData.CONFIG.VERTEX_COUNT || 6;
             appData.namelist.push({ name: "New", points: Array(vc).fill(5), desc: "" });
-            renderBands();
+            refreshBandViews();
         }
 
         function removeBand(idx) {
             if (!confirm(`确认删除 "${appData.namelist[idx].name}"？`)) return;
             appData.namelist.splice(idx, 1);
-            renderBands();
+            refreshBandViews();
         }
 
         function moveBand(idx, dir) {
             const target = idx + dir;
             [appData.namelist[idx], appData.namelist[target]] = [appData.namelist[target], appData.namelist[idx]];
-            renderBands();
+            refreshBandViews();
+        }
+
+        function moveBandTo(idx, target) {
+            const len = appData.namelist.length;
+            if (!len) return;
+            const to = Math.max(0, Math.min(len - 1, target));
+            if (idx === to) return;
+            const [item] = appData.namelist.splice(idx, 1);
+            appData.namelist.splice(to, 0, item);
+            refreshBandViews();
+        }
+
+        function jumpBandTo(idx) {
+            const input = document.getElementById(`band-pos-${idx}`);
+            if (!input) return;
+            const to = parseInt(input.value, 10);
+            if (!Number.isFinite(to)) return;
+            moveBandTo(idx, to - 1);
         }
 
         // ===== 全局配置 =====
         function renderConfig() {
             const C = appData.CONFIG;
+            if (C.PHOTO_FX_ENABLED === undefined) C.PHOTO_FX_ENABLED = true;
+            if (C.PHOTO_FX_INTENSITY === undefined) C.PHOTO_FX_INTENSITY = 1;
+            if (C.MUSIC_VOLUME === undefined) C.MUSIC_VOLUME = 0.7;
+            if (C.MUSIC_TRACKS === undefined) C.MUSIC_TRACKS = 'music.mp3';
+            if (C.GACHA_LOGO_ON_TIME === undefined) C.GACHA_LOGO_ON_TIME = 120;
+            if (C.GACHA_LOGO_DURATION === undefined) C.GACHA_LOGO_DURATION = 400;
+            if (C.RADAR_AUTO_OFFSET === undefined) C.RADAR_AUTO_OFFSET = false;
+            if (C.PERFORMANCE_MODE === undefined) C.PERFORMANCE_MODE = 'balanced';
+            if (C.ADAPTIVE_PERF === undefined) C.ADAPTIVE_PERF = true;
             // 数字/文本字段
             ['RADAR_SCALE','RADAR_GRID_LEVELS','RADAR_GRID_LINE_WIDTH','RADAR_GRID_LINE_OPACITY',
-             'VERTEX_COUNT','LABEL_MARGIN','ANIM_DURATION','DEFAULT_DURATION','INTRO_WAIT_TIME',
-             'IMAGE_SCALE','PARTICLE_OPACITY_MULT','PARTICLE_SIZE_MULT','GACHA_ANIM_DURATION','BEST_FONT'].forEach(k => {
+              'VERTEX_COUNT','LABEL_MARGIN','ANIM_DURATION','DEFAULT_DURATION','INTRO_WAIT_TIME',
+              'MUSIC_VOLUME','MUSIC_TRACKS','IMAGE_SCALE','PARTICLE_OPACITY_MULT','PARTICLE_SIZE_MULT','PHOTO_FX_INTENSITY','GACHA_ANIM_DURATION','GACHA_LOGO_ON_TIME','GACHA_LOGO_DURATION','BEST_FONT'].forEach(k => {
                 const el = document.getElementById(`cfg-${k}`);
                 if (el) el.value = C[k] !== undefined ? C[k] : '';
             });
             // 复选框
-            ['SHOW_DESC','ENABLE_SPECIAL_FORMAT','USE_AUTO_PRECISION','SHOW_SCORE_UNDER_NAME'].forEach(k => {
+            ['SHOW_DESC','ENABLE_SPECIAL_FORMAT','USE_AUTO_PRECISION','SHOW_SCORE_UNDER_NAME','PHOTO_FX_ENABLED','RADAR_AUTO_OFFSET','ADAPTIVE_PERF'].forEach(k => {
                 const el = document.getElementById(`cfg-${k}`);
                 if (el) el.checked = !!C[k];
             });
@@ -525,6 +1051,8 @@
             // 下拉
             const gachaStyle = document.getElementById('cfg-GACHA_FONT_STYLE');
             if (gachaStyle) gachaStyle.value = C.GACHA_FONT_STYLE || 0;
+            const perfMode = document.getElementById('cfg-PERFORMANCE_MODE');
+            if (perfMode) perfMode.value = C.PERFORMANCE_MODE || 'balanced';
             // MVP
             document.getElementById('cfg-mvplist').value = (appData.mvplist || []).join(', ');
             // 维度设置
@@ -549,7 +1077,7 @@
 
         function collectConfig() {
             const C = appData.CONFIG;
-            ['RADAR_SCALE','RADAR_GRID_LINE_WIDTH','RADAR_GRID_LINE_OPACITY','IMAGE_SCALE','PARTICLE_OPACITY_MULT','PARTICLE_SIZE_MULT'].forEach(k => {
+            ['RADAR_SCALE','RADAR_GRID_LINE_WIDTH','RADAR_GRID_LINE_OPACITY','MUSIC_VOLUME','IMAGE_SCALE','PARTICLE_OPACITY_MULT','PARTICLE_SIZE_MULT','PHOTO_FX_INTENSITY'].forEach(k => {
                 const el = document.getElementById(`cfg-${k}`);
                 if (el) C[k] = parseFloat(el.value) || 0;
             });
@@ -557,12 +1085,22 @@
                 const el = document.getElementById(`cfg-${k}`);
                 if (el) C[k] = parseInt(el.value) || 0;
             });
-            ['SHOW_DESC','ENABLE_SPECIAL_FORMAT','USE_AUTO_PRECISION','SHOW_SCORE_UNDER_NAME'].forEach(k => {
+            ['GACHA_LOGO_ON_TIME','GACHA_LOGO_DURATION'].forEach(k => {
+                const el = document.getElementById(`cfg-${k}`);
+                if (el) C[k] = Math.max(0, parseInt(el.value) || 0);
+            });
+            {
+                const musicVolume = Number(C.MUSIC_VOLUME);
+                C.MUSIC_VOLUME = Number.isFinite(musicVolume) ? Math.max(0, Math.min(1, musicVolume)) : 0.7;
+            }
+            ['SHOW_DESC','ENABLE_SPECIAL_FORMAT','USE_AUTO_PRECISION','SHOW_SCORE_UNDER_NAME','PHOTO_FX_ENABLED','RADAR_AUTO_OFFSET','ADAPTIVE_PERF'].forEach(k => {
                 const el = document.getElementById(`cfg-${k}`);
                 if (el) C[k] = el.checked;
             });
             C.BEST_COLOR = document.getElementById('cfg-BEST_COLOR').value;
             C.BEST_FONT = document.getElementById('cfg-BEST_FONT').value;
+            C.MUSIC_TRACKS = String(document.getElementById('cfg-MUSIC_TRACKS').value || '').trim();
+            C.PERFORMANCE_MODE = document.getElementById('cfg-PERFORMANCE_MODE').value || 'balanced';
             C.GACHA_ANIM_TYPE = 2;
             C.GACHA_FONT_STYLE = parseInt(document.getElementById('cfg-GACHA_FONT_STYLE').value);
             // MVP list
@@ -739,13 +1277,24 @@
             }
         }
 
+        function getDefaultImageMeta(name = '', placement = '') {
+            const base = imageBaseName(name);
+            if (placement === 'left-half' || placement === 'right-half') {
+                return { fit: 'cover', scale: 1, x: 50, y: 50 };
+            }
+            if (placement === 'gacha-full-bg' || base.startsWith('best_')) {
+                return { fit: 'cover', scale: 1, x: 50, y: 50 };
+            }
+            if (placement === 'mvp-left-fade') {
+                return { fit: 'contain', scale: 1, x: 50, y: 50 };
+            }
+            return { fit: 'contain', scale: 1, x: 50, y: 50 };
+        }
+
         function getImageMeta(name) {
             appData.IMAGE_META = appData.IMAGE_META || {};
             return {
-                fit: 'contain',
-                scale: 1,
-                x: 50,
-                y: 50,
+                ...getDefaultImageMeta(name, getImagePlacement(name)),
                 ...(appData.IMAGE_META[name] || {})
             };
         }
@@ -754,6 +1303,7 @@
             const base = imageBaseName(name);
             if (base === 'gacha_door_left') return 'left-half';
             if (base === 'gacha_door_right') return 'right-half';
+            if (base.startsWith('best_')) return 'gacha-full-bg';
             if (base.endsWith('1')) return 'mvp-left-fade';
             return '';
         }
@@ -764,6 +1314,9 @@
                 next.x = (meta.x ?? 50) / 2;
             } else if (placement === 'right-half') {
                 next.x = 50 + ((meta.x ?? 50) / 2);
+            } else if (placement === 'mvp-left-fade') {
+                // MVP 只展示左侧渐隐区域，编辑时让 0-100 直接对应这个可见区
+                next.x = ((meta.x ?? 50) * 0.58);
             }
             return next;
         }
@@ -775,6 +1328,7 @@
             document.getElementById('cropPreviewImage').src = url;
             cropStage.classList.toggle('door-preview', currentImageEditor.placement === 'left-half' || currentImageEditor.placement === 'right-half');
             cropStage.classList.toggle('mvp-preview', currentImageEditor.placement === 'mvp-left-fade');
+            cropStage.classList.toggle('best-preview', currentImageEditor.placement === 'gacha-full-bg');
             cropStage.classList.toggle('door-left', currentImageEditor.placement === 'left-half');
             cropStage.classList.toggle('door-right', currentImageEditor.placement === 'right-half');
             document.getElementById('imageEditorModal').classList.add('show');
@@ -784,14 +1338,14 @@
 
         function closeImageEditor() {
             document.getElementById('imageEditorModal').classList.remove('show');
-            cropStage.classList.remove('door-preview', 'mvp-preview', 'door-left', 'door-right');
+            cropStage.classList.remove('door-preview', 'mvp-preview', 'best-preview', 'door-left', 'door-right');
             currentImageEditor = null;
             cropDraft = null;
         }
 
         function resetImageEditor() {
             if (!currentImageEditor) return;
-            cropDraft = { fit: 'contain', scale: 1, x: 50, y: 50 };
+            cropDraft = { ...getDefaultImageMeta(currentImageEditor.name, currentImageEditor.placement) };
             syncImageEditorControls();
             renderImageEditorPreview();
         }
@@ -907,6 +1461,55 @@
 
         document.getElementById('imageEditorModal').addEventListener('mousedown', e => {
             if (e.target.id === 'imageEditorModal') closeImageEditor();
+        });
+
+        document.getElementById('bandSortModal').addEventListener('mousedown', e => {
+            if (e.target.id === 'bandSortModal') closeBandSortModal();
+        });
+
+        document.getElementById('bandSortTable').addEventListener('dragstart', e => {
+            const row = e.target.closest('.sort-row');
+            if (!row) return;
+            bandSortDragState = { fromIdx: Number(row.dataset.idx) };
+            clearBandSortHoverState();
+            row.classList.add('dragging');
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                try {
+                    e.dataTransfer.setData('text/plain', row.dataset.idx || '');
+                } catch (_) {}
+            }
+        });
+
+        document.getElementById('bandSortTable').addEventListener('dragover', e => {
+            const row = e.target.closest('.sort-row');
+            if (!row || !bandSortDragState) return;
+            e.preventDefault();
+            clearBandSortHoverState();
+            const rect = row.getBoundingClientRect();
+            const insertAfter = e.clientY >= rect.top + rect.height / 2;
+            row.classList.add(insertAfter ? 'drag-over-bottom' : 'drag-over-top');
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+        });
+
+        document.getElementById('bandSortTable').addEventListener('drop', e => {
+            const row = e.target.closest('.sort-row');
+            if (!row || !bandSortDragState) return;
+            e.preventDefault();
+            const rect = row.getBoundingClientRect();
+            const insertAfter = e.clientY >= rect.top + rect.height / 2;
+            const toIdx = Number(row.dataset.idx);
+            const fromIdx = bandSortDragState.fromIdx;
+            bandSortDragState = null;
+            reorderBandByDrag(fromIdx, toIdx, insertAfter);
+        });
+
+        document.getElementById('bandSortTable').addEventListener('dragend', () => {
+            clearBandSortHoverState();
+            document.querySelectorAll('#bandSortTable .sort-row.dragging').forEach(row => {
+                row.classList.remove('dragging');
+            });
+            bandSortDragState = null;
         });
 
         // ===== 保存 =====
