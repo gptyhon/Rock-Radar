@@ -284,7 +284,7 @@
                     <div class="form-group"><label>网格层数</label><input type="number" id="cfg-RADAR_GRID_LEVELS" min="1" max="20"></div>
                     <div class="form-group"><label>网格线宽</label><input type="number" id="cfg-RADAR_GRID_LINE_WIDTH" step="0.5" min="0.5"></div>
                     <div class="form-group"><label>网格透明度</label><input type="number" id="cfg-RADAR_GRID_LINE_OPACITY" step="0.05" min="0" max="1"></div>
-                    <div class="form-group"><label>顶点数</label><input type="number" id="cfg-VERTEX_COUNT" min="3" max="20"></div>
+                    <div class="form-group"><label>顶点数</label><input type="number" id="cfg-VERTEX_COUNT" min="6" max="8"></div>
                     <div class="form-group"><label>标签边距</label><input type="number" id="cfg-LABEL_MARGIN" min="0"></div>
                 </div>
             </div>
@@ -331,6 +331,17 @@
                     <div class="checkbox-row"><input type="checkbox" id="cfg-ENABLE_SPECIAL_FORMAT"><label>启用 10+ 特殊格式</label></div>
                     <div class="checkbox-row"><input type="checkbox" id="cfg-USE_AUTO_PRECISION"><label>自动精度控制</label></div>
                     <div class="checkbox-row"><input type="checkbox" id="cfg-SHOW_SCORE_UNDER_NAME"><label>分数显示在名称下方</label></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>品牌文案</h3>
+                <div class="form-row">
+                    <div class="form-group" style="min-width:260px;"><label>右上角文案</label><input type="text" id="cfg-BRAND_TOP_RIGHT_TEXT"></div>
+                    <div class="form-group" style="min-width:260px;"><label>左下角文案</label><input type="text" id="cfg-BRAND_BOTTOM_LEFT_TEXT"></div>
+                    <div class="form-group" style="min-width:260px;"><label>背景主标题</label><input type="text" id="cfg-BRAND_WATERMARK_CN"></div>
+                    <div class="form-group" style="min-width:260px;"><label>背景英文小字</label><input type="text" id="cfg-BRAND_WATERMARK_EN"></div>
+                    <div class="form-group" style="min-width:260px;"><label>开场主标题</label><input type="text" id="cfg-INTRO_TITLE_MAIN"></div>
+                    <div class="form-group" style="min-width:260px;"><label>开场英文小字</label><input type="text" id="cfg-INTRO_TITLE_SUB"></div>
                 </div>
             </div>
             <div class="card">
@@ -508,6 +519,8 @@
             page: 1,
             pageSize: 20
         };
+        const MIN_VERTEX_COUNT = 6;
+        const MAX_VERTEX_COUNT = 8;
         const specialImageSlots = [
             { id: 'door_left', title: '左门图片', baseName: 'gacha_door_left' },
             { id: 'door_right', title: '右门图片', baseName: 'gacha_door_right' }
@@ -518,12 +531,75 @@
             const res = await fetch('/api/data');
             appData = await res.json();
             appData.IMAGE_META = appData.IMAGE_META || {};
+            normalizeVertexConfigAndBands();
             bindBandControls();
             bindBandCsvTools();
+            bindConfigControls();
             renderBands();
             renderConfig();
             renderColors();
             loadImages();
+        }
+
+        function getNormalizedVertexCount(value) {
+            const num = parseInt(value, 10);
+            if (!Number.isFinite(num)) return MIN_VERTEX_COUNT;
+            return clamp(num, MIN_VERTEX_COUNT, MAX_VERTEX_COUNT);
+        }
+
+        function ensureLength(arr, len, factory) {
+            const out = Array.isArray(arr) ? arr.slice(0, len) : [];
+            while (out.length < len) out.push(factory(out.length));
+            return out;
+        }
+
+        function normalizeVertexConfigAndBands() {
+            if (!appData) return;
+            appData.CONFIG = appData.CONFIG || {};
+            const C = appData.CONFIG;
+            const vc = getNormalizedVertexCount(C.VERTEX_COUNT);
+            C.VERTEX_COUNT = vc;
+
+            C.DIM_NAMES = ensureLength(C.DIM_NAMES, vc, i => `维度${i + 1}`)
+                .map((name, i) => {
+                    const text = String(name ?? '').trim();
+                    return text || `维度${i + 1}`;
+                });
+
+            C.BASE_MAX_SCORES = ensureLength(C.BASE_MAX_SCORES, vc, () => 10)
+                .map(v => {
+                    const n = Number(v);
+                    return Number.isFinite(n) ? n : 10;
+                });
+
+            C.MIN_SCORES = ensureLength(C.MIN_SCORES, vc, () => 0)
+                .map(v => {
+                    const n = Number(v);
+                    return Number.isFinite(n) ? n : 0;
+                });
+
+            C.USE_PERCENTAGE = ensureLength(C.USE_PERCENTAGE, vc, () => false)
+                .map(v => !!v);
+            C.REAL_PERCENTAGE = ensureLength(C.REAL_PERCENTAGE, vc, () => false)
+                .map(v => !!v);
+            for (let i = 0; i < vc; i++) {
+                if (C.REAL_PERCENTAGE[i] && C.USE_PERCENTAGE[i]) {
+                    C.USE_PERCENTAGE[i] = false;
+                }
+            }
+
+            appData.namelist = Array.isArray(appData.namelist) ? appData.namelist : [];
+            appData.namelist = appData.namelist.map(band => {
+                const rawPoints = Array.isArray(band.points) ? band.points : [];
+                const points = ensureLength(rawPoints, vc, i => C.MIN_SCORES[i] ?? 0)
+                    .map((v, i) => {
+                        const n = Number(v);
+                        if (Number.isFinite(n)) return n;
+                        const minScore = Number(C.MIN_SCORES[i] ?? 0);
+                        return Number.isFinite(minScore) ? minScore : 0;
+                    });
+                return { ...band, points };
+            });
         }
 
         function bindBandControls() {
@@ -559,6 +635,23 @@
             const fileEl = document.getElementById('bandCsvFile');
             if (!fileEl) return;
             fileEl.addEventListener('change', importBandsCsv);
+        }
+
+        function bindConfigControls() {
+            const vertexInput = document.getElementById('cfg-VERTEX_COUNT');
+            if (!vertexInput) return;
+
+            const syncVertexCount = () => {
+                if (!appData || !appData.CONFIG) return;
+                appData.CONFIG.VERTEX_COUNT = getNormalizedVertexCount(vertexInput.value);
+                normalizeVertexConfigAndBands();
+                vertexInput.value = appData.CONFIG.VERTEX_COUNT;
+                renderDimSettings();
+                refreshBandViews();
+            };
+
+            vertexInput.addEventListener('change', syncVertexCount);
+            vertexInput.addEventListener('input', syncVertexCount);
         }
 
         function getBandCsvHeaders() {
@@ -746,6 +839,7 @@
                     appData.namelist = merged;
                 }
 
+                normalizeVertexConfigAndBands();
                 bandViewState.page = 1;
                 refreshBandViews();
                 showToast(`CSV 导入完成：${imported.length} 条`, 'success');
@@ -986,7 +1080,8 @@
         function updatePoint(idx, dim, val) { appData.namelist[idx].points[dim] = val; }
 
         function addBand() {
-            const vc = appData.CONFIG.VERTEX_COUNT || 6;
+            normalizeVertexConfigAndBands();
+            const vc = getNormalizedVertexCount(appData.CONFIG.VERTEX_COUNT);
             appData.namelist.push({ name: "New", points: Array(vc).fill(5), desc: "" });
             refreshBandViews();
         }
@@ -1033,10 +1128,21 @@
             if (C.RADAR_AUTO_OFFSET === undefined) C.RADAR_AUTO_OFFSET = false;
             if (C.PERFORMANCE_MODE === undefined) C.PERFORMANCE_MODE = 'balanced';
             if (C.ADAPTIVE_PERF === undefined) C.ADAPTIVE_PERF = true;
+            if (C.BRAND_TOP_RIGHT_TEXT === undefined) {
+                const legacy = String(C.BRAND_LEFT_TOP_TEXT || '').trim();
+                C.BRAND_TOP_RIGHT_TEXT = (legacy && legacy !== 'IPC LOCK') ? legacy : 'HONKAI: STAR RAIL V4.0';
+            }
+            if (C.BRAND_BOTTOM_LEFT_TEXT === undefined) C.BRAND_BOTTOM_LEFT_TEXT = C.BRAND_RIGHT_BOTTOM_TEXT || 'CURRENCY WAR / IPC';
+            if (C.BRAND_WATERMARK_CN === undefined) C.BRAND_WATERMARK_CN = '货币战争';
+            if (C.BRAND_WATERMARK_EN === undefined) C.BRAND_WATERMARK_EN = 'CURRENCY WAR';
+            if (C.INTRO_TITLE_MAIN === undefined) C.INTRO_TITLE_MAIN = '货币战争雷达图 V4.0';
+            if (C.INTRO_TITLE_SUB === undefined) C.INTRO_TITLE_SUB = 'Currency War Radar System';
+            normalizeVertexConfigAndBands();
             // 数字/文本字段
             ['RADAR_SCALE','RADAR_GRID_LEVELS','RADAR_GRID_LINE_WIDTH','RADAR_GRID_LINE_OPACITY',
               'VERTEX_COUNT','LABEL_MARGIN','ANIM_DURATION','DEFAULT_DURATION','INTRO_WAIT_TIME',
-              'MUSIC_VOLUME','MUSIC_TRACKS','IMAGE_SCALE','PARTICLE_OPACITY_MULT','PARTICLE_SIZE_MULT','PHOTO_FX_INTENSITY','GACHA_ANIM_DURATION','GACHA_LOGO_ON_TIME','GACHA_LOGO_DURATION','BEST_FONT'].forEach(k => {
+              'MUSIC_VOLUME','MUSIC_TRACKS','IMAGE_SCALE','PARTICLE_OPACITY_MULT','PARTICLE_SIZE_MULT','PHOTO_FX_INTENSITY','GACHA_ANIM_DURATION','GACHA_LOGO_ON_TIME','GACHA_LOGO_DURATION','BEST_FONT',
+              'BRAND_TOP_RIGHT_TEXT','BRAND_BOTTOM_LEFT_TEXT','BRAND_WATERMARK_CN','BRAND_WATERMARK_EN','INTRO_TITLE_MAIN','INTRO_TITLE_SUB'].forEach(k => {
                 const el = document.getElementById(`cfg-${k}`);
                 if (el) el.value = C[k] !== undefined ? C[k] : '';
             });
@@ -1059,16 +1165,33 @@
             renderDimSettings();
         }
 
+        function setDimPercentMode(index, mode, checked) {
+            const C = appData && appData.CONFIG ? appData.CONFIG : null;
+            if (!C) return;
+            C.USE_PERCENTAGE[index] = !!C.USE_PERCENTAGE[index];
+            C.REAL_PERCENTAGE[index] = !!C.REAL_PERCENTAGE[index];
+            if (mode === 'range') {
+                C.USE_PERCENTAGE[index] = !!checked;
+                if (checked) C.REAL_PERCENTAGE[index] = false;
+            } else if (mode === 'real') {
+                C.REAL_PERCENTAGE[index] = !!checked;
+                if (checked) C.USE_PERCENTAGE[index] = false;
+            }
+            renderDimSettings();
+            refreshBandViews();
+        }
+
         function renderDimSettings() {
             const C = appData.CONFIG;
-            const vc = C.VERTEX_COUNT || 6;
+            const vc = getNormalizedVertexCount(C.VERTEX_COUNT);
             let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">';
             for (let i = 0; i < vc; i++) {
                 html += `<div class="card" style="padding:12px;">
                     <div class="form-group"><label>维度 ${i + 1} 名称</label><input type="text" value="${esc(C.DIM_NAMES[i] || '')}" onchange="appData.CONFIG.DIM_NAMES[${i}]=this.value" style="width:100%;"></div>
                     <div class="form-group"><label>满分</label><input type="number" value="${C.BASE_MAX_SCORES[i] || 10}" step="1" onchange="appData.CONFIG.BASE_MAX_SCORES[${i}]=+this.value" style="width:100%;"></div>
                     <div class="form-group"><label>最低分</label><input type="number" value="${C.MIN_SCORES[i] || 0}" step="1" onchange="appData.CONFIG.MIN_SCORES[${i}]=+this.value" style="width:100%;"></div>
-                    <div class="checkbox-row"><input type="checkbox" ${C.USE_PERCENTAGE[i] ? 'checked' : ''} onchange="appData.CONFIG.USE_PERCENTAGE[${i}]=this.checked"><label>百分比</label></div>
+                    <div class="checkbox-row"><input type="checkbox" ${C.USE_PERCENTAGE[i] ? 'checked' : ''} onchange="setDimPercentMode(${i},'range',this.checked)"><label>百分比（按量程）</label></div>
+                    <div class="checkbox-row"><input type="checkbox" ${C.REAL_PERCENTAGE && C.REAL_PERCENTAGE[i] ? 'checked' : ''} onchange="setDimPercentMode(${i},'real',this.checked)"><label>真实百分比</label></div>
                 </div>`;
             }
             html += '</div>';
@@ -1100,11 +1223,16 @@
             C.BEST_COLOR = document.getElementById('cfg-BEST_COLOR').value;
             C.BEST_FONT = document.getElementById('cfg-BEST_FONT').value;
             C.MUSIC_TRACKS = String(document.getElementById('cfg-MUSIC_TRACKS').value || '').trim();
+            ['BRAND_TOP_RIGHT_TEXT','BRAND_BOTTOM_LEFT_TEXT','BRAND_WATERMARK_CN','BRAND_WATERMARK_EN','INTRO_TITLE_MAIN','INTRO_TITLE_SUB'].forEach(k => {
+                const el = document.getElementById(`cfg-${k}`);
+                if (el) C[k] = String(el.value || '').trim();
+            });
             C.PERFORMANCE_MODE = document.getElementById('cfg-PERFORMANCE_MODE').value || 'balanced';
             C.GACHA_ANIM_TYPE = 2;
             C.GACHA_FONT_STYLE = parseInt(document.getElementById('cfg-GACHA_FONT_STYLE').value);
             // MVP list
             appData.mvplist = document.getElementById('cfg-mvplist').value.split(',').map(s => s.trim()).filter(Boolean);
+            normalizeVertexConfigAndBands();
         }
 
         // ===== 颜色方案 =====

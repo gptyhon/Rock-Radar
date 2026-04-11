@@ -3709,8 +3709,8 @@
     <div id="introOverlay">
         <div class="intro-sequence" aria-hidden="true">
             <div class="intro-title-banner">
-                <div class="intro-title-main">货币战争雷达图 V4.0</div>
-                <div class="intro-title-sub">Currency War Radar System</div>
+                <div class="intro-title-main" id="introTitleMain">货币战争雷达图 V4.0</div>
+                <div class="intro-title-sub" id="introTitleSub">Currency War Radar System</div>
             </div>
             <div class="intro-guide-wrap">
                 <div class="intro-guide-panel">
@@ -3727,7 +3727,7 @@
         <div class="brand-security-pattern"></div>
         <div class="brand-emblem"></div>
         <div class="brand-scan-badge brand-b3" aria-hidden="true">
-            <div class="brand-b3-label">IPC LOCK</div>
+            <div class="brand-b3-label" id="brandLeftTopText">IPC LOCK</div>
             <div class="brand-b3-rail brand-b3-rail-main"></div>
             <div class="brand-b3-rail brand-b3-rail-sub"></div>
             <div class="brand-b3-focus"></div>
@@ -3837,13 +3837,13 @@
             <span class="brand-diamond-spark brand-diamond-spark-c"></span>
         </div>
         <div class="brand-watermark">
-            <span class="brand-watermark-cn">货币战争</span>
-            <span class="brand-watermark-en">CURRENCY WAR</span>
+            <span class="brand-watermark-cn" id="brandWatermarkCn">货币战争</span>
+            <span class="brand-watermark-en" id="brandWatermarkEn">CURRENCY WAR</span>
         </div>
         <div class="brand-corner brand-corner-top-right"></div>
         <div class="brand-corner brand-corner-bottom-left"></div>
-        <div class="brand-serial brand-serial-top">HONKAI: STAR RAIL V4.0</div>
-        <div class="brand-serial brand-serial-bottom">CURRENCY WAR / IPC</div>
+        <div class="brand-serial brand-serial-top" id="brandTopRightText">HONKAI: STAR RAIL V4.0</div>
+        <div class="brand-serial brand-serial-bottom" id="brandBottomLeftText">CURRENCY WAR / IPC</div>
     </div>
 
     <div id="mvpBgContainer" class="mvp-bg-container"></div>
@@ -3993,6 +3993,8 @@
 
             // 哪些维度显示为百分数（例如 0.7 变为 70%）。数组长度 6，true 表示显示为百分数，false 表示显示为普通数字
             USE_PERCENTAGE: [false, false, false, false, false, false],
+            // 真实百分比：直接把输入值当作百分数显示（例如填 20 显示 20%），与 USE_PERCENTAGE 互斥
+            REAL_PERCENTAGE: [false, false, false, false, false, false],
             LABEL_MARGIN: 80, // 维度名称距离雷达图外圈的距离 (px)，默认 80
             USE_AUTO_PRECISION: true, // 是否根据 points 中定义的位数自动控制显示精度（例如写 8.5 就显示 8.5，写 8 就显示整数）
             SHOW_SCORE_UNDER_NAME: false, // 是否将评分数值显示在维度名称下方
@@ -4012,7 +4014,15 @@
             RADAR_AUTO_OFFSET: false,  // 雷达图是否根据形状自动平移中心（会导致“突然上移/下移”）
             PERFORMANCE_MODE: 'balanced', // high / balanced / smooth
             ADAPTIVE_PERF: true,          // 动态降级开关
+            BRAND_TOP_RIGHT_TEXT: 'HONKAI: STAR RAIL V4.0',
+            BRAND_BOTTOM_LEFT_TEXT: 'CURRENCY WAR / IPC',
+            BRAND_WATERMARK_CN: '货币战争',
+            BRAND_WATERMARK_EN: 'CURRENCY WAR',
+            INTRO_TITLE_MAIN: '货币战争雷达图 V4.0',
+            INTRO_TITLE_SUB: 'Currency War Radar System',
         };
+        const MIN_VERTEX_COUNT = 6;
+        const MAX_VERTEX_COUNT = 8;
 
         function getNextColor() {
             const c = colorPool[colorIndex];
@@ -4052,6 +4062,77 @@
             return Number.isFinite(num) ? num : 0;
         }
 
+        function getNormalizedVertexCount(value) {
+            const count = parseInt(value, 10);
+            if (!Number.isFinite(count)) return MIN_VERTEX_COUNT;
+            return Math.max(MIN_VERTEX_COUNT, Math.min(MAX_VERTEX_COUNT, count));
+        }
+
+        function ensureLength(arr, len, factory) {
+            const out = Array.isArray(arr) ? arr.slice(0, len) : [];
+            while (out.length < len) out.push(factory(out.length));
+            return out;
+        }
+
+        function normalizeConfigAndData() {
+            CONFIG.VERTEX_COUNT = getNormalizedVertexCount(CONFIG.VERTEX_COUNT);
+            const vc = CONFIG.VERTEX_COUNT;
+
+            CONFIG.DIM_NAMES = ensureLength(CONFIG.DIM_NAMES, vc, i => `维度${i + 1}`)
+                .map((name, i) => {
+                    const text = String(name ?? '').trim();
+                    return text || `维度${i + 1}`;
+                });
+
+            CONFIG.BASE_MAX_SCORES = ensureLength(CONFIG.BASE_MAX_SCORES, vc, () => 10)
+                .map(v => {
+                    const n = Number(v);
+                    return Number.isFinite(n) ? n : 10;
+                });
+
+            CONFIG.MIN_SCORES = ensureLength(CONFIG.MIN_SCORES, vc, () => 0)
+                .map(v => {
+                    const n = Number(v);
+                    return Number.isFinite(n) ? n : 0;
+                });
+
+            CONFIG.USE_PERCENTAGE = ensureLength(CONFIG.USE_PERCENTAGE, vc, () => false)
+                .map(v => !!v);
+            CONFIG.REAL_PERCENTAGE = ensureLength(CONFIG.REAL_PERCENTAGE, vc, () => false)
+                .map(v => !!v);
+            for (let i = 0; i < vc; i++) {
+                if (CONFIG.REAL_PERCENTAGE[i] && CONFIG.USE_PERCENTAGE[i]) {
+                    CONFIG.USE_PERCENTAGE[i] = false;
+                }
+            }
+
+            {
+                const legacyLeftTop = String(CONFIG.BRAND_LEFT_TOP_TEXT || '').trim();
+                const topFallback = (legacyLeftTop && legacyLeftTop !== 'IPC LOCK')
+                    ? legacyLeftTop
+                    : 'HONKAI: STAR RAIL V4.0';
+                CONFIG.BRAND_TOP_RIGHT_TEXT = String(CONFIG.BRAND_TOP_RIGHT_TEXT || topFallback).trim() || 'HONKAI: STAR RAIL V4.0';
+            }
+            CONFIG.BRAND_BOTTOM_LEFT_TEXT = String(CONFIG.BRAND_BOTTOM_LEFT_TEXT || CONFIG.BRAND_RIGHT_BOTTOM_TEXT || 'CURRENCY WAR / IPC').trim() || 'CURRENCY WAR / IPC';
+            CONFIG.BRAND_WATERMARK_CN = String(CONFIG.BRAND_WATERMARK_CN || '货币战争').trim() || '货币战争';
+            CONFIG.BRAND_WATERMARK_EN = String(CONFIG.BRAND_WATERMARK_EN || 'CURRENCY WAR').trim() || 'CURRENCY WAR';
+            CONFIG.INTRO_TITLE_MAIN = String(CONFIG.INTRO_TITLE_MAIN || '货币战争雷达图 V4.0').trim() || '货币战争雷达图 V4.0';
+            CONFIG.INTRO_TITLE_SUB = String(CONFIG.INTRO_TITLE_SUB || 'Currency War Radar System').trim() || 'Currency War Radar System';
+
+            namelist = Array.isArray(namelist) ? namelist : [];
+            namelist = namelist.map(item => {
+                const rawPoints = Array.isArray(item.points) ? item.points : [];
+                const points = ensureLength(rawPoints, vc, i => CONFIG.MIN_SCORES[i] ?? 0)
+                    .map((value, i) => {
+                        const n = Number(value);
+                        if (Number.isFinite(n)) return n;
+                        const minScore = Number(CONFIG.MIN_SCORES[i] ?? 0);
+                        return Number.isFinite(minScore) ? minScore : 0;
+                    });
+                return { ...item, points };
+            });
+        }
+
         // 维度映射规则：
         // minScore -> 雷达中心(0)
         // maxScore -> 雷达外圈(1)
@@ -4067,6 +4148,8 @@
         }
 
         function rebuildDerivedData() {
+            normalizeConfigAndData();
+            applyBrandTexts();
             colorPool = [...COLOR_PRESETS].sort(() => Math.random() - 0.5);
             colorIndex = 0;
             bands = namelist.map(b => {
@@ -4084,9 +4167,10 @@
                     ...preset
                 };
             });
-            bestScorePerDim = Array.from({ length: CONFIG.VERTEX_COUNT }, (_, i) =>
-                Math.max(...bands.map(b => normalizeScore(b.points[i], i)))
-            );
+            bestScorePerDim = Array.from({ length: CONFIG.VERTEX_COUNT }, (_, i) => {
+                const values = bands.map(b => normalizeScore(b.points[i], i));
+                return values.length ? Math.max(...values) : 0;
+            });
             timeSegments = [];
             let accumulatedTime = 0;
             bands.forEach((b, i) => {
@@ -4141,6 +4225,10 @@
             }
 
             const normalizedValue = normalizeScore(value);
+
+            if (CONFIG.REAL_PERCENTAGE && CONFIG.REAL_PERCENTAGE[index]) {
+                return parseFloat(normalizedValue.toFixed(precision)).toString() + "%";
+            }
 
             // 如果该维度需要显示为百分比
             if (CONFIG.USE_PERCENTAGE && CONFIG.USE_PERCENTAGE[index]) {
@@ -5093,7 +5181,30 @@
                 .replace(/'/g, '&#39;');
         }
 
+        function applyTextById(id, value) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = value;
+        }
+
+        function applyBrandTexts() {
+            applyTextById('brandTopRightText', CONFIG.BRAND_TOP_RIGHT_TEXT);
+            applyTextById('brandBottomLeftText', CONFIG.BRAND_BOTTOM_LEFT_TEXT);
+            applyTextById('brandWatermarkCn', CONFIG.BRAND_WATERMARK_CN);
+            applyTextById('brandWatermarkEn', CONFIG.BRAND_WATERMARK_EN);
+            applyTextById('introTitleMain', CONFIG.INTRO_TITLE_MAIN);
+            applyTextById('introTitleSub', CONFIG.INTRO_TITLE_SUB);
+        }
+
         function getIntroMaxLabel(index) {
+            if (CONFIG.REAL_PERCENTAGE && CONFIG.REAL_PERCENTAGE[index]) {
+                const maxValue = Number(CONFIG.BASE_MAX_SCORES[index] ?? 0);
+                if (!Number.isFinite(maxValue)) return '--';
+                const text = Number.isInteger(maxValue)
+                    ? String(maxValue)
+                    : String(parseFloat(maxValue.toFixed(2)));
+                return `${text}%`;
+            }
             if (CONFIG.USE_PERCENTAGE && CONFIG.USE_PERCENTAGE[index]) return '100%';
             const maxValue = Number(CONFIG.BASE_MAX_SCORES[index] ?? 0);
             if (!Number.isFinite(maxValue)) return '--';
@@ -5107,7 +5218,7 @@
             const labels = document.getElementById("introGuideLabels");
             if (!svg || !labels) return;
 
-            const count = Math.max(3, Number(CONFIG.VERTEX_COUNT) || 6);
+            const count = getNormalizedVertexCount(CONFIG.VERTEX_COUNT);
             const center = 300;
             const radius = 160;
             const layers = Math.max(4, Math.min(6, Number(CONFIG.RADAR_GRID_LEVELS) || 5));
