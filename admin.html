@@ -96,6 +96,7 @@
         .crop-stage { position: relative; width: 100%; aspect-ratio: 1 / 1; background: linear-gradient(135deg, #0f1627, #090d18); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; cursor: grab; }
         .crop-stage.door-preview,
         .crop-stage.mvp-preview,
+        .crop-stage.info-preview,
         .crop-stage.best-preview { aspect-ratio: 16 / 9; }
         .crop-stage.dragging { cursor: grabbing; }
         .crop-stage::before { content: ''; position: absolute; inset: 0; background:
@@ -119,6 +120,11 @@
             background:
                 linear-gradient(180deg, rgba(255,214,102,0.12), rgba(255,214,102,0.04)),
                 linear-gradient(90deg, rgba(8,12,24,0.12), rgba(8,12,24,0) 16%, rgba(8,12,24,0) 84%, rgba(8,12,24,0.12));
+        }
+        .crop-stage.info-preview::after {
+            background:
+                linear-gradient(180deg, rgba(127, 214, 255, 0.1), rgba(127, 214, 255, 0.03)),
+                linear-gradient(90deg, rgba(8,12,24,0.14), rgba(8,12,24,0) 14%, rgba(8,12,24,0) 86%, rgba(8,12,24,0.14));
         }
         .crop-preview-image { width: 100%; height: 100%; object-position: center; user-select: none; pointer-events: none; will-change: transform, object-position; }
         .crop-stage.mvp-preview .crop-preview-image {
@@ -177,6 +183,20 @@
         }
         .crop-stage.best-preview .crop-visible-window::before {
             content: '出金背景显示区';
+            left: 10px;
+        }
+        .crop-stage.info-preview .crop-visible-window {
+            opacity: 1;
+            left: 10px;
+            right: 10px;
+            top: 10px;
+            bottom: 10px;
+            width: auto;
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(127, 214, 255, 0.08), rgba(127, 214, 255, 0.02));
+        }
+        .crop-stage.info-preview .crop-visible-window::before {
+            content: '玩法图显示区';
             left: 10px;
         }
         .crop-side { display: flex; flex-direction: column; gap: 14px; }
@@ -305,6 +325,24 @@
                     <div class="form-group"><label>透明度倍率</label><input type="number" id="cfg-PARTICLE_OPACITY_MULT" step="0.1" min="0"></div>
                     <div class="form-group"><label>大小倍率</label><input type="number" id="cfg-PARTICLE_SIZE_MULT" step="0.1" min="0"></div>
                     <div class="form-group">
+                        <label>背景特效</label>
+                        <select id="cfg-BG_EFFECT_MODE">
+                            <option value="particles">粒子流</option>
+                            <option value="starfield">星空动态</option>
+                            <option value="ripple">波纹背景</option>
+                            <option value="off">关闭</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>雷达音频动效</label>
+                        <select id="cfg-RADAR_AUDIO_FX_MODE">
+                            <option value="tech">科技音频环</option>
+                            <option value="pulse">脉冲波纹</option>
+                            <option value="orbit">轨道点阵</option>
+                            <option value="off">关闭</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>性能档位</label>
                         <select id="cfg-PERFORMANCE_MODE">
                             <option value="high">高画质</option>
@@ -327,7 +365,7 @@
             <div class="card">
                 <h3>显示选项</h3>
                 <div class="form-row">
-                    <div class="checkbox-row"><input type="checkbox" id="cfg-SHOW_DESC"><label>显示乐评描述</label></div>
+                    <div class="checkbox-row"><input type="checkbox" id="cfg-SHOW_DESC"><label>显示羁绊图标/标签</label></div>
                     <div class="checkbox-row"><input type="checkbox" id="cfg-ENABLE_SPECIAL_FORMAT"><label>启用 10+ 特殊格式</label></div>
                     <div class="checkbox-row"><input type="checkbox" id="cfg-USE_AUTO_PRECISION"><label>自动精度控制</label></div>
                     <div class="checkbox-row"><input type="checkbox" id="cfg-SHOW_SCORE_UNDER_NAME"><label>分数显示在名称下方</label></div>
@@ -598,7 +636,27 @@
                         const minScore = Number(C.MIN_SCORES[i] ?? 0);
                         return Number.isFinite(minScore) ? minScore : 0;
                     });
-                return { ...band, points };
+                return {
+                    ...band,
+                    points,
+                    gachaText: String(band.gachaText ?? '').trim(),
+                    midPhase: band?.midPhase && typeof band.midPhase === 'object'
+                        ? {
+                            ...band.midPhase,
+                            enabled: !!band.midPhase.enabled,
+                            triggerRatio: clamp(Number.isFinite(Number(band.midPhase.triggerRatio)) ? Number(band.midPhase.triggerRatio) : 0.5, 0.1, 0.9),
+                            photoName: String(band.midPhase.photoName ?? '').trim(),
+                            colorIndex: band.midPhase.colorIndex === undefined || band.midPhase.colorIndex === null || band.midPhase.colorIndex === ''
+                                ? undefined
+                                : Number(band.midPhase.colorIndex),
+                            points: ensureLength(Array.isArray(band.midPhase.points) ? band.midPhase.points : [], vc, i => points[i] ?? 0)
+                                .map((v, i) => {
+                                    const n = Number(v);
+                                    return Number.isFinite(n) ? n : (points[i] ?? 0);
+                                })
+                        }
+                        : undefined
+                };
             });
         }
 
@@ -656,7 +714,7 @@
 
         function getBandCsvHeaders() {
             const dimNames = (appData.CONFIG.DIM_NAMES || []).map((d, i) => String(d || `dim${i + 1}`).trim() || `dim${i + 1}`);
-            return ['name', 'desc', 'duration', 'colorIndex', 'gacha', ...dimNames];
+            return ['name', 'desc', 'equipmentIds', 'duration', 'starLevel', 'colorIndex', 'gacha', 'gachaText', ...dimNames];
         }
 
         function escapeCsvCell(value) {
@@ -667,16 +725,19 @@
 
         function exportBandsCsv() {
             const headers = getBandCsvHeaders();
-            const dimCount = Math.max(0, headers.length - 5);
+            const dimCount = Math.max(0, headers.length - 8);
             const lines = [headers.map(escapeCsvCell).join(',')];
 
             appData.namelist.forEach(b => {
                 const row = [
                     b.name || '',
                     b.desc || '',
+                    b.equipmentIds || '',
                     b.duration ?? '',
+                    b.starLevel ?? '',
                     b.colorIndex ?? '',
-                    b.gacha ? '1' : '0'
+                    b.gacha ? '1' : '0',
+                    b.gachaText || ''
                 ];
                 for (let i = 0; i < dimCount; i++) {
                     row.push((b.points && b.points[i] !== undefined) ? b.points[i] : '');
@@ -787,9 +848,12 @@
                 }
 
                 const descIdx = findHeader(['desc', 'description', '描述']);
+                const equipmentIdx = findHeader(['equipmentids', 'equipment_ids', 'equipment', 'equipments', '装备', '装备图', '装备列表']);
                 const durationIdx = findHeader(['duration', '时长', 'duration(ms)']);
+                const starLevelIdx = findHeader(['starlevel', 'star', 'stars', '星级']);
                 const colorIdx = findHeader(['colorindex', '配色索引']);
                 const gachaIdx = findHeader(['gacha', '抽卡出金']);
+                const gachaTextIdx = findHeader(['gachatext', 'gacha_text', '抽卡艺术字', '抽卡文字', '抽卡文案']);
                 const dimNames = appData.CONFIG.DIM_NAMES || [];
                 const dimIndexes = dimNames.map((dim, i) => {
                     const exact = headers.findIndex(h => h === dim);
@@ -810,11 +874,17 @@
                         desc: descIdx >= 0 ? String(row[descIdx] || '').trim() : '',
                         points: dimIndexes.map(idx => idx >= 0 ? toNumberOrDefault(row[idx], 0) : 0)
                     };
+                    const equipmentIds = equipmentIdx >= 0 ? String(row[equipmentIdx] || '').trim() : '';
                     const duration = durationIdx >= 0 ? toOptionalNumber(row[durationIdx]) : undefined;
+                    const starLevel = starLevelIdx >= 0 ? toOptionalNumber(row[starLevelIdx]) : undefined;
                     const colorIndex = colorIdx >= 0 ? toOptionalNumber(row[colorIdx]) : undefined;
+                    const gachaText = gachaTextIdx >= 0 ? String(row[gachaTextIdx] || '').trim() : undefined;
+                    if (equipmentIds) band.equipmentIds = equipmentIds;
                     if (duration !== undefined) band.duration = Math.max(0, duration);
+                    if (starLevel !== undefined) band.starLevel = Math.max(1, Math.min(5, Math.floor(starLevel)));
                     if (colorIndex !== undefined) band.colorIndex = Math.max(0, Math.floor(colorIndex));
                     if (gachaIdx >= 0) band.gacha = toBool(row[gachaIdx]);
+                    if (gachaTextIdx >= 0) band.gachaText = gachaText || '';
                     imported.push(band);
                 }
 
@@ -1048,9 +1118,30 @@
                         <div class="form-row">
                             <div class="form-group"><label>名称</label><input type="text" value="${esc(b.name)}" onchange="updateBand(${idx},'name',this.value)"></div>
                             <div class="form-group"><label>描述</label><input type="text" value="${esc(b.desc || '')}" onchange="updateBand(${idx},'desc',this.value)" style="width:300px;"></div>
+                            <div class="form-group"><label>装备图</label><input type="text" value="${esc(b.equipmentIds || '')}" onchange="updateBand(${idx},'equipmentIds',this.value)" placeholder="3,4 或 3,8,16" style="width:180px;"></div>
+                            <div class="form-group"><label>星级</label><select onchange="updateBand(${idx},'starLevel',+this.value)" style="width:78px;">
+                                ${[1,2,3,4,5].map(level => `<option value="${level}" ${Number(b.starLevel || 5) === level ? 'selected' : ''}>${level}星</option>`).join('')}
+                            </select></div>
                             <div class="form-group"><label>配色索引</label><input type="number" value="${b.colorIndex !== undefined ? b.colorIndex : ''}" min="0" max="19" onchange="updateBand(${idx},'colorIndex',this.value===''?undefined:+this.value)" style="width:80px;"></div>
                             <div class="form-group"><label>时长(ms)</label><input type="number" value="${b.duration || ''}" step="500" onchange="updateBand(${idx},'duration',this.value?+this.value:undefined)" style="width:100px;"></div>
                             <div class="checkbox-row" style="margin-top:18px;"><input type="checkbox" ${b.gacha ? 'checked' : ''} onchange="updateBand(${idx},'gacha',this.checked)"><label>抽卡出金</label></div>
+                            <div class="form-group"><label>抽卡艺术字</label><input type="text" value="${esc(b.gachaText || '')}" onchange="updateBand(${idx},'gachaText',this.value)" placeholder="留空则使用角色名" style="width:220px;"></div>
+                        </div>
+                        <div class="card" style="margin-top:14px;padding:14px 16px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);">
+                            <div class="form-row" style="align-items:flex-end;">
+                                <div class="checkbox-row" style="margin-top:0;"><input type="checkbox" ${(b.midPhase && b.midPhase.enabled) ? 'checked' : ''} onchange="updateMidPhase(${idx},'enabled',this.checked)"><label>启用中途形态</label></div>
+                                <div class="form-group"><label>切换比例</label><input type="number" min="0.1" max="0.9" step="0.05" value="${b.midPhase && b.midPhase.triggerRatio !== undefined ? b.midPhase.triggerRatio : 0.5}" onchange="updateMidPhase(${idx},'triggerRatio',Math.max(0.1,Math.min(0.9,+this.value||0.5)))" style="width:90px;"></div>
+                                <div class="form-group"><label>二段图片名</label><input type="text" value="${esc((b.midPhase && b.midPhase.photoName) || '')}" onchange="updateMidPhase(${idx},'photoName',this.value)" placeholder="如：罗刹" style="width:180px;"></div>
+                                <div class="form-group"><label>二段配色索引</label><input type="number" value="${b.midPhase && b.midPhase.colorIndex !== undefined ? b.midPhase.colorIndex : ''}" min="0" max="19" onchange="updateMidPhase(${idx},'colorIndex',this.value===''?undefined:+this.value)" style="width:90px;"></div>
+                            </div>
+                            <div class="points-grid" style="margin-top:10px;">
+                                ${(appData.CONFIG.DIM_NAMES || []).map((dim, di) => `
+                                    <div class="form-group">
+                                        <label>二段${esc(dim)}</label>
+                                        <input type="number" value="${b.midPhase && b.midPhase.points && b.midPhase.points[di] !== undefined ? b.midPhase.points[di] : (b.points[di] !== undefined ? b.points[di] : 0)}" step="0.1" onchange="updateMidPhasePoint(${idx},${di},+this.value)">
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
                         <div class="points-grid">
                             ${(appData.CONFIG.DIM_NAMES || []).map((dim, di) => `
@@ -1078,11 +1169,40 @@
 
         function updateBand(idx, key, val) { appData.namelist[idx][key] = val; }
         function updatePoint(idx, dim, val) { appData.namelist[idx].points[dim] = val; }
+        function ensureBandMidPhase(idx) {
+            const band = appData.namelist[idx];
+            const vc = getNormalizedVertexCount(appData.CONFIG?.VERTEX_COUNT);
+            if (!band.midPhase || typeof band.midPhase !== 'object') {
+                band.midPhase = {
+                    enabled: false,
+                    triggerRatio: 0.5,
+                    photoName: '',
+                    colorIndex: undefined,
+                    points: Array.isArray(band.points) ? band.points.slice(0, vc) : Array(vc).fill(0)
+                };
+            }
+            band.midPhase.points = ensureLength(Array.isArray(band.midPhase.points) ? band.midPhase.points : [], vc, i => band.points?.[i] ?? 0);
+            return band.midPhase;
+        }
+        function updateMidPhase(idx, key, val) { ensureBandMidPhase(idx)[key] = val; }
+        function updateMidPhasePoint(idx, dim, val) { ensureBandMidPhase(idx).points[dim] = val; }
 
         function addBand() {
             normalizeVertexConfigAndBands();
             const vc = getNormalizedVertexCount(appData.CONFIG.VERTEX_COUNT);
-            appData.namelist.push({ name: "New", points: Array(vc).fill(5), desc: "" });
+            appData.namelist.push({
+                name: "New",
+                points: Array(vc).fill(5),
+                desc: "",
+                gachaText: "",
+                midPhase: {
+                    enabled: false,
+                    triggerRatio: 0.5,
+                    photoName: '',
+                    colorIndex: undefined,
+                    points: Array(vc).fill(5)
+                }
+            });
             refreshBandViews();
         }
 
@@ -1127,6 +1247,8 @@
             if (C.GACHA_LOGO_DURATION === undefined) C.GACHA_LOGO_DURATION = 400;
             if (C.RADAR_AUTO_OFFSET === undefined) C.RADAR_AUTO_OFFSET = false;
             if (C.PERFORMANCE_MODE === undefined) C.PERFORMANCE_MODE = 'balanced';
+            if (C.BG_EFFECT_MODE === undefined) C.BG_EFFECT_MODE = 'particles';
+            if (C.RADAR_AUDIO_FX_MODE === undefined) C.RADAR_AUDIO_FX_MODE = 'tech';
             if (C.ADAPTIVE_PERF === undefined) C.ADAPTIVE_PERF = true;
             if (C.BRAND_TOP_RIGHT_TEXT === undefined) {
                 const legacy = String(C.BRAND_LEFT_TOP_TEXT || '').trim();
@@ -1153,12 +1275,16 @@
             });
             // 颜色
             const bestColorEl = document.getElementById('cfg-BEST_COLOR');
-            if (bestColorEl) bestColorEl.value = C.BEST_COLOR || '#FFD700';
+            if (bestColorEl) bestColorEl.value = C.BEST_COLOR || '#fff2a6';
             // 下拉
             const gachaStyle = document.getElementById('cfg-GACHA_FONT_STYLE');
             if (gachaStyle) gachaStyle.value = C.GACHA_FONT_STYLE || 0;
             const perfMode = document.getElementById('cfg-PERFORMANCE_MODE');
             if (perfMode) perfMode.value = C.PERFORMANCE_MODE || 'balanced';
+            const bgEffectMode = document.getElementById('cfg-BG_EFFECT_MODE');
+            if (bgEffectMode) bgEffectMode.value = C.BG_EFFECT_MODE || 'particles';
+            const radarAudioFxMode = document.getElementById('cfg-RADAR_AUDIO_FX_MODE');
+            if (radarAudioFxMode) radarAudioFxMode.value = C.RADAR_AUDIO_FX_MODE || 'tech';
             // MVP
             document.getElementById('cfg-mvplist').value = (appData.mvplist || []).join(', ');
             // 维度设置
@@ -1228,6 +1354,8 @@
                 if (el) C[k] = String(el.value || '').trim();
             });
             C.PERFORMANCE_MODE = document.getElementById('cfg-PERFORMANCE_MODE').value || 'balanced';
+            C.BG_EFFECT_MODE = document.getElementById('cfg-BG_EFFECT_MODE').value || 'particles';
+            C.RADAR_AUDIO_FX_MODE = document.getElementById('cfg-RADAR_AUDIO_FX_MODE').value || 'tech';
             C.GACHA_ANIM_TYPE = 2;
             C.GACHA_FONT_STYLE = parseInt(document.getElementById('cfg-GACHA_FONT_STYLE').value);
             // MVP list
@@ -1413,6 +1541,9 @@
             if (placement === 'gacha-full-bg' || base.startsWith('best_')) {
                 return { fit: 'cover', scale: 1, x: 50, y: 50 };
             }
+            if (placement === 'info-card') {
+                return { fit: 'cover', scale: 1, x: 50, y: 50 };
+            }
             if (placement === 'mvp-left-fade') {
                 return { fit: 'contain', scale: 1, x: 50, y: 50 };
             }
@@ -1433,6 +1564,7 @@
             if (base === 'gacha_door_right') return 'right-half';
             if (base.startsWith('best_')) return 'gacha-full-bg';
             if (base.endsWith('1')) return 'mvp-left-fade';
+            if (base.endsWith('2')) return 'info-card';
             return '';
         }
 
@@ -1456,6 +1588,7 @@
             document.getElementById('cropPreviewImage').src = url;
             cropStage.classList.toggle('door-preview', currentImageEditor.placement === 'left-half' || currentImageEditor.placement === 'right-half');
             cropStage.classList.toggle('mvp-preview', currentImageEditor.placement === 'mvp-left-fade');
+            cropStage.classList.toggle('info-preview', currentImageEditor.placement === 'info-card');
             cropStage.classList.toggle('best-preview', currentImageEditor.placement === 'gacha-full-bg');
             cropStage.classList.toggle('door-left', currentImageEditor.placement === 'left-half');
             cropStage.classList.toggle('door-right', currentImageEditor.placement === 'right-half');
@@ -1466,7 +1599,7 @@
 
         function closeImageEditor() {
             document.getElementById('imageEditorModal').classList.remove('show');
-            cropStage.classList.remove('door-preview', 'mvp-preview', 'best-preview', 'door-left', 'door-right');
+            cropStage.classList.remove('door-preview', 'mvp-preview', 'info-preview', 'best-preview', 'door-left', 'door-right');
             currentImageEditor = null;
             cropDraft = null;
         }

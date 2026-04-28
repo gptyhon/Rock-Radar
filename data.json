@@ -9,9 +9,9 @@
     "RADAR_GRID_LINE_OPACITY": 0.2,
     "PARTICLE_OPACITY_MULT": 2,
     "PARTICLE_SIZE_MULT": 2,
-    "VERTEX_COUNT": 8,
-    "INTRO_WAIT_TIME": 4000,
-    "MUSIC_VOLUME": 1,
+    "VERTEX_COUNT": 6,
+    "INTRO_WAIT_TIME": 6000,
+    "MUSIC_VOLUME": 0.3,
     "MUSIC_TRACKS": "music.mp3,music2.mp3",
     "DIM_NAMES": [
       "攻坚终结",
@@ -19,33 +19,27 @@
       "资源转化",
       "体系羁绊",
       "局内影响",
-      "综合评级",
-      "经济",
-      "攻击"
+      "综合评级"
     ],
     "BASE_MAX_SCORES": [
       90,
       80,
       1.5,
       80,
-      1.3,
-      1.2,
-      30,
-      30
+      1.35,
+      1.25
     ],
     "MIN_SCORES": [
       40,
       40,
       0.7,
-      40,
+      50,
       0.6,
-      0.8,
-      10,
-      10
+      0.8
     ],
     "ANIM_DURATION": 1500,
     "ENABLE_SPECIAL_FORMAT": true,
-    "DEFAULT_DURATION": 4000,
+    "DEFAULT_DURATION": 5200,
     "SHOW_DESC": true,
     "IMAGE_SCALE": 1.2,
     "USE_PERCENTAGE": [
@@ -54,14 +48,12 @@
       false,
       true,
       false,
-      false,
-      false,
       false
     ],
     "LABEL_MARGIN": 80,
     "USE_AUTO_PRECISION": true,
     "SHOW_SCORE_UNDER_NAME": false,
-    "BEST_COLOR": "#ffd700",
+    "BEST_COLOR": "#fff700",
     "BEST_LABEL_FONT": "italic 700 36px \"Cormorant Garamond\", \"Times New Roman\", serif",
     "BEST_VALUE_FONT": "italic 700 34px \"Cormorant Garamond\", \"Times New Roman\", serif",
     "BEST_FONT": "italic 700 42px \"Cormorant Garamond\", \"Times New Roman\", serif",
@@ -78,16 +70,19 @@
       false,
       false,
       false,
-      false,
-      true,
-      true
+      false
     ],
     "BRAND_LEFT_TOP_TEXT": "IPC LOCK",
     "BRAND_RIGHT_BOTTOM_TEXT": "CURRENCY WAR / IPC",
     "BRAND_WATERMARK_CN": "货币战争",
     "BRAND_WATERMARK_EN": "CURRENCY WAR",
-    "INTRO_TITLE_MAIN": "货币战争雷达图 V4.0",
-    "INTRO_TITLE_SUB": "Currency War Radar System"
+    "INTRO_TITLE_MAIN": "货币战争雷达图 V4.2",
+    "INTRO_TITLE_SUB": "Currency War Radar System",
+    "BRAND_TOP_RIGHT_TEXT": "HONKAI: STAR RAIL V4.2",
+    "BRAND_BOTTOM_LEFT_TEXT": "CURRENCY WAR / IPC",
+    "DETAIL_SWAP_LEAD_MS": 2000,
+    "BG_EFFECT_MODE": "particles",
+    "RADAR_AUDIO_FX_MODE": "tech"
   },
   "COLOR_PRESETS": [
     {
@@ -191,9 +186,7 @@
       "bg2": "#00090d"
     }
   ],
-  "mvplist": [
-    "阿格莱雅"
-  ],
+  "mvplist": [],
   "IMAGE_META": {
     "best_阿格莱雅.png": {
       "fit": "cover",
@@ -224,276 +217,58 @@
       "scale": 1.04,
       "x": 43.4,
       "y": 20
+    },
+    "best_瓦尔特.png": {
+      "fit": "cover",
+      "scale": 1.05,
+      "x": 42.3,
+      "y": 7.8
     }
   },
   "namelist": [
     {
-      "name": "镜流",
+      "name": "绯英",
       "points": [
-        62,
-        54,
-        0.9,
-        58,
-        0.84,
-        0.86,
-        20,
-        40
+        82,
+        77,
+        1.2,
+        79,
+        1.19,
+        1.16
       ],
-      "desc": "狼狩 燃血"
+      "desc": "星间旅人 欢愉",
+      "starLevel": 2,
+      "equipmentIds": "2,2,27",
+      "gachaText": "",
+      "duration": 5400
     },
     {
-      "name": "桑博",
+      "name": "星期日",
       "points": [
         68,
-        71,
-        1.2,
-        74,
-        1.1,
-        1.05,
-        0,
-        0
-      ],
-      "desc": "贝洛伯格 星间旅人 持续伤害"
-    },
-    {
-      "name": "三月七",
-      "points": [
-        51,
-        59,
-        1.1,
-        62,
-        0.92,
-        0.96,
-        0,
-        0
-      ],
-      "desc": "列车同行 护盾"
-    },
-    {
-      "name": "Saber",
-      "points": [
-        57,
-        48,
-        0.8,
-        64,
-        0.83,
-        0.84,
-        0,
-        0
-      ],
-      "desc": "星间旅人 能量"
-    },
-    {
-      "name": "青雀",
-      "points": [
-        74,
-        82,
-        1.3,
-        81,
-        1.13,
-        1.14,
-        0,
-        0
-      ],
-      "desc": "仙舟 战技点"
-    },
-    {
-      "name": "长夜月",
-      "points": [
-        58,
-        49,
-        0.9,
-        61,
-        0.87,
-        0.88,
-        0,
-        0
-      ],
-      "desc": "夜之半神 燃血"
-    },
-    {
-      "name": "火花",
-      "points": [
-        89,
-        70,
-        1.4,
-        80,
-        1.25,
-        1.23,
-        0,
-        0
-      ],
-      "desc": "星间旅人 战技点"
-    },
-    {
-      "name": "白厄",
-      "points": [
-        77,
-        66,
-        1.2,
-        88,
-        1.18,
-        1.12,
-        0,
-        0
-      ],
-      "desc": "救世主",
-      "gacha": false
-    },
-    {
-      "name": "藿藿",
-      "points": [
-        60,
-        84,
-        1.2,
-        80,
-        1.1,
-        1.11,
-        0,
-        0
-      ],
-      "desc": "仙舟 能量 治疗"
-    },
-    {
-      "name": "娜塔莎",
-      "points": [
-        51,
-        53,
-        0.8,
-        61,
-        0.74,
-        0.8,
-        0,
-        0
-      ],
-      "desc": "贝洛伯格 治疗"
-    },
-    {
-      "name": "姬子",
-      "points": [
-        67,
-        52,
-        1,
-        63,
-        0.93,
-        0.92,
-        0,
-        0
-      ],
-      "desc": "列车同行 击破"
-    },
-    {
-      "name": "艾丝妲",
-      "points": [
-        49,
-        67,
-        1,
-        69,
-        0.83,
-        0.89,
-        0,
-        0
-      ],
-      "desc": "银河学者 持续伤害"
-    },
-    {
-      "name": "加拉赫",
-      "points": [
-        51,
-        71,
+        68,
         1.2,
         72,
-        1.05,
-        1.06,
-        0,
-        0
+        1.13,
+        1.14
       ],
-      "desc": "盛会之星 击破 治疗"
-    },
-    {
-      "name": "刃",
-      "points": [
-        54,
-        68,
-        1.2,
-        53,
-        0.87,
-        0.86,
-        0,
-        0
-      ],
-      "desc": "星核猎手 燃血"
-    },
-    {
-      "name": "花火",
-      "points": [
-        62,
-        76,
-        1.4,
-        83,
-        1.27,
-        1.25,
-        0,
-        0
-      ],
-      "desc": "盛会之星 量子同频 战技点"
-    },
-    {
-      "name": "貊泽",
-      "points": [
-        53,
-        52,
-        0.9,
-        69,
-        0.75,
-        1,
-        0,
-        0
-      ],
-      "desc": "狼狩 追击"
-    },
-    {
-      "name": "风堇",
-      "points": [
-        59,
-        77,
-        1.2,
-        78,
-        1.21,
-        1.17,
-        0,
-        0
-      ],
-      "desc": "昼之半神 治疗 燃血",
-      "gacha": false
-    },
-    {
-      "name": "流萤",
-      "points": [
-        78,
-        59,
-        1.2,
-        60,
-        1.16,
-        1.12,
-        0,
-        0
-      ],
-      "desc": "星核猎手 击破"
-    },
-    {
-      "name": "希儿",
-      "points": [
-        79,
-        64,
-        1.2,
-        73,
-        1.14,
-        1.14,
-        0,
-        0
-      ],
-      "desc": "贝洛伯格 量子同频"
+      "desc": "列车同行 盛会之星 能量",
+      "starLevel": 3,
+      "gachaText": "",
+      "duration": 5400,
+      "midPhase": {
+        "enabled": false,
+        "triggerRatio": 0.5,
+        "photoName": "",
+        "points": [
+          68,
+          68,
+          1.2,
+          72,
+          1.13,
+          1.14
+        ]
+      }
     },
     {
       "name": "停云",
@@ -503,257 +278,75 @@
         1.2,
         73,
         1.02,
-        1.01,
-        0,
-        0
+        1.02
       ],
-      "desc": "仙舟 能量"
+      "desc": "仙舟 能量",
+      "starLevel": 1,
+      "equipmentIds": "17,21,5",
+      "gachaText": "",
+      "duration": 5400
     },
     {
-      "name": "那刻夏",
+      "name": "Saber",
       "points": [
-        62,
-        58,
-        1,
-        59,
-        0.93,
-        0.96,
-        0,
-        0
+        57,
+        48,
+        0.8,
+        64,
+        0.83,
+        0.84
       ],
-      "desc": "昼之半神 群攻"
+      "desc": "星间旅人 能量",
+      "starLevel": 3,
+      "equipmentIds": "27,2,29",
+      "gachaText": "",
+      "duration": 5400
     },
     {
-      "name": "缇宝",
+      "name": "阮·梅",
       "points": [
-        72,
-        78,
-        1.4,
-        68,
-        1.26,
-        1.2,
-        0,
-        0
-      ],
-      "desc": "昼之半神 群攻",
-      "duration": 4500
-    },
-    {
-      "name": "罗刹",
-      "points": [
-        59,
-        53,
-        1.1,
-        68,
-        1.05,
-        1.01,
-        0,
-        0
-      ],
-      "desc": "星间旅人 治疗",
-      "duration": 4500
-    },
-    {
-      "name": "Archer",
-      "points": [
-        93,
-        71,
-        1.9,
-        81,
-        1.28,
-        1.27,
-        0,
-        0
-      ],
-      "desc": "星间旅人 战技点 魔术师",
-      "gacha": true,
-      "duration": 6000
-    },
-    {
-      "name": "椒丘",
-      "points": [
-        38,
         60,
-        0.9,
-        70,
-        0.92,
-        0.95,
-        0,
-        0
-      ],
-      "desc": "狼狩 治疗 减益"
-    },
-    {
-      "name": "砂金",
-      "points": [
-        53,
-        59,
-        1.1,
-        69,
-        1.03,
-        1.01,
-        0,
-        0
-      ],
-      "desc": "公司 追击 护盾"
-    },
-    {
-      "name": "波提欧",
-      "points": [
-        88,
-        69,
-        1.3,
-        79,
-        1.28,
-        1.29,
-        0,
-        0
-      ],
-      "desc": "巡海游侠 击破"
-    },
-    {
-      "name": "翡翠",
-      "points": [
-        41,
-        49,
-        0.8,
-        64,
-        0.84,
-        0.99,
-        0,
-        0
-      ],
-      "desc": "公司 群攻"
-    },
-    {
-      "name": "彦卿",
-      "points": [
-        64,
-        53,
-        1,
         68,
-        1.01,
-        0.97,
-        0,
-        0
+        1.2,
+        68,
+        1.08,
+        1.1
       ],
-      "desc": "仙舟 狼狩 减益"
+      "desc": "银河学者 击破",
+      "starLevel": 2,
+      "gachaText": "",
+      "duration": 5400
     },
     {
-      "name": "丹恒·饮月",
+      "name": "花火",
       "points": [
-        71,
-        74,
-        1.3,
-        76,
-        1.13,
-        1.12,
-        0,
-        0
-      ],
-      "desc": "列车同行 仙舟 战技点",
-      "duration": 4500
-    },
-    {
-      "name": "灵砂",
-      "points": [
-        75,
-        82,
-        1.3,
-        78,
+        67,
+        77,
+        1.4,
+        84,
         1.26,
-        1.23,
-        0,
-        0
+        1.24
       ],
-      "desc": "狼狩 击破 治疗"
+      "desc": "盛会之星 量子同频 战技点",
+      "starLevel": 2,
+      "equipmentIds": "23,5,17",
+      "gachaText": "",
+      "duration": 5800
     },
     {
-      "name": "乱破",
+      "name": "云璃",
       "points": [
-        69,
-        74,
-        1.2,
-        76,
-        1.07,
-        1.04,
-        0,
-        0
-      ],
-      "desc": "巡海游侠 击破"
-    },
-    {
-      "name": "开拓者",
-      "points": [
-        78,
-        62,
-        1.3,
-        69,
-        1.24,
-        1.19,
-        0,
-        0
-      ],
-      "desc": "列车同行 能量",
-      "duration": 4500
-    },
-    {
-      "name": "飞霄",
-      "points": [
-        72,
         71,
-        1.2,
-        73,
-        1.1,
-        1.04,
-        0,
-        0
-      ],
-      "desc": "狼狩 追击"
-    },
-    {
-      "name": "赛飞儿",
-      "points": [
-        43,
-        47,
-        0.8,
-        45,
-        0.65,
-        0.82,
-        0,
-        0
-      ],
-      "desc": "夜之半神 追击 减益"
-    },
-    {
-      "name": "符玄",
-      "points": [
-        61,
         58,
         1.2,
-        78,
-        1.16,
-        1.13,
-        0,
-        0
+        70,
+        1.08,
+        1.09
       ],
-      "desc": "仙舟 量子同频 治疗",
-      "duration": 4300
-    },
-    {
-      "name": "景元",
-      "points": [
-        76,
-        66,
-        1.1,
-        71,
-        1.04,
-        1.03,
-        0,
-        0
-      ],
-      "desc": "仙舟 群攻",
-      "duration": 4500
+      "desc": "狼狩 能量",
+      "equipmentIds": "29,6,2",
+      "gachaText": "",
+      "duration": 5600
     },
     {
       "name": "布洛妮娅",
@@ -761,246 +354,13 @@
         71,
         54,
         1.1,
-        74,
+        70,
         1.09,
-        1.04,
-        0,
-        0
+        1.04
       ],
-      "desc": "贝洛伯格 大守护者",
-      "duration": 4400
-    },
-    {
-      "name": "昔涟",
-      "points": [
-        81,
-        61,
-        1.4,
-        89,
-        1.31,
-        1.26,
-        0,
-        0
-      ],
-      "desc": "挚爱之人 昼之半神 夜之半神",
-      "gacha": true,
-      "duration": 6000
-    },
-    {
-      "name": "遐蝶",
-      "points": [
-        68,
-        53,
-        1.1,
-        71,
-        1.07,
-        1.06,
-        0,
-        0
-      ],
-      "desc": "夜之半神 燃血",
-      "gacha": false,
-      "duration": 3700
-    },
-    {
-      "name": "丹恒·腾荒",
-      "points": [
-        62,
-        69,
-        1.2,
-        59,
-        0.99,
-        1.01,
-        0,
-        0
-      ],
-      "desc": "夜之半神 护盾"
-    },
-    {
-      "name": "知更鸟",
-      "points": [
-        68,
-        59,
-        1.2,
-        63,
-        1.06,
-        1.08,
-        0,
-        0
-      ],
-      "desc": "盛会之星 追击"
-    },
-    {
-      "name": "佩拉",
-      "points": [
-        58,
-        71,
-        1.2,
-        64,
-        1.04,
-        1.01,
-        0,
-        0
-      ],
-      "desc": "贝洛伯格 减益"
-    },
-    {
-      "name": "瓦尔特",
-      "points": [
-        86,
-        64,
-        1.3,
-        68,
-        1.39,
-        1.33,
-        0,
-        0
-      ],
-      "desc": "列车同行 减益"
-    },
-    {
-      "name": "忘归人",
-      "points": [
-        70,
-        56,
-        1.2,
-        71,
-        1.13,
-        1.09,
-        0,
-        0
-      ],
-      "desc": "仙舟 击破"
-    },
-    {
-      "name": "星期日",
-      "points": [
-        70,
-        68,
-        1.2,
-        72,
-        1.21,
-        1.16,
-        0,
-        0
-      ],
-      "desc": "列车同行 盛会之星 能量"
-    },
-    {
-      "name": "万敌",
-      "points": [
-        70,
-        70,
-        1.2,
-        73,
-        1.12,
-        1.11,
-        0,
-        0
-      ],
-      "desc": "夜之半神 燃血"
-    },
-    {
-      "name": "大黑塔",
-      "points": [
-        67,
-        70,
-        1.1,
-        74,
-        1.01,
-        1,
-        0,
-        0
-      ],
-      "desc": "银河学者 群攻"
-    },
-    {
-      "name": "云璃",
-      "points": [
-        71,
-        58,
-        1.1,
-        72,
-        1.06,
-        1.09,
-        0,
-        0
-      ],
-      "desc": "狼狩 能量",
-      "duration": 3500
-    },
-    {
-      "name": "大丽花",
-      "points": [
-        62,
-        74,
-        1.3,
-        71,
-        1.07,
-        1.08,
-        0,
-        0
-      ],
-      "desc": "盛会之星 击破"
-    },
-    {
-      "name": "黄泉",
-      "points": [
-        71,
-        62,
-        1.1,
-        73,
-        1.04,
-        1.07,
-        0,
-        0
-      ],
-      "desc": "巡海游侠 减益",
-      "duration": 3500
-    },
-    {
-      "name": "爻光",
-      "points": [
-        71,
-        94,
-        1.4,
-        81,
-        1.28,
-        1.28,
-        0,
-        0
-      ],
-      "desc": "仙舟 战技点",
-      "gacha": true,
-      "duration": 6000
-    },
-    {
-      "name": "黑天鹅",
-      "points": [
-        68,
-        57,
-        1.1,
-        75,
-        1.03,
-        1.05,
-        0,
-        0
-      ],
-      "desc": "盛会之星 持续伤害 命运卜者"
-    },
-    {
-      "name": "银狼",
-      "points": [
-        69,
-        62,
-        1.1,
-        76,
-        1.05,
-        1.09,
-        0,
-        0
-      ],
-      "desc": "星核猎手 量子同频"
+      "desc": "贝洛伯格 大守护者 燃血",
+      "gachaText": "",
+      "duration": 5400
     },
     {
       "name": "杰帕德",
@@ -1010,12 +370,137 @@
         1,
         66,
         0.99,
-        0.97,
-        0,
-        0
+        0.97
       ],
       "desc": "贝洛伯格 护盾",
-      "duration": 3500
+      "starLevel": 4,
+      "equipmentIds": "25,8,11",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "彦卿",
+      "points": [
+        66,
+        54,
+        1,
+        68,
+        1.01,
+        1.02
+      ],
+      "desc": "仙舟 狼狩 减益",
+      "starLevel": 4,
+      "equipmentIds": "29,6,27",
+      "gachaText": "",
+      "duration": 5600
+    },
+    {
+      "name": "Archer",
+      "points": [
+        95,
+        67,
+        1.8,
+        81,
+        1.36,
+        1.29
+      ],
+      "desc": "星间旅人 战技点 魔术师",
+      "gacha": true,
+      "duration": 6000,
+      "equipmentIds": "2,8,15",
+      "gachaText": ""
+    },
+    {
+      "name": "桑博",
+      "points": [
+        68,
+        74,
+        1.2,
+        74,
+        1.1,
+        1.06
+      ],
+      "desc": "贝洛伯格 星间旅人 持续伤害",
+      "starLevel": 1,
+      "equipmentIds": "1,1,18",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "大丽花",
+      "points": [
+        62,
+        74,
+        1.3,
+        68,
+        1.07,
+        1.08
+      ],
+      "desc": "盛会之星 击破",
+      "starLevel": 1,
+      "gachaText": ""
+    },
+    {
+      "name": "三月七",
+      "points": [
+        57,
+        60,
+        1.1,
+        62,
+        0.94,
+        0.99
+      ],
+      "desc": "列车同行 护盾",
+      "starLevel": 1,
+      "equipmentIds": "1,1,14",
+      "gachaText": "",
+      "midPhase": {
+        "enabled": true,
+        "triggerRatio": 0.5,
+        "photoName": "罗刹",
+        "colorIndex": 4,
+        "points": [
+          71,
+          70,
+          1.2,
+          67,
+          1.21,
+          1.19
+        ]
+      },
+      "duration": 6000
+    },
+    {
+      "name": "大黑塔",
+      "points": [
+        64,
+        68,
+        1.1,
+        68,
+        1.01,
+        0.96
+      ],
+      "desc": "银河学者 群攻",
+      "starLevel": 4,
+      "equipmentIds": "8,2,21",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "万敌",
+      "points": [
+        73,
+        70,
+        1.2,
+        73,
+        1.13,
+        1.14
+      ],
+      "desc": "夜之半神 燃血",
+      "starLevel": 2,
+      "equipmentIds": "2,8,24",
+      "gachaText": "",
+      "duration": 5400
     },
     {
       "name": "真理医生",
@@ -1024,56 +509,703 @@
         59,
         1,
         68,
-        1.01,
-        0.97,
-        0,
-        0
+        0.94,
+        0.97
       ],
-      "desc": "银河学者 星间旅人 追击"
+      "desc": "银河学者 星间旅人 追击",
+      "starLevel": 3,
+      "equipmentIds": "2,8,8",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "黑塔",
+      "points": [
+        65,
+        70,
+        1.2,
+        69,
+        1.02,
+        1.03
+      ],
+      "desc": "银河学者 群攻",
+      "starLevel": 1,
+      "equipmentIds": "2,22,29",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "符玄",
+      "points": [
+        64,
+        61,
+        1.2,
+        76,
+        1.19,
+        1.17
+      ],
+      "desc": "仙舟 量子同频 治疗",
+      "starLevel": 4,
+      "equipmentIds": "13,24,19",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "流萤",
+      "points": [
+        71,
+        59,
+        1.2,
+        63,
+        1.08,
+        1.09
+      ],
+      "desc": "星核猎手 击破",
+      "equipmentIds": "20,3,27",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "白厄",
+      "points": [
+        78,
+        62,
+        1.2,
+        88,
+        1.18,
+        1.11
+      ],
+      "desc": "救世主",
+      "gacha": false,
+      "starLevel": 3,
+      "equipmentIds": "33,33,33",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "加拉赫",
+      "points": [
+        51,
+        71,
+        1.2,
+        72,
+        1.05,
+        1.06
+      ],
+      "desc": "盛会之星 击破 治疗",
+      "starLevel": 1,
+      "equipmentIds": "10,12,24",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "忘归人",
+      "points": [
+        70,
+        58,
+        1.2,
+        71,
+        1.13,
+        1.09
+      ],
+      "desc": "仙舟 击破",
+      "starLevel": 3,
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "希儿",
+      "points": [
+        96,
+        74,
+        1.5,
+        79,
+        1.38,
+        1.29
+      ],
+      "desc": "贝洛伯格 量子同频",
+      "starLevel": 3,
+      "equipmentIds": "2,2,8",
+      "gacha": true,
+      "gachaText": "Seele",
+      "duration": 6000
+    },
+    {
+      "name": "姬子",
+      "points": [
+        62,
+        52,
+        1,
+        63,
+        0.93,
+        0.92
+      ],
+      "desc": "列车同行 击破",
+      "starLevel": 3,
+      "gachaText": ""
+    },
+    {
+      "name": "丹恒·腾荒",
+      "points": [
+        62,
+        69,
+        1.2,
+        59,
+        1.01,
+        1.02
+      ],
+      "desc": "夜之半神 护盾",
+      "starLevel": 2,
+      "equipmentIds": "1,25,12",
+      "gachaText": ""
+    },
+    {
+      "name": "知更鸟",
+      "points": [
+        67,
+        59,
+        1.2,
+        67,
+        1.07,
+        1.09
+      ],
+      "desc": "盛会之星 追击",
+      "starLevel": 4,
+      "equipmentIds": "4,4",
+      "gachaText": ""
+    },
+    {
+      "name": "刻律德菈",
+      "points": [
+        61,
+        66,
+        1.2,
+        70,
+        1.09,
+        1.12
+      ],
+      "desc": "夜之半神 战技点",
+      "starLevel": 3,
+      "equipmentIds": "1,4",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "黑天鹅",
+      "points": [
+        68,
+        57,
+        1.1,
+        75,
+        1.03,
+        1.05
+      ],
+      "desc": "盛会之星 持续伤害 命运卜者",
+      "equipmentIds": "6,2,16",
+      "gachaText": ""
+    },
+    {
+      "name": "黄泉",
+      "points": [
+        71,
+        63,
+        1.2,
+        75,
+        1.04,
+        1.09
+      ],
+      "desc": "巡海游侠 减益",
+      "starLevel": 3,
+      "equipmentIds": "8,8,27",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "赛飞儿",
+      "points": [
+        46,
+        47,
+        0.7,
+        45,
+        0.61,
+        0.82
+      ],
+      "desc": "夜之半神 追击 减益",
+      "starLevel": 1,
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "银枝",
+      "points": [
+        57,
+        64,
+        1.1,
+        66,
+        0.87,
+        0.89
+      ],
+      "desc": "星间旅人 群攻 能量",
+      "starLevel": 2,
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "貊泽",
+      "points": [
+        55,
+        56,
+        0.9,
+        68,
+        0.85,
+        1.02
+      ],
+      "desc": "狼狩 追击",
+      "starLevel": 1,
+      "gachaText": ""
+    },
+    {
+      "name": "不死途",
+      "points": [
+        82,
+        76,
+        1.3,
+        78,
+        1.22,
+        1.23
+      ],
+      "desc": "巡海游侠 追击",
+      "starLevel": 2,
+      "equipmentIds": "2,8,14",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "罗刹",
+      "points": [
+        62,
+        56,
+        1.2,
+        68,
+        1.06,
+        1.05
+      ],
+      "desc": "星间旅人 治疗",
+      "starLevel": 4,
+      "equipmentIds": "12,13,19",
+      "gachaText": ""
+    },
+    {
+      "name": "火花",
+      "points": [
+        91,
+        70,
+        1.4,
+        87,
+        1.28,
+        1.27
+      ],
+      "desc": "星间旅人 战技点 欢愉",
+      "starLevel": 4,
+      "equipmentIds": "8,2",
+      "gachaText": "",
+      "duration": 5400
     },
     {
       "name": "托帕&账账",
       "points": [
         65,
-        64,
+        62,
         1.4,
         64,
         1.06,
-        1.06,
-        0,
-        0
+        1.06
       ],
       "desc": "公司 追击",
-      "duration": 3500
+      "equipmentIds": "6,29,2",
+      "gachaText": ""
     },
     {
-      "name": "黑塔",
+      "name": "镜流",
       "points": [
-        66,
-        70,
+        56,
+        54,
+        0.9,
+        56,
+        0.85,
+        0.87
+      ],
+      "desc": "狼狩 燃血",
+      "starLevel": 3,
+      "equipmentIds": "29,1,14",
+      "gachaText": ""
+    },
+    {
+      "name": "翡翠",
+      "points": [
+        41,
+        49,
+        0.8,
+        54,
+        0.84,
+        0.86
+      ],
+      "desc": "公司 群攻",
+      "starLevel": 1,
+      "equipmentIds": "26,5,17",
+      "gachaText": ""
+    },
+    {
+      "name": "丹恒·饮月",
+      "points": [
+        75,
+        75,
+        1.3,
+        77,
+        1.18,
+        1.12
+      ],
+      "desc": "列车同行 仙舟 战技点",
+      "starLevel": 2,
+      "equipmentIds": "8,8,2",
+      "gachaText": ""
+    },
+    {
+      "name": "青雀",
+      "points": [
+        76,
+        82,
+        1.3,
+        81,
+        1.13,
+        1.14
+      ],
+      "desc": "仙舟 战技点",
+      "starLevel": 1,
+      "equipmentIds": "28,2,15",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "乱破",
+      "points": [
+        69,
+        74,
+        1.2,
+        75,
+        1.07,
+        1.04
+      ],
+      "desc": "巡海游侠 击破",
+      "starLevel": 1,
+      "equipmentIds": "20,20,14",
+      "gachaText": ""
+    },
+    {
+      "name": "灵砂",
+      "points": [
+        74,
+        80,
+        1.3,
+        72,
+        1.25,
+        1.23
+      ],
+      "desc": "狼狩 击破 治疗",
+      "starLevel": 2,
+      "equipmentIds": "20,20,2",
+      "gachaText": ""
+    },
+    {
+      "name": "缇宝",
+      "points": [
+        77,
+        78,
+        1.4,
+        79,
+        1.29,
+        1.24
+      ],
+      "desc": "昼之半神 群攻 量子同频",
+      "starLevel": 2,
+      "equipmentIds": "17,5,7",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "银狼",
+      "points": [
+        69,
+        60,
+        1.1,
+        74,
+        1.04,
+        1.08
+      ],
+      "desc": "星核猎手 量子同频",
+      "starLevel": 4,
+      "gacha": false,
+      "gachaText": ""
+    },
+    {
+      "name": "娜塔莎",
+      "points": [
+        51,
+        51,
+        0.8,
+        61,
+        0.74,
+        0.8
+      ],
+      "desc": "贝洛伯格 治疗",
+      "starLevel": 3,
+      "equipmentIds": "10,12,24",
+      "gachaText": ""
+    },
+    {
+      "name": "银狼LV.999",
+      "points": [
+        87,
+        76,
+        1.4,
+        89,
+        1.26,
+        1.25
+      ],
+      "desc": "头号玩家 星核猎手 欢愉",
+      "starLevel": 3,
+      "equipmentIds": "32",
+      "gacha": true,
+      "gachaText": "Silver Wolf LV.999",
+      "duration": 7000
+    },
+    {
+      "name": "爻光",
+      "points": [
+        74,
+        96,
+        1.4,
+        86,
+        1.32,
+        1.3
+      ],
+      "desc": "仙舟 战技点 欢愉",
+      "gacha": true,
+      "duration": 6000,
+      "starLevel": 1,
+      "equipmentIds": "1,1,1",
+      "gachaText": "Yao Guang"
+    },
+    {
+      "name": "砂金",
+      "points": [
+        53,
+        61,
         1.2,
         69,
-        1.02,
         1.03,
-        0,
-        0
+        1.01
       ],
-      "desc": "银河学者 群攻"
+      "desc": "公司 追击 护盾",
+      "starLevel": 2,
+      "equipmentIds": "25,31,11",
+      "gachaText": ""
     },
     {
-      "name": "银枝",
+      "name": "椒丘",
       "points": [
+        38,
+        60,
+        0.9,
+        70,
+        0.86,
+        0.95
+      ],
+      "desc": "狼狩 治疗 减益",
+      "starLevel": 1,
+      "equipmentIds": "19,13,12",
+      "gachaText": ""
+    },
+    {
+      "name": "藿藿",
+      "points": [
+        60,
+        84,
+        1.2,
+        80,
+        1.1,
+        1.11
+      ],
+      "desc": "仙舟 能量 治疗",
+      "starLevel": 1,
+      "equipmentIds": "10,12,24",
+      "gachaText": ""
+    },
+    {
+      "name": "昔涟",
+      "points": [
+        81,
         61,
+        1.4,
+        87,
+        1.31,
+        1.26
+      ],
+      "desc": "挚爱之人 昼之半神 夜之半神",
+      "gacha": false,
+      "duration": 6000,
+      "equipmentIds": "27",
+      "gachaText": ""
+    },
+    {
+      "name": "飞霄",
+      "points": [
+        72,
+        71,
+        1.2,
+        71,
+        1.1,
+        1.04
+      ],
+      "desc": "狼狩 追击",
+      "starLevel": 1,
+      "equipmentIds": "2,2,8",
+      "gachaText": ""
+    },
+    {
+      "name": "刃",
+      "points": [
+        56,
         68,
         1.1,
-        71,
-        0.92,
-        0.89,
-        0,
-        0
+        57,
+        0.87,
+        0.86
       ],
-      "desc": "星间旅人 群攻 能量",
-      "duration": 3500
+      "desc": "星核猎手 燃血",
+      "starLevel": 1,
+      "equipmentIds": "",
+      "gachaText": ""
+    },
+    {
+      "name": "长夜月",
+      "points": [
+        54,
+        41,
+        0.9,
+        61,
+        0.86,
+        0.88
+      ],
+      "desc": "夜之半神 燃血",
+      "starLevel": 4,
+      "equipmentIds": "7,5,17",
+      "gachaText": ""
+    },
+    {
+      "name": "景元",
+      "points": [
+        74,
+        66,
+        1.1,
+        70,
+        1.04,
+        1.03
+      ],
+      "desc": "仙舟 群攻",
+      "equipmentIds": "8,3,2",
+      "gachaText": ""
+    },
+    {
+      "name": "那刻夏",
+      "points": [
+        58,
+        54,
+        1,
+        59,
+        0.91,
+        0.96
+      ],
+      "desc": "昼之半神 群攻",
+      "starLevel": 3,
+      "gachaText": ""
+    },
+    {
+      "name": "波提欧",
+      "points": [
+        91,
+        66,
+        1.3,
+        78,
+        1.25,
+        1.25
+      ],
+      "desc": "巡海游侠 击破",
+      "starLevel": 4,
+      "equipmentIds": "20,20,14",
+      "gachaText": "",
+      "duration": 5400
+    },
+    {
+      "name": "佩拉",
+      "points": [
+        59,
+        71,
+        1.2,
+        65,
+        1.05,
+        1.04
+      ],
+      "desc": "贝洛伯格 减益",
+      "starLevel": 2,
+      "gachaText": ""
+    },
+    {
+      "name": "艾丝妲",
+      "points": [
+        51,
+        71,
+        1,
+        69,
+        0.83,
+        0.92
+      ],
+      "desc": "银河学者 持续伤害",
+      "starLevel": 1,
+      "equipmentIds": "23,5,19",
+      "gachaText": ""
+    },
+    {
+      "name": "开拓者",
+      "points": [
+        78,
+        62,
+        1.3,
+        73,
+        1.25,
+        1.25
+      ],
+      "desc": "列车同行 欢愉(后台) 能量(前台)",
+      "starLevel": 4,
+      "equipmentIds": "5,26,17",
+      "gachaText": "",
+      "duration": 5500
+    },
+    {
+      "name": "遐蝶",
+      "points": [
+        67,
+        53,
+        1.1,
+        69,
+        1.02,
+        0.99
+      ],
+      "desc": "夜之半神 燃血",
+      "gacha": false,
+      "starLevel": 4,
+      "equipmentIds": "30,8,3",
+      "gachaText": ""
     },
     {
       "name": "海瑟音",
@@ -1083,70 +1215,75 @@
         1.1,
         72,
         1.1,
-        1.06,
-        0,
-        0
+        1.06
       ],
-      "desc": "昼之半神 持续伤害"
+      "desc": "昼之半神 持续伤害",
+      "starLevel": 4,
+      "gachaText": ""
     },
     {
-      "name": "刻律德菈",
+      "name": "风堇",
       "points": [
-        61,
-        62,
+        59,
+        77,
         1.2,
-        71,
-        1.09,
-        1.12,
-        0,
-        0
+        78,
+        1.2,
+        1.16
       ],
-      "desc": "夜之半神 战技点",
-      "duration": 3600
-    },
-    {
-      "name": "阿格莱雅",
-      "points": [
-        100,
-        92,
-        1.7,
-        75,
-        1.41,
-        1.35,
-        0,
-        0
-      ],
-      "desc": "昼之半神 能量",
-      "gacha": true,
-      "duration": 6000
+      "desc": "昼之半神 治疗 燃血",
+      "gacha": false,
+      "starLevel": 2,
+      "equipmentIds": "10,12,24",
+      "gachaText": ""
     },
     {
       "name": "卡芙卡",
       "points": [
-        64,
-        59,
-        1.1,
+        66,
+        69,
+        1.2,
         71,
-        1.06,
-        1.03,
-        0,
-        0
+        1.07,
+        1.08
       ],
-      "desc": "星核猎手 持续伤害"
+      "desc": "星核猎手 持续伤害",
+      "starLevel": 2,
+      "equipmentIds": "1,2,2",
+      "gachaText": ""
     },
     {
-      "name": "阮·梅",
+      "name": "阿格莱雅",
       "points": [
-        60,
-        68,
-        1.2,
-        68,
-        1.09,
-        1.1,
-        0,
-        0
+        95,
+        89,
+        1.6,
+        71,
+        1.38,
+        1.34
       ],
-      "desc": "银河学者 击破"
+      "desc": "昼之半神 能量",
+      "gacha": true,
+      "duration": 7100,
+      "starLevel": 1,
+      "equipmentIds": "1,1,14",
+      "gachaText": "Aglaea"
+    },
+    {
+      "name": "瓦尔特",
+      "points": [
+        94,
+        65,
+        1.7,
+        71,
+        1.45,
+        1.33
+      ],
+      "desc": "列车同行 减益",
+      "equipmentIds": "23,27,21",
+      "gacha": true,
+      "gachaText": "Welt",
+      "duration": 6000
     }
   ]
 }
