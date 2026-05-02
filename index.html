@@ -1621,6 +1621,94 @@
             filter: blur(4px);
         }
 
+        .band-phase-wipe-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 7;
+            pointer-events: none;
+            overflow: hidden;
+            isolation: isolate;
+            --phase-wipe-x: -18%;
+        }
+
+        .band-phase-wipe-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            user-select: none;
+            pointer-events: none;
+            will-change: clip-path, opacity, transform, filter;
+        }
+
+        .band-phase-wipe-old {
+            z-index: 1;
+            filter: saturate(0.94) brightness(0.9);
+        }
+
+        .band-phase-wipe-new {
+            z-index: 2;
+            filter: saturate(1.14) brightness(1.03) contrast(1.04);
+            clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+        }
+
+        .band-phase-wipe-line {
+            position: absolute;
+            top: -18%;
+            left: var(--phase-wipe-x);
+            width: 12px;
+            height: 136%;
+            z-index: 4;
+            border-radius: 999px;
+            transform: translateX(-50%) skewX(-16deg);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.98) 12%, var(--theme-color) 50%, rgba(255,255,255,0.98) 88%, rgba(255,255,255,0) 100%);
+            box-shadow:
+                0 0 12px rgba(255,255,255,0.72),
+                0 0 28px var(--theme-color),
+                0 0 56px rgba(255,255,255,0.22);
+            mix-blend-mode: screen;
+            opacity: 0.96;
+        }
+
+        .band-phase-wipe-line::before,
+        .band-phase-wipe-line::after {
+            content: '';
+            position: absolute;
+            inset: -22px -18px;
+            border-radius: inherit;
+            background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.24) 18%, var(--theme-color) 50%, rgba(255,255,255,0.24) 82%, rgba(255,255,255,0) 100%);
+            filter: blur(15px);
+        }
+
+        .band-phase-wipe-line::after {
+            inset: -10px -48px;
+            opacity: 0.55;
+            filter: blur(22px);
+        }
+
+        .band-phase-wipe-spark {
+            position: absolute;
+            top: 50%;
+            left: var(--phase-wipe-x);
+            width: 34%;
+            height: 58%;
+            z-index: 3;
+            transform: translate(-50%, -50%) skewX(-16deg);
+            background:
+                radial-gradient(ellipse at center, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.08) 34%, rgba(255,255,255,0) 72%),
+                linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 48%, rgba(255,255,255,0) 100%);
+            filter: blur(10px);
+            mix-blend-mode: screen;
+            opacity: 0.78;
+        }
+
+        .band-photo-container.phase-wipe-active .band-photo {
+            opacity: 0;
+        }
+
         .band-desc-container {
             align-self: flex-start;
             position: relative;
@@ -4677,6 +4765,14 @@
             return gachaText === 'silver wolf lv.999';
         }
 
+        function getBandDisplayName(band) {
+            if (!band) return '';
+            if (band.phaseKeepIdentity && band.phaseParentName) {
+                return String(band.phaseParentName || '').trim();
+            }
+            return String(band.name || '').trim();
+        }
+
         function normalizePhaseRatio(value, fallback = 0.5) {
             const num = Number(value);
             if (!Number.isFinite(num)) return fallback;
@@ -4858,7 +4954,6 @@
                 derivedBands.push(baseBand);
 
                 if (midBandRaw) {
-                    const midPreset = resolveColorPresetByIndex(midBandRaw.colorIndex, basePreset) || basePreset;
                     const midPrecisions = midBandRaw.points.map(val => {
                         const s = val.toString();
                         const dotIdx = s.indexOf('.');
@@ -4869,7 +4964,10 @@
                         precisions: midPrecisions,
                         isGoat: mvplist.includes(midBandRaw.name),
                         duration: Math.max(1, baseDuration - baseBand.duration),
-                        ...midPreset
+                        colorIndex: baseBand.colorIndex,
+                        color: baseBand.color,
+                        bg1: baseBand.bg1,
+                        bg2: baseBand.bg2
                     });
                 }
             });
@@ -5192,12 +5290,13 @@
             const band = bands[index];
             if (!band) return;
 
-            const preloadBases = [band.name];
+            const displayName = getBandDisplayName(band);
+            const preloadBases = [displayName || band.name];
             if (band.photoName) preloadBases.push(band.photoName);
             parseBondTags(band.desc || '').forEach(tag => preloadBases.push(`faction_${tag}`));
-            if (mvplist.includes(band.name)) preloadBases.push(`${band.name}1`);
+            if (mvplist.includes(displayName)) preloadBases.push(`${displayName}1`);
             if (shouldPlayGachaForBand(band, index, false)) {
-                preloadBases.push(`best_${band.name}`, 'gacha_door_left', 'gacha_door_right');
+                preloadBases.push(`best_${displayName || band.name}`, 'gacha_door_left', 'gacha_door_right');
             }
 
             prewarmNamedImage(preloadBases);
@@ -5354,10 +5453,106 @@
             }, null, () => isUiTransitionActive(sessionId));
         }
 
+        function isMidPhaseTransition(prevBand, nextBand) {
+            if (!prevBand || !nextBand) return false;
+            if (String(nextBand.phaseRole || '').trim() !== 'mid') return false;
+            return String(prevBand.phaseParentName || prevBand.name || '').trim() === String(nextBand.phaseParentName || '').trim()
+                && String(prevBand.phaseRole || 'base').trim() === 'base';
+        }
+
+        function clearPhotoWipeLayer(photoContainer) {
+            if (!photoContainer) return;
+            photoContainer.classList.remove('phase-wipe-active');
+            photoContainer.querySelectorAll('.band-phase-wipe-layer').forEach(node => node.remove());
+        }
+
+        function createPhotoWipeLayer(photoContainer, oldPhotoCandidate, newPhotoCandidate, sessionId, onComplete = null, onMidpoint = null) {
+            if (!photoContainer || !oldPhotoCandidate || !newPhotoCandidate) return null;
+            clearPhotoWipeLayer(photoContainer);
+
+            const layer = document.createElement('div');
+            layer.className = 'band-phase-wipe-layer';
+
+            const oldImg = document.createElement('img');
+            oldImg.className = 'band-phase-wipe-image band-phase-wipe-old';
+            oldImg.src = oldPhotoCandidate.url;
+            applyImageMeta(oldImg, oldPhotoCandidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
+            setElementUserScale(oldImg);
+
+            const newImg = document.createElement('img');
+            newImg.className = 'band-phase-wipe-image band-phase-wipe-new';
+            newImg.src = newPhotoCandidate.url;
+            applyImageMeta(newImg, newPhotoCandidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
+            setElementUserScale(newImg);
+
+            const spark = document.createElement('span');
+            spark.className = 'band-phase-wipe-spark';
+
+            const line = document.createElement('span');
+            line.className = 'band-phase-wipe-line';
+
+            layer.appendChild(oldImg);
+            layer.appendChild(newImg);
+            layer.appendChild(spark);
+            layer.appendChild(line);
+            photoContainer.appendChild(layer);
+
+            const duration = Math.max(560, Math.round(ANIM_DURATION * 0.72));
+            const startLeft = -18;
+            const endLeft = 118;
+            const diagonalWidth = 24;
+            const settleLeft = 112;
+            const startTime = performance.now();
+            const midpointX = 50;
+            let midpointHandled = false;
+
+            photoContainer.classList.add('phase-wipe-active');
+
+            const animate = now => {
+                if (!isUiTransitionActive(sessionId)) return;
+                const elapsed = Math.max(0, now - startTime);
+                const progress = Math.min(1, elapsed / duration);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const lineX = startLeft + (endLeft - startLeft) * eased;
+                layer.style.setProperty('--phase-wipe-x', `${lineX.toFixed(2)}%`);
+                const topEdge = Math.max(0, Math.min(100, lineX));
+                const bottomEdge = Math.max(0, Math.min(100, lineX + diagonalWidth));
+                newImg.style.clipPath = `polygon(0 0, ${topEdge.toFixed(2)}% 0, ${bottomEdge.toFixed(2)}% 100%, 0 100%)`;
+
+                if (!midpointHandled && lineX >= midpointX) {
+                    midpointHandled = true;
+                    oldImg.remove();
+                    if (typeof onMidpoint === 'function') {
+                        onMidpoint();
+                    }
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                    return;
+                }
+
+                layer.style.setProperty('--phase-wipe-x', `${settleLeft}%`);
+                newImg.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
+                requestAnimationFrame(() => {
+                    if (!isUiTransitionActive(sessionId)) return;
+                    clearPhotoWipeLayer(photoContainer);
+                    if (typeof onComplete === 'function') {
+                        onComplete();
+                    }
+                });
+            };
+
+            requestAnimationFrame(animate);
+            return layer;
+        }
+
         function syncBandPhotoVariant() {
             if (currentIndex < 0 || !bands[currentIndex]) return;
             const photoEl = document.getElementById('bandPhoto');
+            const photoContainer = document.getElementById('photoContainer');
             if (!photoEl) return;
+            if (photoContainer && photoContainer.classList.contains('phase-wipe-active')) return;
 
             const band = bands[currentIndex];
             const nextPhotoName = getBandPhotoName(band, globalCurrentTime);
@@ -5365,6 +5560,13 @@
             const currentPhotoName = String(photoEl.dataset.photoBandName || '').trim();
             if (currentPhotoName === nextPhotoName) return;
             crossfadeBandPhotoVariant(nextPhotoName);
+        }
+
+        function getTransitionPrevBandForIndex(nextIndex) {
+            if (!Number.isInteger(nextIndex) || nextIndex <= 0) return null;
+            const nextBand = bands[nextIndex];
+            if (String(nextBand?.phaseRole || '').trim() !== 'mid') return null;
+            return bands[nextIndex - 1] || null;
         }
 
         function renderBondIcons(desc = '', sessionId = uiTransitionSession) {
@@ -6712,8 +6914,9 @@
             if (gachaPlaying) return;
             const currentSegment = getTimeSegmentAt(globalCurrentTime, false);
             if (currentSegment && currentSegment.bandIndex !== currentIndex) {
+                const prevBand = getTransitionPrevBandForIndex(currentSegment.bandIndex);
                 currentIndex = currentSegment.bandIndex;
-                updateUI(bands[currentIndex], currentIndex === 0 && globalCurrentTime < 1000);
+                updateUI(bands[currentIndex], currentIndex === 0 && globalCurrentTime < 1000, prevBand);
             }
         }
 
@@ -7369,7 +7572,7 @@
         function getBandGachaDisplayText(band) {
             const custom = String(band?.gachaText || '').trim();
             if (custom) return custom;
-            return String(band?.name || '').trim();
+            return getBandDisplayName(band);
         }
 
         /**
@@ -7391,7 +7594,11 @@
                 const bgImg = document.getElementById('gachaBgImg');
                 const nameEl = document.getElementById('gachaName');
                 const animType = 2;
-                const isSilverWolfGacha = isSilverwolfBand(band);
+                const displayName = getBandDisplayName(band);
+                const displayIdentityBand = displayName && displayName !== band.name
+                    ? { ...band, name: displayName }
+                    : band;
+                const isSilverWolfGacha = isSilverwolfBand(displayIdentityBand);
                 const overlayTypeClass = `gacha-type-${animType}`;
                 const duration = Math.max(CONFIG.GACHA_ANIM_DURATION || 4500, 2200);
 
@@ -7414,7 +7621,7 @@
                 resetGachaOverlayState();
                 overlay.offsetWidth;
 
-                loadNamedImage(`best_${band.name}`, candidate => {
+                loadNamedImage(`best_${displayName || band.name}`, candidate => {
                     bgImg.src = candidate.url;
                     applyImageMeta(bgImg, candidate.name, { fit: 'cover', x: 50, y: 50, scale: 1 }, true);
                 }, () => {
@@ -7486,13 +7693,15 @@
          * @param {Object} band - 即将展示的乐队数据对象
          * @param {boolean} isFirst - 是否是初始首次加载
          */
-        function updateUI(band, isFirst = false) {
+        function updateUI(band, isFirst = false, forcedPrevBand = null) {
             const sessionId = beginUiTransitionSession();
             const nameEl = document.getElementById("bandName");
             const containerEl = document.getElementById("bandDetailContainer");
             const photoEl = document.getElementById("bandPhoto");
             const starEl = document.getElementById("bandStarRank");
             const shouldCenterReveal = isFirst || bandHasBest(band);
+            const prevBand = forcedPrevBand || null;
+            const isMidPhase = isMidPhaseTransition(prevBand, band);
 
             // 抽卡出金动画检查
             if (shouldPlayGachaForBand(band, currentIndex, isFirst)) {
@@ -7516,8 +7725,16 @@
                     const resolvedIndex = currentSegment?.bandIndex;
                     if (!Number.isInteger(resolvedIndex) || !bands[resolvedIndex]) return;
                     currentIndex = resolvedIndex;
-                    performTransition(bands[resolvedIndex], false, sessionId, { postGachaFastReveal: true });
+                    const resolvedPrevBand = getTransitionPrevBandForIndex(resolvedIndex);
+                    performTransition(bands[resolvedIndex], false, sessionId, { postGachaFastReveal: true, prevBand: resolvedPrevBand });
                 });
+                return;
+            }
+
+            if (isMidPhase) {
+                nameEl.style.animation = 'none';
+                containerEl.style.animation = 'none';
+                performTransition(band, isFirst, sessionId, { prevBand, isMidPhase });
                 return;
             }
 
@@ -7534,10 +7751,10 @@
                 photoEl.style.opacity = "0";
 
                 queueUiTransitionTimer(sessionId, () => {
-                    performTransition(band, isFirst, sessionId);
+                    performTransition(band, isFirst, sessionId, { prevBand, isMidPhase });
                 }, 500);
             } else {
-                performTransition(band, isFirst, sessionId);
+                performTransition(band, isFirst, sessionId, { prevBand, isMidPhase });
             }
         }
 
@@ -7556,11 +7773,17 @@
             const mvpContainer = document.getElementById("mvpBgContainer");
             const shouldCenterReveal = isFirst || bandHasBest(band);
             const shouldUsePostGachaTiming = !!options.postGachaFastReveal && shouldCenterReveal;
-            const isSilverWolf = isSilverwolfBand(band);
+            const prevBand = options.prevBand || null;
+            const isMidPhase = options.isMidPhase === true || isMidPhaseTransition(prevBand, band);
+            const displayName = getBandDisplayName(band);
+            const displayIdentityBand = displayName && displayName !== band.name
+                ? { ...band, name: displayName }
+                : band;
+            const isSilverWolf = isSilverwolfBand(displayIdentityBand);
             let centerRevealQueued = false;
 
             // MVP 底图逻辑
-            const isMvp = mvplist.includes(band.name);
+            const isMvp = mvplist.includes(displayName);
             const themeColor = isMvp ? MVP_THEME.color : (isSilverWolf ? SILVERWOLF_THEME.color : band.color);
             const bgColor1 = isMvp ? MVP_THEME.bg1 : (isSilverWolf ? SILVERWOLF_THEME.bg1 : band.bg1);
             const bgColor2 = isMvp ? MVP_THEME.bg2 : (isSilverWolf ? SILVERWOLF_THEME.bg2 : band.bg2);
@@ -7577,10 +7800,17 @@
             containerEl.style.display = "none";
             if (equipmentGridEl) equipmentGridEl.innerHTML = '';
             photoContainer.querySelectorAll('.band-photo-variant').forEach(node => node.remove());
-            photoEl.style.transition = 'opacity 0.62s cubic-bezier(0.24, 1, 0.36, 1), transform 0.82s cubic-bezier(0.22, 1, 0.36, 1), filter 0.45s ease';
             photoEl.style.filter = 'blur(0)';
-            photoEl.style.opacity = "0";
-            setPhotoTransform(photoEl, "translate3d(72px, 0, 0) scale(0.94)");
+            if (isMidPhase) {
+                photoEl.style.transition = 'none';
+                photoEl.style.opacity = "0";
+                setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
+            } else {
+                photoEl.style.transition = 'opacity 0.62s cubic-bezier(0.24, 1, 0.36, 1), transform 0.82s cubic-bezier(0.22, 1, 0.36, 1), filter 0.45s ease';
+                photoEl.style.opacity = "0";
+                setPhotoTransform(photoEl, "translate3d(72px, 0, 0) scale(0.94)");
+            }
+            clearPhotoWipeLayer(photoContainer);
 
             // 根据配置调整图片容器高度以改变“外界大小”
             // 默认 380px 为 1.0 比例的基准高度
@@ -7601,7 +7831,7 @@
                 img.className = "mvp-bg-image";
                 img.src = ""; 
                 mvpContainer.appendChild(img);
-                loadNamedImage(`${band.name}1`, candidate => {
+                loadNamedImage(`${displayName}1`, candidate => {
                     if (!isUiTransitionActive(sessionId)) return;
                     img.src = candidate.url;
                     applyImageMeta(img, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true, 'mvp-left-fade');
@@ -7613,7 +7843,7 @@
                 }, null, () => isUiTransitionActive(sessionId));
             }
 
-            if (!isFirst) {
+            if (!isFirst && !isMidPhase) {
                 void nameEl.offsetWidth;
                 void containerEl.offsetWidth;
             }
@@ -7658,27 +7888,69 @@
                 animStartTime = performance.now();
             }
 
-            nameEl.textContent = band.name;
+            nameEl.textContent = displayName;
             applyBandStarLevel(band, sessionId);
             renderBondIcons(band.desc || '', sessionId);
             
-            nameEl.style.animation = "nameEntrance 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards";
-            containerEl.style.animation = "descEntrance 1s ease-out 0.3s both";
+            if (!isMidPhase) {
+                nameEl.style.animation = "nameEntrance 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards";
+                containerEl.style.animation = "descEntrance 1s ease-out 0.3s both";
+            }
 
             const photoName = getBandPhotoName(band, globalCurrentTime);
             loadNamedImage(photoName, candidate => {
                 if (!isUiTransitionActive(sessionId)) return;
-                photoEl.src = candidate.url;
-                photoEl.dataset.photoBandName = photoName;
-                applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
-                photoEl.style.opacity = "1";
-                setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
+                if (isMidPhase && prevBand) {
+                    const oldPhotoName = String(photoEl.dataset.photoBandName || prevBand.photoName || prevBand.name || '').trim() || photoName;
+                    const oldPhotoSrc = photoEl.currentSrc || photoEl.src || '';
+                    const oldCandidate = oldPhotoSrc
+                        ? { url: oldPhotoSrc, name: oldPhotoName }
+                        : null;
+                    if (oldCandidate) {
+                        createPhotoWipeLayer(
+                            photoContainer,
+                            oldCandidate,
+                            candidate,
+                            sessionId,
+                            () => {
+                                if (!isUiTransitionActive(sessionId)) return;
+                                photoEl.style.transition = 'opacity 0.62s cubic-bezier(0.24, 1, 0.36, 1), transform 0.82s cubic-bezier(0.22, 1, 0.36, 1), filter 0.45s ease';
+                            },
+                            () => {
+                                if (!isUiTransitionActive(sessionId)) return;
+                                photoEl.style.transition = 'none';
+                                photoEl.src = candidate.url;
+                                photoEl.dataset.photoBandName = photoName;
+                                applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
+                                photoEl.style.opacity = '1';
+                                setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
+                            }
+                        );
+                    } else {
+                        photoEl.src = candidate.url;
+                        photoEl.dataset.photoBandName = photoName;
+                        applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
+                        photoEl.style.transition = 'opacity 0.62s cubic-bezier(0.24, 1, 0.36, 1), transform 0.82s cubic-bezier(0.22, 1, 0.36, 1), filter 0.45s ease';
+                        photoEl.style.opacity = '1';
+                        setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
+                        clearPhotoWipeLayer(photoContainer);
+                    }
+                } else {
+                    photoEl.src = candidate.url;
+                    photoEl.dataset.photoBandName = photoName;
+                    applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
+                    setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
+                    photoEl.style.opacity = "1";
+                    clearPhotoWipeLayer(photoContainer);
+                }
+
                 if (shouldUsePostGachaTiming) {
                     startCenterReveal(RADAR_POST_GACHA_REVEAL_DELAY);
                 }
             }, () => {
                 if (!isUiTransitionActive(sessionId)) return;
                 photoEl.style.opacity = "0";
+                clearPhotoWipeLayer(photoContainer);
                 if (shouldUsePostGachaTiming) {
                     startCenterReveal(RADAR_POST_GACHA_REVEAL_DELAY);
                 }
@@ -8514,8 +8786,9 @@
             // 立即检查并切换
             const currentSegment = getTimeSegmentAt(globalCurrentTime, true);
             if (currentSegment && currentSegment.bandIndex !== currentIndex) {
+                const prevBand = getTransitionPrevBandForIndex(currentSegment.bandIndex);
                 currentIndex = currentSegment.bandIndex;
-                updateUI(bands[currentIndex], false);
+                updateUI(bands[currentIndex], false, prevBand);
             }
             if (globalCurrentTime < totalDuration) {
                 isPaused = false;
@@ -8644,11 +8917,11 @@
             }, exitStart);
 
             queueIntroSequenceTimer(() => {
-                globalCurrentTime = 0;
-                if (bands.length) {
-                    currentIndex = 0;
-                    updateUI(bands[0], true);
-                }
+                    globalCurrentTime = 0;
+                    if (bands.length) {
+                        currentIndex = 0;
+                        updateUI(bands[0], true, null);
+                    }
                 overlay.style.opacity = "0";
                 isPaused = false; 
                 queueIntroSequenceTimer(() => {
