@@ -28,14 +28,20 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        body { 
-            font-family: "HarmonyOS Sans SC", "PingFang SC", "Lantinghei SC", "Microsoft YaHei", "HanHei SC", "Helvetica Neue", "Open Sans", Arial, sans-serif; 
-            overflow: hidden; 
-            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
-            background-size: 400% 400%;
-            animation: gradientBG 30s ease infinite; 
-            color: #fff; 
-            transition: all 2s ease; 
+        body {
+            font-family: "HarmonyOS Sans SC", "PingFang SC", "Lantinghei SC", "Microsoft YaHei", "HanHei SC", "Helvetica Neue", "Open Sans", Arial, sans-serif;
+            overflow: hidden;
+            background: linear-gradient(180deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
+            background-size: 100% 400%;
+            animation: gradientBGPortrait 30s ease infinite;
+            color: #fff;
+            transition: all 2s ease;
+        }
+
+        @keyframes gradientBGPortrait {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
         }
 
         #particles-canvas {
@@ -54,12 +60,13 @@
             opacity: 0;
             transition: opacity 0.6s ease;
             background:
-                radial-gradient(circle at 50% 42%, rgba(99, 230, 255, 0.16) 0%, rgba(99, 230, 255, 0) 28%),
+                radial-gradient(circle at 50% 15%, rgba(212, 171, 89, 0.18) 0%, rgba(212, 171, 89, 0) 35%),
+                radial-gradient(circle at 50% 50%, rgba(99, 230, 255, 0.12) 0%, rgba(99, 230, 255, 0) 40%),
                 radial-gradient(circle at 18% 22%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 18%),
-                linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
-            background-size: 140% 140%, 120% 120%, 400% 400%;
-            animation: gradientBG 16s ease infinite;
-            box-shadow: inset 0 0 160px rgba(0,0,0,0.46), inset 0 0 90px rgba(99, 230, 255, 0.06);
+                linear-gradient(180deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
+            background-size: 140% 140%, 100% 100%, 120% 120%, 100% 400%;
+            animation: gradientBGPortrait 16s ease infinite;
+            box-shadow: inset 0 0 160px rgba(0,0,0,0.46), inset 0 0 90px rgba(212, 171, 89, 0.08);
         }
 
         #coverBgLayer::before {
@@ -84,9 +91,9 @@
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.28s ease;
-            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
-            background-size: 400% 400%;
-            animation: gradientBG 30s ease infinite;
+            background: linear-gradient(180deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
+            background-size: 100% 400%;
+            animation: gradientBGPortrait 30s ease infinite;
             will-change: clip-path, opacity;
         }
 
@@ -4806,6 +4813,7 @@
 
     <script>
         let COLOR_PRESETS = [
+            { color: "#d4af37", bg1: "#1a1608", bg2: "#0d0b04" }, // 金色主题 (新增 - 适配reference图)
             { color: "#00ffff", bg1: "#001a1a", bg2: "#000d0d" }, // 青色系
             { color: "#ff00ff", bg1: "#1a001a", bg2: "#0d000d" }, // 洋红色系
             { color: "#ffff00", bg1: "#1a1a00", bg2: "#0d0d00" }, // 黄色系
