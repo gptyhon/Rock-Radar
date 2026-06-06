@@ -7339,7 +7339,7 @@
             ensureBackgroundStars();
             const speed = (0.035 + audioVizBass * 0.08) * (deltaTime || 16.7);
             const cx = pCanvas.width * 0.5;
-            const cy = pCanvas.height * 0.48;
+            const cy = pCanvas.height * 0.4; // Adjusted for portrait: focus on middle-upper area
             const accent = currentThemeColor || '#63e6ff';
 
             pCtx.save();
@@ -7384,8 +7384,8 @@
             bgRippleTime += (deltaTime || 16.7) * 0.001;
             const accent = currentThemeColor || '#63e6ff';
             const cx = pCanvas.width * 0.5;
-            const cy = pCanvas.height * 0.5;
-            const maxR = Math.hypot(pCanvas.width, pCanvas.height) * 0.54;
+            const cy = pCanvas.height * 0.4; // Adjusted for portrait: radar is at 40% height
+            const maxR = Math.hypot(pCanvas.width, pCanvas.height) * 0.5;
             const pulse = clampNumber(audioVizBeat * 0.7 + audioVizBass * 0.5, 0, 1);
             const ringCount = Math.max(5, Math.round(8 * getAudioQualityScale()));
 
@@ -7404,9 +7404,10 @@
                 pCtx.stroke();
             }
 
+            // Horizontal waves (keep these for visual interest)
             const waveCount = 4;
             for (let i = 0; i < waveCount; i++) {
-                const y = pCanvas.height * (0.18 + i * 0.18) + Math.sin(bgRippleTime * 1.2 + i) * pCanvas.height * 0.035;
+                const y = pCanvas.height * (0.15 + i * 0.2) + Math.sin(bgRippleTime * 1.2 + i) * pCanvas.height * 0.03;
                 pCtx.beginPath();
                 for (let x = -20; x <= pCanvas.width + 20; x += 28) {
                     const yy = y + Math.sin(x * 0.008 + bgRippleTime * (1.8 + i * 0.25)) * (14 + pulse * 22);
