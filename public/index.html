@@ -18,12 +18,12 @@
             --brand-gold-bright: #f8e6b7;
             --brand-gold-deep: #6f4713;
 
-            /* Portrait layout variables */
+            /* Portrait layout variables - Optimized for B站 */
             --portrait-width: 100vw;
             --portrait-height: 100vh;
-            --top-section-height: 15vh;
-            --middle-section-height: 35vh;
-            --bottom-section-height: 50vh;
+            --top-section-height: 10vh;
+            --middle-section-height: 45vh;
+            --bottom-section-height: 45vh;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1341,22 +1341,19 @@
         }
 
         .event-title {
-            font-family: "Orbitron", "HarmonyOS Sans SC", sans-serif;
-            font-size: clamp(16px, 4vw, 22px);
-            font-weight: 700;
-            letter-spacing: 0.18em;
+            font-family: "ZCOOL QingKe HuangYou", "Noto Serif SC", "HarmonyOS Sans SC", sans-serif;
+            font-size: clamp(22px, 5.5vw, 32px);
+            font-weight: 900;
+            letter-spacing: 0.3em;
             color: var(--brand-gold-bright);
-            text-shadow: 0 0 12px rgba(212, 171, 89, 0.4);
-            margin-bottom: 0.5vh;
+            text-shadow:
+                0 0 16px rgba(212, 171, 89, 0.6),
+                0 2px 8px rgba(0, 0, 0, 0.8);
+            padding-left: 0.3em;
         }
 
         .overall-score {
-            font-family: "Orbitron", "HarmonyOS Sans SC", sans-serif;
-            font-size: clamp(28px, 7vw, 48px);
-            font-weight: 900;
-            letter-spacing: 0.08em;
-            color: var(--brand-gold);
-            text-shadow: 0 0 18px rgba(212, 171, 89, 0.6);
+            display: none; /* Hide score as requested */
         }
 
         /* Middle Section: Radar Chart */
@@ -1381,10 +1378,10 @@
         }
 
         #radarCanvas {
-            width: min(90vw, calc(var(--middle-section-height) * 0.9));
-            height: min(90vw, calc(var(--middle-section-height) * 0.9));
+            width: min(95vw, calc(var(--middle-section-height) * 0.95));
+            height: min(95vw, calc(var(--middle-section-height) * 0.95));
             aspect-ratio: 1/1;
-            transform: translateY(0) scale(1.2);
+            transform: translateY(0) scale(1.1);
             opacity: 1;
             filter: blur(0);
             transition: opacity 0.28s ease, transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
@@ -4757,8 +4754,7 @@
         <div class="main-layout">
             <!-- Top Section: Event Info & Overall Score -->
             <div class="top-section">
-                <div class="event-title" id="eventTitle">PARIS MAJOR</div>
-                <div class="overall-score" id="overallScore">0.89</div>
+                <div class="event-title" id="eventTitle">货币战争</div>
             </div>
 
             <!-- Middle Section: Radar Chart -->
