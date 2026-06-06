@@ -39,9 +39,11 @@
         }
 
         @keyframes gradientBGPortrait {
-            0% { background-position: 0% 0%; }
-            50% { background-position: 0% 100%; }
-            100% { background-position: 0% 0%; }
+            /* Disabled for performance */
+        }
+
+        @keyframes gradientBG {
+            /* Disabled for performance */
         }
 
         #particles-canvas {
@@ -1387,25 +1389,24 @@
             aspect-ratio: 1/1;
             transform: translateY(0) scale(2.0);
             opacity: 1;
-            filter: blur(0);
-            transition: opacity 0.28s ease, transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
+            filter: none;
+            transition: opacity 0.2s ease, transform 0.4s ease;
             will-change: transform, opacity;
         }
 
         #radarCanvas.radar-hidden {
             opacity: 0;
-            filter: blur(18px);
-            transform: translateY(0) scale(2.2);
+            filter: none;
+            transform: translateY(0) scale(2.1);
         }
 
         #radarCanvas.radar-reveal {
-            animation: radarEntrancePortrait 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: radarEntrancePortrait 0.5s ease both;
         }
 
         @keyframes radarEntrancePortrait {
-            0% { opacity: 0; filter: blur(24px); transform: translateY(0) scale(2.4); }
-            60% { opacity: 1; filter: blur(3px); transform: translateY(0) scale(2.1); }
-            100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(2.0); }
+            0% { opacity: 0; transform: translateY(0) scale(2.2); }
+            100% { opacity: 1; transform: translateY(0) scale(2.0); }
         }
 
         /* Bottom Section: Character Display */
@@ -1451,10 +1452,12 @@
             height: 100%;
             object-fit: cover;
             object-position: center bottom;
-            transform: scale(1.1);
-            filter: brightness(0.95) saturate(1.1);
+            transform: scale(1.05);
+            filter: none;
             will-change: auto;
             backface-visibility: hidden;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
 
         .character-info-overlay {
