@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Rock Radar - 战力雷达图</title>
     <style>
         @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Noto+Serif+SC:wght@700;900&family=Orbitron:wght@500;700;900&family=ZCOOL+QingKe+HuangYou&family=ZCOOL+XiaoWei&display=swap");
@@ -17,6 +17,13 @@
             --brand-gold: #d4ab59;
             --brand-gold-bright: #f8e6b7;
             --brand-gold-deep: #6f4713;
+
+            /* Portrait layout variables */
+            --portrait-width: 100vw;
+            --portrait-height: 100vh;
+            --top-section-height: 15vh;
+            --middle-section-height: 35vh;
+            --bottom-section-height: 50vh;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1304,30 +1311,75 @@
             padding: 1vh 1vw; 
         }
 
+        /* Portrait Layout Structure */
         .main-layout {
             display: flex;
-            width: 98%;
-            max-width: 1700px;
-            height: 94vh;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
             position: relative;
+            overflow: hidden;
         }
 
-        .left-panel { 
-            flex: 1.3; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
+        /* Top Section: Event Info & Score */
+        .top-section {
+            height: var(--top-section-height);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5vh 4vw;
             position: relative;
-            overflow: visible; /* 允许雷达图辉光溢出 */
+            z-index: 100;
         }
 
-        #radarCanvas { 
-            width: 100%; 
-            max-width: 900px;
-            height: auto; 
+        .event-title {
+            font-family: "Orbitron", "HarmonyOS Sans SC", sans-serif;
+            font-size: clamp(16px, 4vw, 22px);
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: var(--brand-gold-bright);
+            text-shadow: 0 0 12px rgba(212, 171, 89, 0.4);
+            margin-bottom: 0.5vh;
+        }
+
+        .overall-score {
+            font-family: "Orbitron", "HarmonyOS Sans SC", sans-serif;
+            font-size: clamp(28px, 7vw, 48px);
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            color: var(--brand-gold);
+            text-shadow: 0 0 18px rgba(212, 171, 89, 0.6);
+        }
+
+        /* Middle Section: Radar Chart */
+        .middle-section {
+            height: var(--middle-section-height);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: visible;
+            z-index: 50;
+        }
+
+        .left-panel {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: visible;
+        }
+
+        #radarCanvas {
+            width: 90vw;
+            height: 90vw;
+            max-width: 90vw;
+            max-height: var(--middle-section-height);
             aspect-ratio: 1/1;
-            /* 1.6 倍放大使得内部逻辑长宽增加 60% 后，能包容哪怕是 20 分这样的越界图像，且最终在屏幕上的视觉大小依然和原先严格一致 */
-            transform: translateY(var(--radar-shift-y)) scale(1.6);
+            transform: translateY(0) scale(1.2);
             opacity: 1;
             filter: blur(0);
             transition: opacity 0.28s ease, transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
@@ -1336,26 +1388,122 @@
         #radarCanvas.radar-hidden {
             opacity: 0;
             filter: blur(18px);
-            transform: translateY(var(--radar-shift-y)) scale(1.82);
+            transform: translateY(0) scale(1.4);
         }
 
         #radarCanvas.radar-reveal {
-            animation: radarEntrance 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: radarEntrancePortrait 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
-        @keyframes radarEntrance {
-            0% { opacity: 0; filter: blur(24px); transform: translateY(var(--radar-shift-y)) scale(1.92); }
-            60% { opacity: 1; filter: blur(3px); transform: translateY(var(--radar-shift-y)) scale(1.68); }
-            100% { opacity: 1; filter: blur(0); transform: translateY(var(--radar-shift-y)) scale(1.6); }
+        @keyframes radarEntrancePortrait {
+            0% { opacity: 0; filter: blur(24px); transform: translateY(0) scale(1.5); }
+            60% { opacity: 1; filter: blur(3px); transform: translateY(0) scale(1.28); }
+            100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1.2); }
         }
 
-        .right-panel { 
-            flex: 0.7; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: flex-start; 
-            gap: 18px;
-            padding: clamp(44px, 7vh, 96px) 10px 0;
+        /* Bottom Section: Character Display */
+        .bottom-section {
+            height: var(--bottom-section-height);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .character-image-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .character-image-wrapper::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to top, var(--bg-color-1), transparent);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .band-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center bottom;
+            transform: scale(1.1);
+            filter: brightness(0.95) saturate(1.1);
+        }
+
+        .character-info-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 3vh 6vw;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+        }
+
+        .character-id-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .band-name {
+            font-family: "Orbitron", "HarmonyOS Sans SC", sans-serif;
+            font-size: clamp(24px, 6vw, 42px);
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            color: #fff;
+            text-shadow:
+                0 0 12px rgba(0, 0, 0, 0.8),
+                0 0 24px var(--theme-color);
+        }
+
+        .team-info-section {
+            display: flex;
+            align-items: center;
+            gap: 2vw;
+        }
+
+        .team-logo {
+            width: clamp(32px, 8vw, 52px);
+            height: clamp(32px, 8vw, 52px);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            object-fit: cover;
+        }
+
+        .band-equipment-grid {
+            display: flex;
+            gap: 1.5vw;
+        }
+
+        .equipment-item {
+            width: clamp(28px, 7vw, 44px);
+            height: clamp(28px, 7vw, 44px);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            object-fit: cover;
+        }
+
+        .right-panel {
+            display: none; /* Hide old right panel in portrait mode */
         }
 
         .band-info-box {
@@ -1436,7 +1584,7 @@
         }
 
         .band-star-rank {
-            width: clamp(118px, 13vw, 190px);
+            width: clamp(80px, 20vw, 140px);
             aspect-ratio: 5 / 1;
             object-fit: contain;
             opacity: 0;
@@ -1465,21 +1613,26 @@
         .bond-icons {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            min-height: 46px;
+            gap: 2vw;
+            min-height: 36px;
             align-items: center;
             opacity: 0;
-            transform: translate3d(38px, 0, 0);
+            transform: translate3d(0, 20px, 0);
             filter: blur(10px);
-            animation: bondEntrance 0.88s cubic-bezier(0.18, 0.92, 0.24, 1) 0.18s both;
+            animation: bondEntrancePortrait 0.88s cubic-bezier(0.18, 0.92, 0.24, 1) 0.18s both;
+        }
+
+        @keyframes bondEntrancePortrait {
+            0% { opacity: 0; transform: translate3d(0, 20px, 0); filter: blur(10px); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
         }
 
         .bond-item {
-            height: 42px;
+            height: clamp(32px, 8vw, 42px);
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 4px 10px 4px 5px;
+            gap: 1.5vw;
+            padding: 4px 2.5vw 4px 1vw;
             border-radius: 10px;
             color: rgba(235,248,255,0.9);
             background: rgba(255,255,255,0.055);
@@ -1488,8 +1641,8 @@
         }
 
         .bond-icon {
-            width: 32px;
-            height: 32px;
+            width: clamp(24px, 6vw, 32px);
+            height: clamp(24px, 6vw, 32px);
             border-radius: 7px;
             object-fit: cover;
             background: transparent;
@@ -1499,14 +1652,14 @@
         }
 
         .bond-label {
-            font: 700 13px "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
+            font: 700 clamp(11px, 2.8vw, 13px) "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
             letter-spacing: 0.08em;
             white-space: nowrap;
         }
 
         .bond-item.no-icon {
-            height: 32px;
-            padding: 0 10px;
+            height: clamp(28px, 7vw, 32px);
+            padding: 0 2.5vw;
             border-radius: 8px;
         }
 
@@ -4589,25 +4742,53 @@
 
     <div class="container">
         <div class="main-layout">
-            <div class="left-panel">
-                <canvas id="radarCanvas" width="1600" height="1600"></canvas>
+            <!-- Top Section: Event Info & Overall Score -->
+            <div class="top-section">
+                <div class="event-title" id="eventTitle">PARIS MAJOR</div>
+                <div class="overall-score" id="overallScore">0.89</div>
             </div>
-            <div class="right-panel">
-                <div class="band-info-box">
-                    <div class="band-name-row">
+
+            <!-- Middle Section: Radar Chart -->
+            <div class="middle-section">
+                <div class="left-panel">
+                    <canvas id="radarCanvas" width="1600" height="1600"></canvas>
+                </div>
+            </div>
+
+            <!-- Bottom Section: Character Display -->
+            <div class="bottom-section">
+                <div class="character-image-wrapper">
+                    <img id="bandPhoto" class="band-photo" src="" alt="">
+                    <canvas id="photoFxCanvas" class="band-photo-fx-layer"></canvas>
+                </div>
+                <div class="character-info-overlay">
+                    <div class="character-id-section">
                         <div class="band-name" id="bandName"></div>
                         <img class="band-star-rank" id="bandStarRank" src="" alt="">
                     </div>
-                    <div class="bond-icons" id="bondIcons"></div>
-                    
+                    <div class="team-info-section">
+                        <div class="bond-icons" id="bondIcons"></div>
+                        <div class="band-equipment-grid" id="bandEquipmentGrid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legacy right panel (hidden in portrait) -->
+            <div class="right-panel" style="display: none;">
+                <div class="band-info-box">
+                    <div class="band-name-row">
+                        <div class="band-name-legacy" id="bandNameLegacy"></div>
+                        <img class="band-star-rank-legacy" id="bandStarRankLegacy" src="" alt="">
+                    </div>
+                    <div class="bond-icons-legacy" id="bondIconsLegacy"></div>
+
                     <div class="band-photo-container" id="photoContainer">
-                        <canvas id="photoFxCanvas" class="band-photo-fx-layer"></canvas>
-                        <img id="bandPhoto" class="band-photo" src="" alt="">
+                        <img id="bandPhotoLegacy" class="band-photo-legacy" src="" alt="">
                     </div>
 
                     <div class="band-desc-container" id="bandDetailContainer">
                         <div class="band-detail-panel band-detail-image-panel" id="bandAttachmentPanel" aria-hidden="true">
-                            <div class="band-equipment-grid" id="bandEquipmentGrid"></div>
+                            <div class="band-equipment-grid-legacy" id="bandEquipmentGridLegacy"></div>
                         </div>
                     </div>
                 </div>
