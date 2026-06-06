@@ -1381,10 +1381,8 @@
         }
 
         #radarCanvas {
-            width: 90vw;
-            height: 90vw;
-            max-width: 90vw;
-            max-height: var(--middle-section-height);
+            width: min(90vw, calc(var(--middle-section-height) * 0.9));
+            height: min(90vw, calc(var(--middle-section-height) * 0.9));
             aspect-ratio: 1/1;
             transform: translateY(0) scale(1.2);
             opacity: 1;
