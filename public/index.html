@@ -4373,7 +4373,7 @@
     </style>
 </head>
 <body>
-    <audio id="bgMusic" src="music.mp3"></audio>
+    <audio id="bgMusic" src="/assets/audio/music.mp3"></audio>
     <div id="outroOverlay" aria-hidden="true">
         <video id="outroVideo" class="outro-video" playsinline muted preload="metadata"></video>
         <div class="outro-fallback"></div>
@@ -4570,7 +4570,7 @@
         <div class="gacha-panel gacha-panel-bottom" id="gachaPanelBottom">
             <img class="gacha-panel-image" id="gachaPanelBottomImg" src="" alt="">
         </div>
-        <img class="gacha-logo" id="gachaLogo" src="pic/hsr_logo.webp" alt="">
+        <img class="gacha-logo" id="gachaLogo" src="/assets/images/hsr_logo.webp" alt="">
         <div class="gacha-name" id="gachaName"></div>
     </div>
 
@@ -4663,8 +4663,8 @@
             VERTEX_COUNT: 6,             // 雷达图顶点数（默认为6边形，可改为8边形等）,一定要把DIM_NAMES等数组内容也改成对应的个数!
             INTRO_WAIT_TIME: 1000, // 蓝色前奏时长 (ms)
             MUSIC_VOLUME: 0.7, // 背景音乐音量（0-1）
-            MUSIC_TRACKS: "music.mp3", // 背景音乐列表，逗号分隔
-            OUTRO_VIDEO: "ending.mp4", // 全部角色结束后的结尾视频（主目录文件名）
+            MUSIC_TRACKS: "/assets/audio/music.mp3", // 背景音乐列表，逗号分隔
+            OUTRO_VIDEO: "/assets/video/ending.mp4", // 全部角色结束后的结尾视频文件
             OUTRO_TRANSITION_MS: 1100, // 结尾视频转场时长 (ms)
 
             // 雷达图各个维度的名称
@@ -5145,7 +5145,7 @@
         let audioVizTreble = 0;
         let audioVizBeat = 0;
         let audioVizPrevBass = 0;
-        let musicPlaylist = ["music.mp3"];
+        let musicPlaylist = ["/assets/audio/music.mp3"];
         let musicTrackDurations = [];
         let currentMusicTrackIndex = 0;
         let musicPlaybackCycles = 0;
@@ -5396,7 +5396,7 @@
             img.classList.remove('exit');
             img.alt = `${level}星`;
             img.title = `${level}星`;
-            img.src = `./pic/Star${level}.png`;
+            img.src = `/assets/images/Star${level}.png`;
             img.onload = () => {
                 if (!isUiTransitionActive(sessionId)) return;
                 img.classList.remove('exit');
@@ -5615,7 +5615,7 @@
             ids.forEach(id => {
                 const img = document.createElement('img');
                 img.className = 'band-equipment-icon';
-                img.src = `./pic/${id}.png`;
+                img.src = `/assets/images/${id}.png`;
                 img.alt = `装备 ${id}`;
                 img.title = `装备 ${id}`;
                 img.onload = () => {
@@ -5658,7 +5658,7 @@
             if (Array.isArray(raw)) tracks = raw;
             else if (typeof raw === "string") tracks = raw.split(/[,\n;|]/g);
             tracks = tracks.map(s => String(s || "").trim()).filter(Boolean);
-            if (!tracks.length) tracks = ["music.mp3"];
+            if (!tracks.length) tracks = ["/assets/audio/music.mp3"];
             return tracks;
         }
 
@@ -5780,15 +5780,15 @@
                 }
             } else if (!items.length) {
                 items = [
-                    "ending-lite.mp4",
-                    "ending-720p.mp4",
-                    "ending.mp4",
-                    "ending.webm",
-                    "ending.mov",
-                    "outro.mp4",
-                    "outro.webm",
-                    "final.mp4",
-                    "final.webm"
+                    "/assets/video/ending-lite.mp4",
+                    "/assets/video/ending-720p.mp4",
+                    "/assets/video/ending.mp4",
+                    "/assets/video/ending.webm",
+                    "/assets/video/ending.mov",
+                    "/assets/video/outro.mp4",
+                    "/assets/video/outro.webm",
+                    "/assets/video/final.mp4",
+                    "/assets/video/final.webm"
                 ];
             }
             return Array.from(new Set(items));
@@ -6573,7 +6573,7 @@
                 const cached = namedImageCache.get(base);
                 if (cached) candidates.push(cached);
                 extensions.forEach(ext => {
-                    const candidate = { base, name: `${base}.${ext}`, url: `./pic/${base}.${ext}` };
+                    const candidate = { base, name: `${base}.${ext}`, url: `/assets/images/${encodeURIComponent(base)}.${ext}` };
                     if (cached && cached.name === candidate.name) return;
                     candidates.push(candidate);
                 });

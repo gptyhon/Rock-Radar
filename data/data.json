@@ -12,7 +12,7 @@
     "VERTEX_COUNT": 6,
     "INTRO_WAIT_TIME": 6000,
     "MUSIC_VOLUME": 0.3,
-    "MUSIC_TRACKS": "music.mp3,music2.mp3",
+    "MUSIC_TRACKS": "/assets/audio/music.mp3,/assets/audio/music2.mp3",
     "DIM_NAMES": [
       "攻坚终结",
       "过渡平滑度",

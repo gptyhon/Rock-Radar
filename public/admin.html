@@ -315,7 +315,7 @@
                     <div class="form-group"><label>默认展示时长(ms)</label><input type="number" id="cfg-DEFAULT_DURATION" step="500"></div>
                     <div class="form-group"><label>蓝色前奏(ms)</label><input type="number" id="cfg-INTRO_WAIT_TIME" step="100"></div>
                     <div class="form-group"><label>音乐音量(0-1)</label><input type="number" id="cfg-MUSIC_VOLUME" step="0.01" min="0" max="1"></div>
-                    <div class="form-group" style="min-width:340px;"><label>音乐列表（逗号分隔）</label><input type="text" id="cfg-MUSIC_TRACKS" placeholder="music.mp3,music2.mp3"></div>
+                    <div class="form-group" style="min-width:340px;"><label>音乐列表（逗号分隔）</label><input type="text" id="cfg-MUSIC_TRACKS" placeholder="/assets/audio/music.mp3,/assets/audio/music2.mp3"></div>
                     <div class="form-group"><label>图片缩放</label><input type="number" id="cfg-IMAGE_SCALE" step="0.1" min="0.1"></div>
                 </div>
             </div>
@@ -508,7 +508,7 @@
                     </div>
                     <div class="hint">
                         拖动预览图可直接选取画面区域。<br>
-                        改完点“应用取景”，最后再点顶部“保存全部”写入 `data.json`。
+                        改完点“应用取景”，最后再点顶部“保存全部”写入数据文件。
                     </div>
                 </div>
             </div>
@@ -525,7 +525,7 @@
                 <div>
                     <h3 style="color:var(--accent);margin-bottom:4px;">拖拽排序</h3>
                     <div class="hint">
-                        这里专门调整全部角色的顺序。拖动左侧手柄即可重新排序，改完后再点顶部“保存全部”写入 `data.json`。
+                        这里专门调整全部角色的顺序。拖动左侧手柄即可重新排序，改完后再点顶部“保存全部”写入数据文件。
                     </div>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px;">
@@ -1242,7 +1242,7 @@
             if (C.PHOTO_FX_ENABLED === undefined) C.PHOTO_FX_ENABLED = true;
             if (C.PHOTO_FX_INTENSITY === undefined) C.PHOTO_FX_INTENSITY = 1;
             if (C.MUSIC_VOLUME === undefined) C.MUSIC_VOLUME = 0.7;
-            if (C.MUSIC_TRACKS === undefined) C.MUSIC_TRACKS = 'music.mp3';
+            if (C.MUSIC_TRACKS === undefined) C.MUSIC_TRACKS = '/assets/audio/music.mp3';
             if (C.GACHA_LOGO_ON_TIME === undefined) C.GACHA_LOGO_ON_TIME = 120;
             if (C.GACHA_LOGO_DURATION === undefined) C.GACHA_LOGO_DURATION = 400;
             if (C.RADAR_AUTO_OFFSET === undefined) C.RADAR_AUTO_OFFSET = false;

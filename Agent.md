@@ -97,13 +97,15 @@ PR 审查 (Code Review)： 变更意图、风险、希望重点查看的维度�
 
 `Rock-Radar` 是一个本地运行的前端雷达图演示系统，核心目标是把一组角色分数做成具有包装感的雷达图切换演出，而不是通用图表组件库或线上后台系统。
 
-当前项目主要由三部分组成：
+当前项目主要由五部分组成：
 
-- `index.html`：展示页 / 雷达图特效主入口，负责数据加载、时间轴、角色切换、雷达图绘制、背景特效、音频联动、抽卡动画、MVP 高光和结尾视频。
-- `admin.html`：本地管理页，负责编辑角色数据、雷达维度、全局配置、颜色方案、图片素材、取景参数，并把结果保存回 `data.json`。
-- `server.js`：本地 Express 服务，负责静态文件访问、`data.json` 读写、`pic/` 图片枚举、上传、重命名和删除。
+- `public/index.html`：展示页 / 雷达图特效主入口，负责数据加载、时间轴、角色切换、雷达图绘制、背景特效、音频联动、抽卡动画、MVP 高光和结尾视频。
+- `public/admin.html`：本地管理页，负责编辑角色数据、雷达维度、全局配置、颜色方案、图片素材、取景参数，并把结果保存回 `data/data.json`。
+- `server/server.js`：本地 Express 服务，负责静态文件访问、`data/data.json` 读写、`public/assets/images/` 图片枚举、上传、重命名和删除。
+- `public/assets/`：运行时静态素材目录，包含 `images/`、`audio/`、`video/`。
+- `src/`：后续模块化拆分目标目录，当前运行时还不依赖它。
 
-项目的持久化数据源是根目录的 `data.json`，常见结构包括：
+项目的持久化数据源是 `data/data.json`，常见结构包括：
 
 - `CONFIG`：展示和演出配置，例如雷达维度、动画时长、音乐、背景特效、抽卡和结尾视频。
 - `COLOR_PRESETS`：颜色方案。
@@ -123,7 +125,7 @@ npm start
 - 管理页：`http://localhost:3003/`
 - 展示页：`http://localhost:3003/radar`
 
-素材主要放在 `pic/` 目录，并大量依赖文件命名约定：
+素材主要放在 `public/assets/images/` 目录，并大量依赖文件命名约定：
 
 - 角色主图：`<角色名>.*`
 - 抽卡背景：`best_<角色名>.*`
@@ -135,14 +137,14 @@ npm start
 
 当前仓库中应重点保留和维护的主流程文件：
 
-- `admin.html`
-- `index.html`
-- `server.js`
-- `data.json`
-- `pic/`
-- `music.mp3`
-- `music2.mp3`
-- `ending.mp4`
+- `public/admin.html`
+- `public/index.html`
+- `server/server.js`
+- `data/data.json`
+- `public/assets/images/`
+- `public/assets/audio/`
+- `public/assets/video/`
+- `src/`
 - `package.json`
 - `package-lock.json`
 - `README.md`
@@ -150,19 +152,20 @@ npm start
 
 后续开发时应优先理解这些主链路：
 
-1. `admin.html` 读取 `/api/data`，编辑后通过 `PUT /api/data` 写回 `data.json`。
-2. `index.html` 启动时读取 `/api/data`，把角色、配置、图片元数据转成运行时状态。
+1. `public/admin.html` 读取 `/api/data`，编辑后通过 `PUT /api/data` 写回 `data/data.json`。
+2. `public/index.html` 启动时读取 `/api/data`，把角色、配置、图片元数据转成运行时状态。
 3. 展示页按时间轴依次切换角色，并驱动雷达图变形、图片切换、背景特效、音频效果、抽卡动画和结尾视频。
+4. 图片管理 API 读写 `public/assets/images/`，同时保留 `/pic/<filename>` 兼容旧路径。
 
 当前工程风险：
 
-- `index.html` 和 `admin.html` 都是大单文件，逻辑耦合较高。
+- `public/index.html` 和 `public/admin.html` 都是大单文件，逻辑耦合较高。
 - 图片素材依赖命名约定，缺少显式校验，命名错误可能导致静默失效。
-- `data.json` 字段较自由，缺少 schema 约束。
+- `data/data.json` 字段较自由，缺少 schema 约束。
 - 代码里仍有历史命名混用，例如 band / 角色 / 选手。
 
 推荐后续演进方向：
 
-1. 先整理展示页模块边界，例如拆出 radar、timeline、audio、gacha、assets 等模块。
+1. 先从 `public/index.html` 拆出展示页模块边界，例如 `src/radar/`、`src/effects/`、timeline、audio、gacha、assets 等模块。
 2. 再整理数据边界，明确雷达数据、演出配置和素材映射的职责。
 3. 最后继续追加视觉细节和特效，避免大单文件继续膨胀。

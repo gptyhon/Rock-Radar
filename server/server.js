@@ -4,9 +4,13 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3003;
-const DATA_FILE = path.join(__dirname, 'data.json');
-const PIC_DIR = path.join(__dirname, 'pic');
+const PORT = Number(process.env.PORT) || 3003;
+const ROOT_DIR = path.join(__dirname, '..');
+const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
+const DATA_FILE = path.join(ROOT_DIR, 'data', 'data.json');
+const PIC_DIR = path.join(PUBLIC_DIR, 'assets', 'images');
+const AUDIO_DIR = path.join(PUBLIC_DIR, 'assets', 'audio');
+const VIDEO_DIR = path.join(PUBLIC_DIR, 'assets', 'video');
 const IMAGE_EXT_RE = /\.(jpg|jpeg|png|gif|webp|svg)$/i;
 const INVALID_FILENAME_RE = /[<>:"/\\|?*\x00-\x1F]/g;
 const RESERVED_BASENAMES = new Set(['CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9']);
@@ -15,11 +19,24 @@ const SPECIAL_IMAGE_SLOTS = {
     door_right: 'gacha_door_right'
 };
 
-// 确保 pic 目录存在
-if (!fs.existsSync(PIC_DIR)) fs.mkdirSync(PIC_DIR);
+// Ensure runtime-writable directories exist when the repo is freshly cloned.
+for (const dir of [path.dirname(DATA_FILE), PIC_DIR, AUDIO_DIR, VIDEO_DIR]) {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
 
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(__dirname, { index: false }));
+app.use(express.static(PUBLIC_DIR, { index: false }));
+app.use('/pic', express.static(PIC_DIR, { index: false }));
+
+// Legacy root-level media URLs are kept because data.json and older HTML
+// references may still point at music.mp3, music2.mp3, or ending.mp4.
+app.get('/:filename(music.mp3|music2.mp3)', (req, res) => {
+    res.sendFile(path.join(AUDIO_DIR, req.params.filename));
+});
+
+app.get('/:filename(ending.mp4)', (req, res) => {
+    res.sendFile(path.join(VIDEO_DIR, req.params.filename));
+});
 
 function normalizeRequestedFilename(filename, fallbackName = '') {
     let name = String(filename || '').trim().replace(INVALID_FILENAME_RE, '_');
@@ -42,6 +59,10 @@ function normalizeRequestedFilename(filename, fallbackName = '') {
 
 function isValidImageName(filename) {
     return IMAGE_EXT_RE.test(path.extname(filename || ''));
+}
+
+function getImageUrl(filename) {
+    return `/assets/images/${encodeURIComponent(filename)}`;
 }
 
 // multer 配置：保留原始扩展名
@@ -110,10 +131,10 @@ function listMatchingImagesByBase(baseName) {
 // ===== 路由 =====
 
 // 管理面板
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get('/', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'admin.html')));
 
 // 雷达展示页
-app.get('/radar', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/radar', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
 
 // 获取全部配置数据
 app.get('/api/data', (req, res) => {
@@ -147,7 +168,7 @@ app.get('/api/images', (req, res) => {
             .map(f => ({
                 name: f,
                 size: fs.statSync(path.join(PIC_DIR, f)).size,
-                url: `/pic/${f}`
+                url: getImageUrl(f)
             }));
         res.json(files);
     } catch (e) {
@@ -161,7 +182,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     res.json({
         success: true,
         filename: req.file.filename,
-        url: `/pic/${req.file.filename}`
+        url: getImageUrl(req.file.filename)
     });
 });
 
@@ -183,7 +204,7 @@ app.post('/api/upload-slot/:slot', upload.single('image'), (req, res) => {
         res.json({
             success: true,
             filename: req.file.filename,
-            url: `/pic/${req.file.filename}`
+            url: getImageUrl(req.file.filename)
         });
     } catch (e) {
         res.status(500).json({ error: '槽位图片保存失败' });
@@ -221,7 +242,7 @@ app.patch('/api/images/:filename', (req, res) => {
         res.json({
             success: true,
             filename: nextName,
-            url: `/pic/${nextName}`
+            url: getImageUrl(nextName)
         });
     } catch (e) {
         res.status(500).json({ error: '重命名失败' });
@@ -248,7 +269,17 @@ app.delete('/api/images/:filename', (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Rock Radar 管理面板: http://localhost:${PORT}`);
     console.log(`雷达展示页: http://localhost:${PORT}/radar`);
+});
+
+server.on('error', error => {
+    if (error.code === 'EADDRINUSE') {
+        console.error(`端口 ${PORT} 已被占用。请关闭已有 Rock Radar 服务，或换一个端口启动：`);
+        console.error(`PowerShell: $env:PORT=3004; npm start`);
+        process.exit(1);
+    }
+    console.error(error);
+    process.exit(1);
 });

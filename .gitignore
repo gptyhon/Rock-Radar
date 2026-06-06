@@ -29,7 +29,22 @@ ending-*.webm
 outro*.mp4
 outro*.webm
 *.mp3
+
+# Runtime assets live under public/assets after the structure cleanup.
+public/assets/audio/**
+!public/assets/audio/.gitkeep
+public/assets/video/**
+!public/assets/video/.gitkeep
+public/assets/images/**
+!public/assets/images/.gitkeep
+
 # Local image assets
 pic/**
 !pic/.gitkeep
 hktv.html
+
+# CodeGraph cache
+.codegraph/
+
+# Reference images (design mockups)
+reference/
