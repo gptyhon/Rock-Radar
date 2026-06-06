@@ -48,8 +48,10 @@
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            z-index: 1005; /* 初始置顶以显示粒子 */
+            z-index: 1005;
             pointer-events: none;
+            will-change: auto;
+            transform: translateZ(0);
         }
 
         #coverBgLayer {
@@ -1365,6 +1367,8 @@
             position: relative;
             overflow: visible;
             z-index: 50;
+            will-change: auto;
+            transform: translateZ(0);
         }
 
         .left-panel {
@@ -1381,16 +1385,17 @@
             width: min(95vw, calc(var(--middle-section-height) * 0.95));
             height: min(95vw, calc(var(--middle-section-height) * 0.95));
             aspect-ratio: 1/1;
-            transform: translateY(0) scale(1.1);
+            transform: translateY(0) scale(2.0);
             opacity: 1;
             filter: blur(0);
             transition: opacity 0.28s ease, transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
+            will-change: transform, opacity;
         }
 
         #radarCanvas.radar-hidden {
             opacity: 0;
             filter: blur(18px);
-            transform: translateY(0) scale(1.4);
+            transform: translateY(0) scale(2.2);
         }
 
         #radarCanvas.radar-reveal {
@@ -1398,9 +1403,9 @@
         }
 
         @keyframes radarEntrancePortrait {
-            0% { opacity: 0; filter: blur(24px); transform: translateY(0) scale(1.5); }
-            60% { opacity: 1; filter: blur(3px); transform: translateY(0) scale(1.28); }
-            100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1.2); }
+            0% { opacity: 0; filter: blur(24px); transform: translateY(0) scale(2.4); }
+            60% { opacity: 1; filter: blur(3px); transform: translateY(0) scale(2.1); }
+            100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(2.0); }
         }
 
         /* Bottom Section: Character Display */
@@ -1425,6 +1430,8 @@
             align-items: flex-end;
             justify-content: center;
             overflow: hidden;
+            will-change: auto;
+            transform: translateZ(0);
         }
 
         .character-image-wrapper::before {
@@ -1446,6 +1453,8 @@
             object-position: center bottom;
             transform: scale(1.1);
             filter: brightness(0.95) saturate(1.1);
+            will-change: auto;
+            backface-visibility: hidden;
         }
 
         .character-info-overlay {
