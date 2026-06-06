@@ -2,17 +2,16 @@
   "CONFIG": {
     "RADAR_SCALE": 0.7,
     "RADAR_AUTO_OFFSET": false,
-    "PERFORMANCE_MODE": "fast",
-    "ADAPTIVE_PERF": true,
-    "RADAR_GRID_LEVELS": 3,
-    "RADAR_GRID_LINE_WIDTH": 1.5,
-    "RADAR_GRID_LINE_OPACITY": 0.1,
-    "PARTICLE_OPACITY_MULT": 0,
-    "PARTICLE_SIZE_MULT": 0,
+    "PERFORMANCE_MODE": "smooth",
+    "ADAPTIVE_PERF": false,
+    "RADAR_GRID_LEVELS": 5,
+    "RADAR_GRID_LINE_WIDTH": 3,
+    "RADAR_GRID_LINE_OPACITY": 0.2,
+    "PARTICLE_OPACITY_MULT": 2,
+    "PARTICLE_SIZE_MULT": 2,
     "VERTEX_COUNT": 6,
-    "INTRO_WAIT_TIME": 1000,
+    "INTRO_WAIT_TIME": 6000,
     "MUSIC_VOLUME": 0.3,
-    "BACKGROUND_EFFECT": "off",
     "MUSIC_TRACKS": "/assets/audio/music.mp3,/assets/audio/music2.mp3",
     "DIM_NAMES": [
       "攻坚终结",
@@ -82,8 +81,8 @@
     "BRAND_TOP_RIGHT_TEXT": "HONKAI: STAR RAIL V4.2",
     "BRAND_BOTTOM_LEFT_TEXT": "CURRENCY WAR / IPC",
     "DETAIL_SWAP_LEAD_MS": 2000,
-    "BG_EFFECT_MODE": "particles",
-    "RADAR_AUDIO_FX_MODE": "tech"
+    "BG_EFFECT_MODE": "off",
+    "RADAR_AUDIO_FX_MODE": "off"
   },
   "COLOR_PRESETS": [
     {
