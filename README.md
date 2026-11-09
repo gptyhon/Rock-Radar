@@ -60,10 +60,11 @@ npm start
 ├─ index.html          展示页 / 雷达图特效主入口
 ├─ server.js           本地 API 与静态资源服务
 ├─ data.json           配置、角色数据、图片取景数据
-├─ pic/                图片素材目录
-├─ music.mp3           背景音乐 1
-├─ music2.mp3          背景音乐 2
-├─ ending.mp4          结尾视频（可选）
+├─ public/
+│  └─ assets/
+│     ├─ images/       图片素材目录
+│     ├─ audio/        背景音乐
+│     └─ video/        结尾视频（可选）
 ├─ package.json
 ├─ README.md
 └─ docs/
@@ -81,12 +82,12 @@ npm start
 
 `index.html` 是整个项目的主引擎，主要职责包括：
 
-- 启动时请求 `/api/data` 并载入 `CONFIG`、`namelist`、`mvplist`、`IMAGE_META`
+- 启动时请求 `/api/data` 并载入 `CONFIG`、`namelist`、`COLOR_PRESETS`、`SPECIAL_PROFILES`、`mvplist`、`expertlist`、`IMAGE_META`
 - 根据角色顺序计算总时间轴和单角色停留时长
 - 在切换角色时更新主题色、角色图、附属素材和目标分数
 - 用 canvas 绘制雷达网格、平均值参考层、当前角色雷达多边形和标签
 - 用音频分析数据驱动雷达周围额外动效
-- 根据配置播放背景粒子、星空或涟漪效果
+- 根据配置播放背景粒子或音乐响应式流体折射场
 - 对标记了 `gacha: true` 的角色插入抽卡开门动画
 - 在全部角色结束后播放 `OUTRO_VIDEO`
 
@@ -97,10 +98,14 @@ npm start
 `admin.html` 不是简单表单，它已经是一套本地编辑后台，支持：
 
 - 编辑角色列表
-- 编辑每个角色的各维度分数、描述、颜色索引、停留时长、是否触发抽卡
+- 编辑每个角色的各维度分数、描述、配色类型、停留时长、是否触发抽卡
+- 在“角色对比”中选择两名不同角色，用红蓝双雷达实时比较、编辑并保存原始维度数据
+- 在“角色位置”中一次查看全部角色，通过拖拽调整顺序并独立保存；Best 角色会以金色高亮
 - 调整维度数量、维度名称、每个维度的满分和最小值
 - 调整雷达图参数、音乐参数、背景特效参数、抽卡参数、品牌文案
-- 维护 `COLOR_PRESETS`
+- 维护 MVP 与专家角色名称列表
+- 在独立“专场管理”页面维护角色专属主题、转场、抽卡风格和素材覆盖
+- 在全局配置中维护 5 个固定配色，角色也可使用独立自定义配色
 - 上传图片、重命名图片、删除图片
 - 给普通图片、抽卡背景、门板图片、MVP 图片设置取景参数
 - 导入/导出 CSV 批量编辑角色数据
@@ -115,7 +120,7 @@ npm start
 - `/` 返回 `admin.html`
 - `/radar` 返回 `index.html`
 - `/api/data` 读取和保存 `data.json`
-- `/api/images` 枚举 `pic/` 目录图片
+- `/api/images` 枚举 `public/assets/images/` 目录图片
 - `/api/upload` 上传普通图片
 - `/api/upload-slot/:slot` 上传特殊槽位图片
 - `/api/images/:filename` 支持重命名和删除
@@ -130,7 +135,9 @@ npm start
 {
   "CONFIG": {},
   "COLOR_PRESETS": [],
+  "SPECIAL_PROFILES": [],
   "mvplist": [],
+  "expertlist": [],
   "IMAGE_META": {},
   "namelist": []
 }
@@ -146,11 +153,13 @@ npm start
 - 播放节奏：`ANIM_DURATION`、`DEFAULT_DURATION`、`INTRO_WAIT_TIME`、`DETAIL_SWAP_LEAD_MS`
 - 图片显示：`IMAGE_SCALE`
 - 背景特效：`BG_EFFECT_MODE`、`PARTICLE_OPACITY_MULT`、`PARTICLE_SIZE_MULT`
-- 音乐：`MUSIC_VOLUME`、`MUSIC_TRACKS`
+- 音乐：`MUSIC_VOLUME`、`MUSIC_TRACKS`、`MUSIC_DELAY_SECONDS`
 - 雷达音频特效：`RADAR_AUDIO_FX_MODE`
 - 抽卡演出：`GACHA_ANIM_DURATION`、`GACHA_ANIM_TYPE`、`GACHA_FONT_STYLE`、`GACHA_LOGO_ON_TIME`、`GACHA_LOGO_DURATION`
 - 结尾：`OUTRO_VIDEO`、`OUTRO_TRANSITION_MS`
 - 品牌文案：`BRAND_TOP_RIGHT_TEXT`、`BRAND_BOTTOM_LEFT_TEXT`、`BRAND_WATERMARK_CN`、`BRAND_WATERMARK_EN`、`INTRO_TITLE_MAIN`、`INTRO_TITLE_SUB`
+
+`MUSIC_DELAY_SECONDS` 表示音乐相对整场演出向后延迟的秒数，范围为 `0–60`，支持一位小数。延迟期间视觉时间轴继续运行；延迟结束后音乐立即按 `MUSIC_VOLUME` 播放，多首音乐仅在整个播放列表首次启动前应用一次延迟。
 
 ### `namelist`
 
@@ -161,10 +170,10 @@ npm start
   "name": "角色名",
   "points": [80, 72, 1.2, 68, 1.05, 1.08],
   "desc": "描述标签",
+  "colorMode": "preset",
   "colorIndex": 3,
   "duration": 6000,
   "gacha": true,
-  "starLevel": 4,
   "equipmentIds": "1,5,9"
 }
 ```
@@ -174,11 +183,34 @@ npm start
 - `name`：展示名称，也会参与图片命名匹配
 - `points`：雷达图各维分数
 - `desc`：描述文本，同时会被拆分为羁绊/标签图片名称
-- `colorIndex`：对应 `COLOR_PRESETS` 的索引
+- `colorMode`：`preset` 使用固定配色，`custom` 使用角色自定义配色
+- `colorIndex`：固定配色索引，只允许 `0–4`
+- `customColor`：自定义配色对象，包含 `color`、`bg1`、`bg2`
 - `duration`：该角色停留时长，未填时使用全局默认值
 - `gacha`：是否在该角色出现前播放抽卡动画
-- `starLevel`：角色星级条图片使用的等级
 - `equipmentIds`：角色下方装备/附属图标编号列表
+- `specialProfileId`：可选的角色专场 ID；失效或停用时自动回退普通界面
+
+### `COLOR_PRESETS`
+
+固定保存 5 个全局配色，每项包含可编辑名称、主色与两层背景色：
+
+```json
+{
+  "name": "青蓝",
+  "color": "#00ffff",
+  "bg1": "#001a1a",
+  "bg2": "#000d0d"
+}
+```
+
+选手管理中的配色按钮会读取这五项。选择“自定义”后，颜色写入该角色自己的 `customColor`，不会影响其他角色。二段形态使用相同结构。
+
+### `SPECIAL_PROFILES`
+
+保存可复用的角色专场。管理页使用折叠卡片编辑主题色、背景、名称动画、角色图转场、雷达转场、抽卡风格、时间和素材，并通过 `specialProfileId` 绑定角色。
+
+银狼 LV.999 的原有专属界面已经迁移为 `silverwolf-lv999` 专场，不再直接依赖角色名称触发。完整结构和扩展方法见 [`docs/special-profiles.md`](docs/special-profiles.md)。
 
 ### `mvplist`
 
@@ -189,6 +221,20 @@ npm start
 - 尝试加载 `<角色名>1.*` 作为左侧背景图
 - 使用金色风格的雷达图主题
 - 显示 MVP 标识和额外高光
+
+### `expertlist`
+
+`expertlist` 是一个去重后的角色名称数组，通过管理页“全局配置 → 专家列表”维护。
+
+当当前展示名称与列表中的名称精确匹配时，展示页会在角色名字右侧显示 `public/assets/images/专家.png`。基础、二段和 MVP 等展示状态使用同一匹配规则；未匹配的角色不创建可见占位。
+
+### 角色对比
+
+管理页“角色对比”同时叠加两名不同角色的雷达多边形，并允许在旁边直接修改双方原始 `points`。输入支持两位小数，超过全局满分时图形可以越过最外圈；雷达图下方实时统计全部角色在各维度的最高分和并列角色。保存后写回原有 `namelist`。实现与边界说明见 [`docs/role-comparison.md`](docs/role-comparison.md)。
+
+### 角色位置
+
+管理页“角色位置”会在响应式网格中一次展示全部角色名称。拖动卡片到目标卡片前后即可调整 `namelist` 顺序，靠近视口上下边缘时会自动滚动；只有点击“保存顺序”后才会写入服务器。MVP 名单成员或存在 `best_<角色名>.*` 图片的角色会显示 Best 高亮。完整规则见 [`docs/role-position.md`](docs/role-position.md)。
 
 ### `IMAGE_META`
 
@@ -265,18 +311,6 @@ gacha_door_right.<扩展名>
 faction_<标签>.<扩展名>
 ```
 
-### 星级图
-
-展示页会根据 `starLevel` 尝试匹配：
-
-```text
-Star1.png
-Star2.png
-Star3.png
-Star4.png
-Star5.png
-```
-
 ### 装备图
 
 展示页会根据 `equipmentIds` 加载数字编号图片，例如：
@@ -297,7 +331,7 @@ Star5.png
 4. 进入介绍页/等待阶段
 5. 依次切换角色
 6. 如果当前角色开启 `gacha`，先播抽卡动画
-7. 更新角色名、主图、星级、装备、羁绊和 MVP 图层
+7. 更新角色名、主图、装备、羁绊和 MVP 图层
 8. 将雷达图从上一组分数过渡到下一组分数，或者从中心展开
 9. 按音乐分析结果叠加雷达外圈动效与背景特效
 10. 全部角色结束后进入结尾视频

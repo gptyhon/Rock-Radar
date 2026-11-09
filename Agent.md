@@ -107,8 +107,10 @@ PR 审查 (Code Review)： 变更意图、风险、希望重点查看的维度�
 
 - `CONFIG`：展示和演出配置，例如雷达维度、动画时长、音乐、背景特效、抽卡和结尾视频。
 - `COLOR_PRESETS`：颜色方案。
+- `SPECIAL_PROFILES`：可复用的角色专场、主题、转场和抽卡配置。
 - `namelist`：实际播放的角色列表和分数数据。
 - `mvplist`：触发 MVP 特效的角色名称列表。
+- `expertlist`：在角色名称右侧显示专家图标的角色名称列表。
 - `IMAGE_META`：图片取景和缩放信息。
 
 主要运行方式：
@@ -123,14 +125,13 @@ npm start
 - 管理页：`http://localhost:3003/`
 - 展示页：`http://localhost:3003/radar`
 
-素材主要放在 `pic/` 目录，并大量依赖文件命名约定：
+素材主要放在 `public/assets/images/` 目录，并大量依赖文件命名约定：
 
 - 角色主图：`<角色名>.*`
 - 抽卡背景：`best_<角色名>.*`
 - MVP 背景：`<角色名>1.*`
 - 抽卡门板：`gacha_door_left.*`、`gacha_door_right.*`
 - 羁绊 / 标签图标：`faction_<标签>.*`
-- 星级图：`Star1.png` 到 `Star5.png`
 - 装备图：`1.png`、`2.png` 等数字编号图片。
 
 当前仓库中应重点保留和维护的主流程文件：

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node tests/background-effects.test.js && node tests/role-comparison.test.js && node tests/role-position.test.js && node tests/music-timeline.test.js && node tests/gacha-handoff.test.js"
   },
   "dependencies": {
     "express": "^4.21.0",

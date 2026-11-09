@@ -14,6 +14,10 @@
             --bg-color-1: #0f1015;
             --bg-color-2: #1a1a2e;
             --radar-shift-y: 0px;
+            --viewport-scale: 1;
+            --presentation-scale: 1.3;
+            --presentation-layout-width: 1307.692px;
+            --presentation-layout-height: 780.769px;
             --brand-gold: #d4ab59;
             --brand-gold-bright: #f8e6b7;
             --brand-gold-deep: #6f4713;
@@ -24,63 +28,8 @@
         body { 
             font-family: "HarmonyOS Sans SC", "PingFang SC", "Lantinghei SC", "Microsoft YaHei", "HanHei SC", "Helvetica Neue", "Open Sans", Arial, sans-serif; 
             overflow: hidden; 
-            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
-            background-size: 400% 400%;
-            animation: gradientBG 30s ease infinite; 
             color: #fff; 
             transition: all 2s ease; 
-        }
-
-        #particles-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: 1005; /* 初始置顶以显示粒子 */
-            pointer-events: none;
-        }
-
-        #coverBgLayer {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.6s ease;
-            background:
-                radial-gradient(circle at 50% 42%, rgba(99, 230, 255, 0.16) 0%, rgba(99, 230, 255, 0) 28%),
-                radial-gradient(circle at 18% 22%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 18%),
-                linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
-            background-size: 140% 140%, 120% 120%, 400% 400%;
-            animation: gradientBG 16s ease infinite;
-            box-shadow: inset 0 0 160px rgba(0,0,0,0.46), inset 0 0 90px rgba(99, 230, 255, 0.06);
-        }
-
-        #coverBgLayer::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(circle, rgba(246,251,255,0.66) 0 1px, rgba(246,251,255,0) 1.8px),
-                radial-gradient(circle, rgba(99,230,255,0.34) 0 1.2px, rgba(99,230,255,0) 2.2px),
-                linear-gradient(90deg, rgba(99,230,255,0.03) 1px, transparent 1px),
-                linear-gradient(rgba(99,230,255,0.025) 1px, transparent 1px);
-            background-size: 72px 72px, 118px 118px, 96px 96px, 96px 96px;
-            background-position: 0 0, 34px 18px, 0 0, 0 0;
-            opacity: 0.72;
-            animation: introParticleDrift 9s linear infinite;
-        }
-
-        #radarBgCleaner {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.28s ease;
-            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
-            background-size: 400% 400%;
-            animation: gradientBG 30s ease infinite;
-            will-change: clip-path, opacity;
         }
 
         #brandTextLayer {
@@ -149,20 +98,20 @@
         .bg-brand-serial-top {
             top: 54px;
             right: 58px;
+            font-size: clamp(14px, 0.52vw, 20px);
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            color: rgba(255, 232, 184, 0.72);
+            text-shadow:
+                0 0 1px rgba(255, 250, 234, 0.58),
+                0 0 6px rgba(255, 215, 132, 0.16);
+            text-rendering: geometricPrecision;
+            -webkit-font-smoothing: antialiased;
         }
 
         .bg-brand-serial-bottom {
             bottom: 58px;
             left: 44px;
-        }
-
-        body.cover-bg-active #coverBgLayer {
-            opacity: 1;
-        }
-
-        body.cover-bg-active #brandDecor {
-            opacity: 0.78;
-            filter: saturate(1) brightness(1);
         }
 
         @keyframes gradientBG {
@@ -1295,21 +1244,28 @@
 
 
         .container { 
-            position: relative; 
+            position: fixed;
+            left: 50%;
+            top: 50%;
             z-index: 2; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            height: 100vh; 
-            padding: 1vh 1vw; 
+            width: 1920px;
+            height: 1080px;
+            padding: 11px 19px;
+            transform: translate(-50%, -50%) scale(var(--viewport-scale));
+            transform-origin: center;
         }
 
         .main-layout {
             display: flex;
-            width: 98%;
-            max-width: 1700px;
-            height: 94vh;
+            width: var(--presentation-layout-width);
+            max-width: 98%;
+            height: var(--presentation-layout-height);
             position: relative;
+            transform: scale(var(--presentation-scale));
+            transform-origin: center;
         }
 
         .left-panel { 
@@ -1354,14 +1310,14 @@
             display: flex; 
             flex-direction: column; 
             justify-content: flex-start; 
-            gap: 18px;
-            padding: clamp(44px, 7vh, 96px) 10px 0;
+            gap: 14px;
+            padding: 45px 10px 0;
         }
 
         .band-info-box {
             display: flex;
             flex-direction: column;
-            gap: 22px;
+            gap: 17px;
         }
 
         body.band-theme-silverwolf .band-info-box {
@@ -1406,6 +1362,39 @@
             animation: nameEntrance 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
 
+        .expert-badge {
+            display: block;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            object-fit: contain;
+            pointer-events: none;
+            opacity: 0;
+            transform: translate3d(28px, 0, 0) scale(0.82);
+            filter: blur(8px) drop-shadow(0 0 10px rgba(115, 190, 255, 0.48));
+            transition:
+                opacity 0.42s ease,
+                transform 0.42s ease,
+                filter 0.42s ease;
+        }
+
+        .expert-badge.is-visible {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+            filter: blur(0) drop-shadow(0 0 10px rgba(115, 190, 255, 0.48));
+            animation: expertBadgeEntrance 1.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+        }
+
+        .expert-badge.fade-out {
+            opacity: 0;
+            transform: translate3d(28px, 0, 0) scale(0.86);
+            filter: blur(8px) drop-shadow(0 0 4px rgba(115, 190, 255, 0.18));
+        }
+
+        .expert-badge[hidden] {
+            display: none;
+        }
+
         body.band-theme-silverwolf .band-name {
             font-family: "Orbitron", "Rajdhani", "HarmonyOS Sans SC", sans-serif;
             letter-spacing: 0.08em;
@@ -1433,33 +1422,6 @@
                 0 0 18px rgba(111, 95, 255, 0.18),
                 0 0 28px rgba(74, 224, 255, 0.14);
             opacity: 0.94;
-        }
-
-        .band-star-rank {
-            width: clamp(118px, 13vw, 190px);
-            aspect-ratio: 5 / 1;
-            object-fit: contain;
-            opacity: 0;
-            transform: translate3d(0, -28px, 0) scale(0.96);
-            filter:
-                brightness(1.24)
-                saturate(1.2)
-                contrast(1.06)
-                drop-shadow(0 0 8px rgba(255, 247, 196, 0.34))
-                drop-shadow(0 0 18px rgba(255, 200, 88, 0.28));
-            transition: opacity 0.46s ease, transform 0.62s cubic-bezier(0.16, 1, 0.3, 1), filter 0.58s ease;
-            pointer-events: none;
-            flex: 0 0 auto;
-        }
-
-        .band-star-rank.show {
-            opacity: 0.9;
-            transform: translate3d(0, 0, 0) scale(1);
-        }
-
-        .band-star-rank.exit {
-            opacity: 0;
-            transform: translate3d(0, 24px, 0) scale(0.98);
         }
 
         .bond-icons {
@@ -1522,6 +1484,12 @@
             100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1) skewX(0); filter: blur(0); }
         }
 
+        @keyframes expertBadgeEntrance {
+            0% { opacity: 0; transform: translate3d(34px, 0, 0) scale(0.78); filter: blur(10px) drop-shadow(0 0 4px rgba(115, 190, 255, 0.2)); }
+            68% { opacity: 1; transform: translate3d(-4px, 0, 0) scale(1.04); filter: blur(0) drop-shadow(0 0 14px rgba(115, 190, 255, 0.58)); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0) drop-shadow(0 0 10px rgba(115, 190, 255, 0.48)); }
+        }
+
         .band-photo-container {
             width: 100%;
             height: 380px; 
@@ -1578,6 +1546,93 @@
                 radial-gradient(circle at 24% 18%, rgba(118, 132, 255, 0.12) 0%, rgba(118, 132, 255, 0) 26%),
                 radial-gradient(circle at 78% 74%, rgba(74, 224, 255, 0.08) 0%, rgba(74, 224, 255, 0) 24%);
             opacity: 0.88;
+        }
+
+        #specialSceneOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            mix-blend-mode: screen;
+            transition: opacity 0.7s ease, filter 0.7s ease;
+            filter: saturate(calc(0.8 + var(--special-intensity, 1) * 0.3));
+        }
+
+        body.special-profile-active #specialSceneOverlay.has-image {
+            opacity: var(--special-overlay-opacity, 0.18);
+        }
+
+        #specialPreviewBadge {
+            display:none;
+            position:fixed;
+            top:20px;
+            left:22px;
+            z-index:240;
+            padding:7px 12px;
+            border:1px solid color-mix(in srgb, var(--special-accent, #7ddfff) 55%, transparent);
+            border-radius:999px;
+            color:#eef8ff;
+            background:rgba(5,10,20,.76);
+            box-shadow:0 0 20px color-mix(in srgb, var(--special-accent, #7ddfff) 22%, transparent);
+            font:700 12px "HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+            letter-spacing:.12em;
+            backdrop-filter:blur(10px);
+        }
+
+        body.special-preview-mode #specialPreviewBadge { display:block; }
+        body.special-preview-mode #introOverlay,
+        body.special-preview-mode .global-timeline-container,
+        body.special-preview-mode .session-timer { display:none !important; }
+
+        body.special-photo-zoom .band-photo {
+            transform-origin: center;
+        }
+
+        body.special-photo-glitch .band-photo-container::before {
+            content: '';
+            position: absolute;
+            inset: 4% 2%;
+            z-index: 4;
+            pointer-events: none;
+            opacity: calc(0.08 + var(--special-intensity, 1) * 0.08);
+            background:
+                repeating-linear-gradient(180deg, rgba(124,139,255,.28) 0 1px, transparent 1px 7px),
+                linear-gradient(90deg, transparent, rgba(89,228,255,.16), transparent);
+            mix-blend-mode: screen;
+            animation: specialGlitchScan 1.6s steps(2, end) infinite;
+        }
+
+        body.special-radar-pulse #radarCanvas {
+            animation: specialRadarPulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes specialNameGlitch {
+            0% { opacity:0; transform:translate3d(52px,0,0) skewX(-8deg); filter:blur(12px); }
+            42% { opacity:1; transform:translate3d(-7px,0,0) skewX(4deg); filter:blur(0) hue-rotate(18deg); }
+            48% { transform:translate3d(5px,-2px,0) skewX(-3deg); clip-path:inset(12% 0 48%); }
+            54% { transform:translate3d(-3px,2px,0) skewX(2deg); clip-path:inset(58% 0 8%); }
+            70%,100% { opacity:1; transform:none; filter:none; clip-path:inset(0); }
+        }
+
+        @keyframes specialNamePulse {
+            0% { opacity:0; transform:translate3d(38px,0,0) scale(.9); filter:blur(10px); }
+            64% { opacity:1; transform:translate3d(-2px,0,0) scale(1.06); filter:blur(0) brightness(1.4); }
+            100% { opacity:1; transform:none; filter:none; }
+        }
+
+        @keyframes specialGlitchScan {
+            0%,100% { transform:translate3d(0,-8%,0); clip-path:inset(0 0 68%); }
+            35% { transform:translate3d(6px,34%,0); clip-path:inset(22% 0 42%); }
+            70% { transform:translate3d(-5px,72%,0); clip-path:inset(58% 0 12%); }
+        }
+
+        @keyframes specialRadarPulse {
+            0%,100% { filter:drop-shadow(0 0 0 transparent); }
+            50% { filter:drop-shadow(0 0 calc(10px * var(--special-intensity, 1)) var(--special-accent, #7ddfff)); }
         }
 
         .band-photo {
@@ -1782,6 +1837,7 @@
 
         .progress-bar-container {
             position: relative;
+            flex: 0 0 3px;
             align-self: flex-start;
             width: min(100%, 95%);
             height: 3px;
@@ -2808,7 +2864,6 @@
             transition: transform 0.38s cubic-bezier(0.12, 0.88, 0.32, 1);
             z-index: 2002;
             overflow: hidden;
-            will-change: transform;
             backface-visibility: hidden;
         }
 
@@ -2829,24 +2884,6 @@
         .gacha-panel-bottom { bottom: 0; transform: translateY(0); }
         .gacha-panel-top.open { transform: translateY(-100%); }
         .gacha-panel-bottom.open { transform: translateY(100%); }
-
-        .gacha-panel-image {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: 50% 50%;
-            transform: scale(1);
-            transform-origin: center center;
-            opacity: 0.92;
-            filter: saturate(1.05) brightness(0.82) contrast(1.04);
-        }
-
-        .gacha-panel-image:not([src]),
-        .gacha-panel-image[src=""] {
-            display: none;
-        }
 
         .gacha-diagonal-line {
             position: absolute;
@@ -3739,19 +3776,19 @@
         }
 
         @keyframes gachaDoorTopOpen {
-            0% { transform: translate(-50%, -50%) rotate(-18deg) translateX(0) scale(1); opacity: 1; }
-            18% { transform: translate(-50%, -50%) rotate(-18deg) translateX(0) scale(1.003); opacity: 1; }
-            34% { transform: translate(-50%, -50%) rotate(-18deg) translateX(2.8%) scale(1.008); opacity: 1; }
-            72% { transform: translate(-50%, -50%) rotate(-18deg) translateX(-88%) scale(1.012); opacity: 1; }
-            100% { transform: translate(-50%, -50%) rotate(-18deg) translateX(-108%) scale(1.012); opacity: 1; }
+            0% { transform: rotate(-18deg) translateX(0) scale(1); opacity: 1; }
+            18% { transform: rotate(-18deg) translateX(0) scale(1.003); opacity: 1; }
+            34% { transform: rotate(-18deg) translateX(3.8%) scale(1.008); opacity: 1; }
+            72% { transform: rotate(-18deg) translateX(-124%) scale(1.012); opacity: 1; }
+            100% { transform: rotate(-18deg) translateX(-150%) scale(1.012); opacity: 1; }
         }
 
         @keyframes gachaDoorBottomOpen {
-            0% { transform: translate(-50%, -50%) rotate(-18deg) translateX(0) scale(1); opacity: 1; }
-            18% { transform: translate(-50%, -50%) rotate(-18deg) translateX(0) scale(1.003); opacity: 1; }
-            34% { transform: translate(-50%, -50%) rotate(-18deg) translateX(-2.8%) scale(1.008); opacity: 1; }
-            72% { transform: translate(-50%, -50%) rotate(-18deg) translateX(88%) scale(1.012); opacity: 1; }
-            100% { transform: translate(-50%, -50%) rotate(-18deg) translateX(108%) scale(1.012); opacity: 1; }
+            0% { transform: rotate(-18deg) translateX(0) scale(1); opacity: 1; }
+            18% { transform: rotate(-18deg) translateX(0) scale(1.003); opacity: 1; }
+            34% { transform: rotate(-18deg) translateX(-3.8%) scale(1.008); opacity: 1; }
+            72% { transform: rotate(-18deg) translateX(124%) scale(1.012); opacity: 1; }
+            100% { transform: rotate(-18deg) translateX(150%) scale(1.012); opacity: 1; }
         }
 
         @keyframes gachaNameWaveIn {
@@ -3990,42 +4027,83 @@
         #gachaOverlay.gacha-type-2 .gacha-panel {
             position: absolute;
             top: 50%;
-            left: 50%;
-            width: 190vw;
-            height: 220vh;
+            width: 70vw;
+            height: 170vh;
+            margin-top: -85vh;
             background:
-                linear-gradient(180deg, rgba(12,12,12,0.98), rgba(2,2,2,0.98)),
-                linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0) 30%, rgba(255,255,255,0) 70%, rgba(255,255,255,0.06));
+                linear-gradient(180deg, rgba(24, 22, 17, 0.99), rgba(5, 5, 4, 0.99)),
+                #080806;
             transition: transform 0.58s cubic-bezier(0.06, 0.84, 0.18, 1);
             z-index: 2006;
-            transform-origin: center center;
-            box-shadow: 0 0 30px rgba(0,0,0,0.45), inset 0 0 24px rgba(255,255,255,0.04), inset 0 0 40px rgba(255,220,146,0.03);
+            box-shadow: 0 0 18px rgba(0, 0, 0, 0.34);
+        }
+
+        #gachaOverlay.gacha-type-2.active .gacha-panel {
+            will-change: transform;
+        }
+
+        #gachaOverlay.gacha-type-2 .gacha-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                var(--gacha-door-edge-gradient),
+                repeating-linear-gradient(0deg,
+                    rgba(255, 226, 160, 0.035) 0 1px,
+                    rgba(255, 226, 160, 0) 1px 72px),
+                repeating-linear-gradient(90deg,
+                    rgba(255, 255, 255, 0.018) 0 1px,
+                    rgba(255, 255, 255, 0) 1px 112px),
+                radial-gradient(ellipse at center,
+                    rgba(92, 76, 45, 0.18) 0%,
+                    rgba(22, 21, 17, 0.34) 38%,
+                    rgba(3, 3, 3, 0.74) 100%);
+            opacity: 0.96;
         }
 
         #gachaOverlay.gacha-type-2 .gacha-panel-top {
-            clip-path: inset(0 50% 0 0);
-            transform: translate(-50%, -50%) rotate(-18deg) translateX(0);
+            left: auto;
+            right: 50%;
+            transform-origin: 100% 50%;
+            transform: rotate(-18deg) translateX(0);
+            --gacha-door-edge-gradient: linear-gradient(90deg,
+                rgba(255, 224, 154, 0.04) 0%,
+                rgba(255, 224, 154, 0) 70%,
+                rgba(255, 224, 154, 0.06) 96%,
+                rgba(255, 246, 218, 0.18) 99.7%,
+                rgba(255, 250, 232, 0.3) 100%);
         }
 
         #gachaOverlay.gacha-type-2 .gacha-panel-bottom {
-            clip-path: inset(0 0 0 50%);
-            transform: translate(-50%, -50%) rotate(-18deg) translateX(0);
+            left: 50%;
+            right: auto;
+            transform-origin: 0 50%;
+            transform: rotate(-18deg) translateX(0);
+            --gacha-door-edge-gradient: linear-gradient(90deg,
+                rgba(255, 250, 232, 0.3) 0%,
+                rgba(255, 246, 218, 0.18) 0.3%,
+                rgba(255, 224, 154, 0.06) 4%,
+                rgba(255, 224, 154, 0) 30%,
+                rgba(255, 224, 154, 0.04) 100%);
         }
 
-        #gachaOverlay.gacha-type-2 .gacha-panel-image {
-            width: 126%;
-            height: 126%;
-            top: -13%;
-            left: -13%;
+        #gachaOverlay.gacha-type-2 .gacha-panel-top::after {
+            left: auto;
+            right: -9px;
+        }
+
+        #gachaOverlay.gacha-type-2 .gacha-panel-bottom::after {
+            left: -9px;
         }
 
         #gachaOverlay.gacha-type-2 .gacha-panel-top.open {
-            transform: translate(-50%, -50%) rotate(-18deg) translateX(-108%);
+            transform: rotate(-18deg) translateX(-150%);
             animation: gachaDoorTopOpen 1.18s cubic-bezier(0.22, 0.74, 0.18, 1) both;
         }
 
         #gachaOverlay.gacha-type-2 .gacha-panel-bottom.open {
-            transform: translate(-50%, -50%) rotate(-18deg) translateX(108%);
+            transform: rotate(-18deg) translateX(150%);
             animation: gachaDoorBottomOpen 1.18s cubic-bezier(0.22, 0.74, 0.18, 1) both;
         }
 
@@ -4226,6 +4304,10 @@
             animation: gachaInflateFillFront 1.38s linear 0.16s both;
         }
 
+        #gachaOverlay.active.gacha-fadeout {
+            animation: gachaFadeOut 0.8s ease forwards;
+        }
+
         #outroOverlay {
             position: fixed;
             inset: 0;
@@ -4364,22 +4446,26 @@
         }
 
         body.outro-mode #particles-canvas,
+        body.outro-mode #living-field-canvas,
+        body.outro-mode #living-field-fallback,
         body.outro-mode #brandDecor,
         body.outro-mode #mvpBgContainer,
         body.outro-mode #gachaOverlay,
         body.outro-mode .container {
             visibility: hidden !important;
         }
+
     </style>
+    <link rel="stylesheet" href="/css/background-effects.css">
 </head>
 <body>
-    <audio id="bgMusic" src="music.mp3"></audio>
-    <div id="outroOverlay" aria-hidden="true">
+    <audio id="bgMusic" src="/assets/audio/music.mp3"></audio>
+    <div id="outroOverlay" class="scene-layer scene-layer--overlay" aria-hidden="true">
         <video id="outroVideo" class="outro-video" playsinline muted preload="metadata"></video>
         <div class="outro-fallback"></div>
         <div id="outroThanks" class="outro-thanks">感谢观看</div>
     </div>
-    <div id="introOverlay">
+    <div id="introOverlay" class="scene-layer scene-layer--overlay">
         <div class="intro-sequence" aria-hidden="true">
             <div class="intro-title-banner">
                 <div class="intro-title-main" id="introTitleMain">货币战争雷达图 V4.0</div>
@@ -4396,7 +4482,7 @@
             <div class="intro-exit-wipe"></div>
         </div>
     </div>
-    <div id="brandDecor">
+    <div id="brandDecor" class="scene-layer scene-layer--ambient">
         <div class="brand-security-pattern"></div>
         <div class="brand-emblem"></div>
         <div class="brand-scan-badge brand-b3" aria-hidden="true">
@@ -4519,10 +4605,11 @@
         <div class="brand-serial brand-serial-bottom">CURRENCY WAR / IPC</div>
     </div>
 
-    <div id="mvpBgContainer" class="mvp-bg-container"></div>
+    <div id="mvpBgContainer" class="mvp-bg-container scene-layer scene-layer--ambient"></div>
+    <div id="specialSceneOverlay" class="scene-layer scene-layer--ambient" aria-hidden="true"></div>
 
     <!-- 抽卡出金动画遮罩 -->
-    <div id="gachaOverlay">
+    <div id="gachaOverlay" class="scene-layer scene-layer--overlay">
         <div class="gacha-flash" id="gachaFlash"></div>
         <div class="gacha-diagonal-line" id="gachaDiagonalLine"></div>
         <div class="gacha-line-lock" id="gachaLineLock"></div>
@@ -4564,20 +4651,18 @@
             </div>
         </div>
         <div class="gacha-vignette" id="gachaVignette"></div>
-        <div class="gacha-panel gacha-panel-top" id="gachaPanelTop">
-            <img class="gacha-panel-image" id="gachaPanelTopImg" src="" alt="">
-        </div>
-        <div class="gacha-panel gacha-panel-bottom" id="gachaPanelBottom">
-            <img class="gacha-panel-image" id="gachaPanelBottomImg" src="" alt="">
-        </div>
-        <img class="gacha-logo" id="gachaLogo" src="pic/hsr_logo.webp" alt="">
+        <div class="gacha-panel gacha-panel-top" id="gachaPanelTop"></div>
+        <div class="gacha-panel gacha-panel-bottom" id="gachaPanelBottom"></div>
+        <img class="gacha-logo" id="gachaLogo" src="/assets/images/hsr_logo.webp" alt="">
         <div class="gacha-name" id="gachaName"></div>
     </div>
 
-    <canvas id="particles-canvas"></canvas>
-    <div id="coverBgLayer" aria-hidden="true"></div>
-    <div id="radarBgCleaner" aria-hidden="true"></div>
-    <div id="brandTextLayer" aria-hidden="true">
+    <div id="coverBgLayer" class="scene-layer scene-layer--ambient" aria-hidden="true"></div>
+    <div id="living-field-fallback" class="scene-layer scene-layer--ambient" aria-hidden="true"></div>
+    <canvas id="living-field-canvas" class="scene-layer scene-layer--ambient" aria-hidden="true"></canvas>
+    <canvas id="particles-canvas" class="scene-layer scene-layer--ambient"></canvas>
+    <div id="radarBgCleaner" class="scene-layer scene-layer--ambient" aria-hidden="true"></div>
+    <div id="brandTextLayer" class="scene-layer scene-layer--ambient" aria-hidden="true">
         <div class="bg-brand-watermark">
             <span class="bg-brand-watermark-cn" id="brandWatermarkCn">货币战争</span>
             <span class="bg-brand-watermark-en" id="brandWatermarkEn">CURRENCY WAR</span>
@@ -4585,9 +4670,10 @@
         <div class="bg-brand-serial bg-brand-serial-top" id="brandTopRightText">HONKAI: STAR RAIL V4.2</div>
         <div class="bg-brand-serial bg-brand-serial-bottom" id="brandBottomLeftText">CURRENCY WAR / IPC</div>
     </div>
-    <div class="session-timer" id="sessionTimer">00:00:00</div>
+    <div class="session-timer scene-layer scene-layer--hud" id="sessionTimer">00:00:00</div>
+    <div id="specialPreviewBadge" class="scene-layer scene-layer--hud">专场预览</div>
 
-    <div class="container">
+    <main id="presentationStage" class="container presentation-stage scene-layer scene-layer--core" data-design-width="1920" data-design-height="1080">
         <div class="main-layout">
             <div class="left-panel">
                 <canvas id="radarCanvas" width="1600" height="1600"></canvas>
@@ -4596,7 +4682,7 @@
                 <div class="band-info-box">
                     <div class="band-name-row">
                         <div class="band-name" id="bandName"></div>
-                        <img class="band-star-rank" id="bandStarRank" src="" alt="">
+                        <img class="expert-badge" id="expertBadge" src="/assets/images/专家.png" alt="专家" hidden>
                     </div>
                     <div class="bond-icons" id="bondIcons"></div>
                     
@@ -4616,39 +4702,30 @@
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <div class="global-timeline-container" id="globalTimeline">
+    <div class="global-timeline-container scene-layer scene-layer--hud" id="globalTimeline">
         <div class="global-timeline-bar" id="globalBar"></div>
         <div class="timeline-tooltip" id="timelineTooltip">00:00</div>
     </div>
 
+    <script src="/js/background-effects.js"></script>
+    <script src="/js/living-field-effect.js"></script>
+    <script src="/js/special-profiles.js"></script>
+    <script src="/js/music-timeline.js"></script>
     <script>
-        let COLOR_PRESETS = [
-            { color: "#00ffff", bg1: "#001a1a", bg2: "#000d0d" }, // 青色系
-            { color: "#ff00ff", bg1: "#1a001a", bg2: "#0d000d" }, // 洋红色系
-            { color: "#ffff00", bg1: "#1a1a00", bg2: "#0d0d00" }, // 黄色系
-            { color: "#00ff00", bg1: "#001a00", bg2: "#000d00" }, // 绿色系
-            { color: "#ff4500", bg1: "#1a0700", bg2: "#0d0300" }, // 橙红色系
-            { color: "#1e90ff", bg1: "#000f1a", bg2: "#00070d" }, // 道奇蓝
-            { color: "#ff0040", bg1: "#1a0006", bg2: "#0d0003" }, // 玫红色系
-            { color: "#7cfc00", bg1: "#0c1a00", bg2: "#060d00" }, // 草绿色系
-            { color: "#ba55d3", bg1: "#13091a", bg2: "#09040d" }, // 中兰花紫
-            { color: "#40e0d0", bg1: "#061a18", bg2: "#030d0c" }, // 绿松石系
-            { color: "#f08080", bg1: "#1a0e0e", bg2: "#0d0707" }, // 浅珊瑚红
-            { color: "#00fa9a", bg1: "#001a10", bg2: "#000d08" }, // 中春绿色
-            { color: "#ff8c00", bg1: "#1a0e00", bg2: "#0d0700" }, // 深橙色系
-            { color: "#9370db", bg1: "#0f0b1a", bg2: "#07050d" }, // 中紫色系
-            { color: "#00ced1", bg1: "#00151a", bg2: "#000a0d" }, // 深青色系
-            { color: "#ff1493", bg1: "#1a0210", bg2: "#0d0108" }, // 深粉色系
-            { color: "#adff2f", bg1: "#111a03", bg2: "#080d01" }, // 黄绿色系
-            { color: "#b0c4de", bg1: "#12141a", bg2: "#090a0d" }, // 亮钢兰
-            { color: "#eea2ad", bg1: "#1a1112", bg2: "#0d0809" }, // 浅粉红
-            { color: "#00bfff", bg1: "#00131a", bg2: "#00090d" }  // 深天空蓝
-        ];
+        const MusicTimeline = window.RockRadarMusicTimeline;
 
-        let colorPool = [...COLOR_PRESETS].sort(() => Math.random() - 0.5);
-        let colorIndex = 0;
+        const BackgroundEffects = window.RockRadarBackgroundEffects;
+        const LivingFieldEffect = window.RockRadarLivingFieldEffect;
+        const SpecialProfiles = window.RockRadarSpecialProfiles;
+        let COLOR_PRESETS = [
+            { name: "青蓝", color: "#00ffff", bg1: "#001a1a", bg2: "#000d0d" },
+            { name: "洋红", color: "#ff00ff", bg1: "#1a001a", bg2: "#0d000d" },
+            { name: "明黄", color: "#ffff00", bg1: "#1a1a00", bg2: "#0d0d00" },
+            { name: "翠绿", color: "#00ff00", bg1: "#001a00", bg2: "#000d00" },
+            { name: "橙红", color: "#ff4500", bg1: "#1a0700", bg2: "#0d0300" }
+        ];
 
         // 全局配置参数
         let CONFIG = {
@@ -4658,13 +4735,15 @@
             RADAR_GRID_LINE_OPACITY: 0.2, // 雷达图底图线条透明度
             PARTICLE_OPACITY_MULT: 2.0,  // 背景粒子特效透明度倍率
             PARTICLE_SIZE_MULT: 2.0,     // 背景粒子特效大小倍率
-            BG_EFFECT_MODE: 'particles', // 背景特效：particles / starfield / ripple / off
+            BG_EFFECT_MODE: 'living-field', // 背景特效：particles / living-field / off
+            BG_EFFECT_CONFIG: BackgroundEffects.normalizeConfig(),
             RADAR_AUDIO_FX_MODE: 'tech', // 雷达周围音频动效：tech / pulse / orbit / off
             VERTEX_COUNT: 6,             // 雷达图顶点数（默认为6边形，可改为8边形等）,一定要把DIM_NAMES等数组内容也改成对应的个数!
             INTRO_WAIT_TIME: 1000, // 蓝色前奏时长 (ms)
             MUSIC_VOLUME: 0.7, // 背景音乐音量（0-1）
-            MUSIC_TRACKS: "music.mp3", // 背景音乐列表，逗号分隔
-            OUTRO_VIDEO: "ending.mp4", // 全部角色结束后的结尾视频（主目录文件名）
+            MUSIC_DELAY_SECONDS: 0, // 演出开始后音乐延迟启动秒数
+            MUSIC_TRACKS: "/assets/audio/music.mp3", // 背景音乐列表，逗号分隔
+            OUTRO_VIDEO: "/assets/video/ending.mp4", // 全部角色结束后的结尾视频
             OUTRO_TRANSITION_MS: 1100, // 结尾视频转场时长 (ms)
 
             // 雷达图各个维度的名称
@@ -4681,6 +4760,7 @@
             DEFAULT_DURATION: 5000, // 默认每页的的展示时长 (ms)
             SHOW_DESC: true, // 是否显示羁绊图标/标签
             IMAGE_SCALE: 1.0, // 图片默认缩放比例 (1.0 为原始大小)
+            PRESENTATION_SCALE: 1.3, // 主体舞台倍率；与屏幕物理分辨率无关
 
             // 哪些维度显示为百分数（例如 0.7 变为 70%）。数组长度 6，true 表示显示为百分数，false 表示显示为普通数字
             USE_PERCENTAGE: [false, false, false, false, false, false],
@@ -4714,27 +4794,27 @@
         };
         const MIN_VERTEX_COUNT = 6;
         const MAX_VERTEX_COUNT = 8;
-
-        function getNextColor() {
-            const c = colorPool[colorIndex];
-            colorIndex = (colorIndex + 1) % colorPool.length;
-            if (colorIndex === 0) colorPool.sort(() => Math.random() - 0.5);
-            return c;
-        }
+        const FIXED_COLOR_COUNT = 5;
+        const DEFAULT_FIXED_COLOR_PRESETS = COLOR_PRESETS.map(preset => ({ ...preset }));
 
         let mvplist = ["castorice"];
+        let expertlist = [];
+        let SPECIAL_PROFILES = [];
+        let specialProfilesConfigured = false;
+        let activeSpecialProfile = null;
+        let isSpecialPreviewMode = false;
         let IMAGE_META = {};
 
         // ["创新性", "旋律", "歌词", "影响力", "主唱", "乐器"]
         // 可选属性: 
-        // colorIndex: 对应 COLOR_PRESETS 索引 (0-19)
+        // colorMode: preset / custom；固定配色使用 colorIndex 0-4，自定义使用 customColor
         // duration: 该条目持续显示时间 (ms)，默认由 CONFIG.DEFAULT_DURATION 决定
         let namelist = [
 
-{ name: "castorice", points: [15, 15, 10, 20, 10, 10], desc: "无需多言", colorIndex: 12 ,duration: 6000 },
-{ name: "Nirvana", points: [9, 8, 9, 12, 9, 7], desc: "xqcl" },
-{ name: "Radiohead", points: [13, 8, 9, 10, 8, 12], desc: "rym亲爹。我一直是idm粉丝啊" },
-{ name: "Bob Dylan", points: [14, 4, 15, 14, 1, 2], desc: "诺贝尔文学奖得主的含金量，要歌词有歌词，唱功有歌词" },
+{ name: "castorice", points: [15, 15, 10, 20, 10, 10], desc: "无需多言", colorMode: "preset", colorIndex: 0, duration: 6000 },
+{ name: "Nirvana", points: [9, 8, 9, 12, 9, 7], desc: "xqcl", colorMode: "preset", colorIndex: 1 },
+{ name: "Radiohead", points: [13, 8, 9, 10, 8, 12], desc: "rym亲爹。我一直是idm粉丝啊", colorMode: "preset", colorIndex: 2 },
+{ name: "Bob Dylan", points: [14, 4, 15, 14, 1, 2], desc: "诺贝尔文学奖得主的含金量，要歌词有歌词，唱功有歌词", colorMode: "preset", colorIndex: 3 },
         ];
 
         let bands = [];
@@ -4748,21 +4828,103 @@
             bg1: "#2f1d06",
             bg2: "#6d4510"
         };
-        const SILVERWOLF_THEME = {
-            color: "#7f8fff",
-            bg1: "#130c34",
-            bg2: "#060816"
-        };
 
         function normalizeBandIdentity(value) {
             return String(value || '').trim().replace(/\s+/g, '');
         }
 
-        function isSilverwolfBand(band) {
+        function isLegacySilverwolfBand(band) {
             const name = normalizeBandIdentity(band?.name);
             const gachaText = String(band?.gachaText || '').trim().toLowerCase();
-            if (name === '银狼LV.999' || name === '閾剁嫾LV.999') return true;
-            return gachaText === 'silver wolf lv.999';
+            return name === '银狼LV.999' || gachaText === 'silver wolf lv.999';
+        }
+
+        function normalizeRuntimeSpecialProfiles() {
+            if (!SpecialProfiles) {
+                SPECIAL_PROFILES = [];
+                return;
+            }
+            if (!specialProfilesConfigured) {
+                const legacyBand = (namelist || []).find(isLegacySilverwolfBand);
+                if (legacyBand) {
+                    SPECIAL_PROFILES = [SpecialProfiles.normalizeProfile({
+                        id: 'silverwolf-lv999',
+                        name: '银狼 LV.999 专场',
+                        pluginId: 'silverwolf'
+                    })];
+                    legacyBand.specialProfileId = 'silverwolf-lv999';
+                }
+            }
+            SPECIAL_PROFILES = SpecialProfiles.normalizeProfiles(SPECIAL_PROFILES);
+            const validIds = new Set(SPECIAL_PROFILES.map(profile => profile.id));
+            (namelist || []).forEach(band => {
+                const id = String(band.specialProfileId || '').trim();
+                if (id && validIds.has(id)) band.specialProfileId = id;
+                else delete band.specialProfileId;
+            });
+        }
+
+        function getBandSpecialProfile(band) {
+            return SpecialProfiles?.getProfileById(SPECIAL_PROFILES, band?.specialProfileId) || null;
+        }
+
+        function resolveSpecialAssetUrl(value) {
+            const path = String(value || '').trim();
+            if (!path) return '';
+            if (/^(?:https?:|data:|blob:|\/)/i.test(path)) return path;
+            return `/assets/images/${path}`;
+        }
+
+        function getSpecialPhotoTransitionCss(profile = activeSpecialProfile) {
+            const duration = Math.max(100, Number(profile?.transitions?.photoDuration) || 820);
+            return `opacity ${Math.min(duration, 900)}ms cubic-bezier(0.24, 1, 0.36, 1), transform ${duration}ms cubic-bezier(0.22, 1, 0.36, 1), filter ${Math.min(duration, 700)}ms ease`;
+        }
+
+        function getSpecialPhotoStartTransform(profile = activeSpecialProfile) {
+            const mode = profile?.effects?.photoTransition || 'default';
+            if (mode === 'zoom') return 'translate3d(0, 0, 0) scale(1.16)';
+            if (mode === 'glitch') return 'translate3d(34px, 0, 0) scale(0.96)';
+            return 'translate3d(72px, 0, 0) scale(0.94)';
+        }
+
+        function getSpecialNameAnimation(profile = activeSpecialProfile) {
+            const duration = Math.max(100, Number(profile?.transitions?.nameDuration) || 1200);
+            const mode = profile?.effects?.nameAnimation || 'default';
+            const keyframe = mode === 'glitch'
+                ? 'specialNameGlitch'
+                : mode === 'pulse'
+                    ? 'specialNamePulse'
+                    : 'nameEntrance';
+            return `${keyframe} ${duration}ms cubic-bezier(0.23, 1, 0.32, 1) forwards`;
+        }
+
+        function applySpecialProfile(profile) {
+            activeSpecialProfile = profile || null;
+            const body = document.body;
+            const overlay = document.getElementById('specialSceneOverlay');
+            const effects = profile?.effects || {};
+            const pluginId = profile?.pluginId || '';
+            const classMap = {
+                'band-theme-silverwolf': pluginId === 'silverwolf',
+                'special-profile-active': !!profile,
+                'special-name-glitch': effects.nameAnimation === 'glitch',
+                'special-name-pulse': effects.nameAnimation === 'pulse',
+                'special-photo-zoom': effects.photoTransition === 'zoom',
+                'special-photo-glitch': effects.photoTransition === 'glitch',
+                'special-radar-pulse': effects.radarTransition === 'pulse'
+            };
+            Object.entries(classMap).forEach(([className, enabled]) => body.classList.toggle(className, enabled));
+
+            const root = document.documentElement;
+            root.style.setProperty('--special-intensity', String(profile?.effects?.intensity ?? 1));
+            root.style.setProperty('--special-accent', profile?.theme?.accent || '#7ddfff');
+            root.style.setProperty('--special-overlay-opacity', String(profile?.assets?.overlayOpacity ?? 0));
+
+            if (overlay) {
+                const imageUrl = resolveSpecialAssetUrl(profile?.assets?.overlayImage);
+                overlay.classList.toggle('has-image', !!imageUrl);
+                overlay.style.backgroundImage = imageUrl ? `url("${imageUrl.replace(/"/g, '\\"')}")` : '';
+            }
         }
 
         function getBandDisplayName(band) {
@@ -4777,6 +4939,86 @@
             const num = Number(value);
             if (!Number.isFinite(num)) return fallback;
             return Math.max(0.1, Math.min(0.9, num));
+        }
+
+        function normalizeHexColor(value, fallback) {
+            const color = String(value || '').trim();
+            return /^#[0-9a-f]{6}$/i.test(color) ? color.toLowerCase() : fallback;
+        }
+
+        function normalizeColorObject(value, fallback = DEFAULT_FIXED_COLOR_PRESETS[0]) {
+            const source = value && typeof value === 'object' ? value : {};
+            return {
+                color: normalizeHexColor(source.color, fallback.color),
+                bg1: normalizeHexColor(source.bg1, fallback.bg1),
+                bg2: normalizeHexColor(source.bg2, fallback.bg2)
+            };
+        }
+
+        function cloneColorObject(value, fallback = DEFAULT_FIXED_COLOR_PRESETS[0]) {
+            return { ...normalizeColorObject(value, fallback) };
+        }
+
+        function normalizeRuntimeColorTarget(target, defaultIndex, legacyPresets, inheritedTarget = null) {
+            if (!target || typeof target !== 'object') return;
+            const legacyIndex = Number(target.colorIndex);
+            const hasLegacyIndex = Number.isInteger(legacyIndex);
+
+            if (target.colorMode === 'custom') {
+                const fallback = hasLegacyIndex && legacyPresets[legacyIndex]
+                    ? legacyPresets[legacyIndex]
+                    : inheritedTarget?.customColor || legacyPresets[defaultIndex] || DEFAULT_FIXED_COLOR_PRESETS[defaultIndex];
+                target.customColor = cloneColorObject(target.customColor, normalizeColorObject(fallback));
+                target.colorIndex = null;
+                return;
+            }
+
+            if (hasLegacyIndex && legacyIndex >= FIXED_COLOR_COUNT && legacyPresets[legacyIndex]) {
+                target.colorMode = 'custom';
+                target.colorIndex = null;
+                target.customColor = cloneColorObject(legacyPresets[legacyIndex]);
+                return;
+            }
+
+            if (hasLegacyIndex && legacyIndex >= 0 && legacyIndex < FIXED_COLOR_COUNT) {
+                target.colorMode = 'preset';
+                target.colorIndex = legacyIndex;
+                return;
+            }
+
+            if (inheritedTarget) {
+                target.colorMode = inheritedTarget.colorMode === 'custom' ? 'custom' : 'preset';
+                if (target.colorMode === 'custom') {
+                    target.colorIndex = null;
+                    target.customColor = cloneColorObject(inheritedTarget.customColor);
+                } else {
+                    target.colorIndex = Math.max(0, Math.min(FIXED_COLOR_COUNT - 1, Number(inheritedTarget.colorIndex) || 0));
+                }
+                return;
+            }
+
+            target.colorMode = 'preset';
+            target.colorIndex = Math.max(0, Math.min(FIXED_COLOR_COUNT - 1, defaultIndex));
+        }
+
+        function normalizeRuntimeColorSystem() {
+            const legacyPresets = Array.isArray(COLOR_PRESETS) ? COLOR_PRESETS : [];
+            const fixedPresets = Array.from({ length: FIXED_COLOR_COUNT }, (_, index) => {
+                const fallback = DEFAULT_FIXED_COLOR_PRESETS[index];
+                return {
+                    name: String(legacyPresets[index]?.name || fallback.name).trim() || fallback.name,
+                    ...normalizeColorObject(legacyPresets[index], fallback)
+                };
+            });
+
+            namelist = Array.isArray(namelist) ? namelist : [];
+            namelist.forEach((band, index) => {
+                normalizeRuntimeColorTarget(band, index % FIXED_COLOR_COUNT, legacyPresets);
+                if (band?.midPhase && typeof band.midPhase === 'object') {
+                    normalizeRuntimeColorTarget(band.midPhase, band.colorIndex ?? index % FIXED_COLOR_COUNT, legacyPresets, band);
+                }
+            });
+            COLOR_PRESETS = fixedPresets;
         }
 
         function buildMidPhaseBand(baseBand, vc) {
@@ -4796,9 +5038,9 @@
             return {
                 ...baseBand,
                 points: phasePoints,
-                colorIndex: phase.colorIndex !== undefined && phase.colorIndex !== null && phase.colorIndex !== '' && Number.isFinite(Number(phase.colorIndex))
-                    ? Number(phase.colorIndex)
-                    : baseBand.colorIndex,
+                colorMode: phase.colorMode,
+                colorIndex: phase.colorMode === 'custom' ? null : phase.colorIndex,
+                customColor: phase.colorMode === 'custom' ? cloneColorObject(phase.customColor) : undefined,
                 photoName: String(phase.photoName || '').trim() || undefined,
                 gacha: false,
                 phaseRole: 'mid',
@@ -4815,9 +5057,21 @@
             return fallback;
         }
 
+        function resolveBandColor(band, fallback = DEFAULT_FIXED_COLOR_PRESETS[0]) {
+            if (band?.colorMode === 'custom') {
+                return normalizeColorObject(band.customColor, fallback);
+            }
+            return normalizeColorObject(resolveColorPresetByIndex(band?.colorIndex, fallback), fallback);
+        }
+
         function normalizeScore(value) {
             const num = Number(value);
             return Number.isFinite(num) ? num : 0;
+        }
+
+        function normalizeNameList(value) {
+            const items = Array.isArray(value) ? value : String(value || '').split(',');
+            return [...new Set(items.map(item => String(item || '').trim()).filter(Boolean))];
         }
 
         function getNormalizedVertexCount(value) {
@@ -4833,6 +5087,9 @@
         }
 
         function normalizeConfigAndData() {
+            normalizeRuntimeSpecialProfiles();
+            normalizeRuntimeColorSystem();
+            expertlist = normalizeNameList(expertlist);
             CONFIG.VERTEX_COUNT = getNormalizedVertexCount(CONFIG.VERTEX_COUNT);
             const vc = CONFIG.VERTEX_COUNT;
 
@@ -4876,7 +5133,11 @@
             CONFIG.BRAND_WATERMARK_EN = String(CONFIG.BRAND_WATERMARK_EN || 'CURRENCY WAR').trim() || 'CURRENCY WAR';
             CONFIG.INTRO_TITLE_MAIN = String(CONFIG.INTRO_TITLE_MAIN || '货币战争雷达图 V4.0').trim() || '货币战争雷达图 V4.0';
             CONFIG.INTRO_TITLE_SUB = String(CONFIG.INTRO_TITLE_SUB || 'Currency War Radar System').trim() || 'Currency War Radar System';
-            if (!['particles', 'starfield', 'ripple', 'off'].includes(CONFIG.BG_EFFECT_MODE)) CONFIG.BG_EFFECT_MODE = 'particles';
+            CONFIG.BG_EFFECT_MODE = BackgroundEffects.normalizeMode(CONFIG.BG_EFFECT_MODE);
+            CONFIG.BG_EFFECT_CONFIG = BackgroundEffects.normalizeConfig(CONFIG.BG_EFFECT_CONFIG, CONFIG);
+            CONFIG.MUSIC_DELAY_SECONDS = MusicTimeline.normalizeDelaySeconds(CONFIG.MUSIC_DELAY_SECONDS);
+            CONFIG.PARTICLE_OPACITY_MULT = CONFIG.BG_EFFECT_CONFIG.common.opacity;
+            CONFIG.PARTICLE_SIZE_MULT = CONFIG.BG_EFFECT_CONFIG.common.size;
             if (!['tech', 'pulse', 'orbit', 'off'].includes(CONFIG.RADAR_AUDIO_FX_MODE)) CONFIG.RADAR_AUDIO_FX_MODE = 'tech';
             namelist = Array.isArray(namelist) ? namelist : [];
             namelist = namelist.map(item => {
@@ -4894,9 +5155,11 @@
                         enabled: !!item.midPhase.enabled,
                         triggerRatio: normalizePhaseRatio(item.midPhase.triggerRatio, 0.5),
                         photoName: String(item.midPhase.photoName || '').trim(),
-                        colorIndex: item.midPhase.colorIndex === undefined || item.midPhase.colorIndex === null || item.midPhase.colorIndex === ''
-                            ? undefined
-                            : Number(item.midPhase.colorIndex),
+                        colorMode: item.midPhase.colorMode,
+                        colorIndex: item.midPhase.colorMode === 'custom' ? null : Number(item.midPhase.colorIndex),
+                        customColor: item.midPhase.colorMode === 'custom'
+                            ? cloneColorObject(item.midPhase.customColor)
+                            : undefined,
                         points: ensureLength(Array.isArray(item.midPhase.points) ? item.midPhase.points : [], vc, i => points[i] ?? 0)
                             .map((value, i) => {
                                 const n = Number(value);
@@ -4926,12 +5189,10 @@
         function rebuildDerivedData() {
             normalizeConfigAndData();
             applyBrandTexts();
-            colorPool = [...COLOR_PRESETS].sort(() => Math.random() - 0.5);
-            colorIndex = 0;
             const derivedBands = [];
-            namelist.forEach(b => {
+            namelist.forEach((b, bandIndex) => {
                 const baseDuration = b.duration || CONFIG.DEFAULT_DURATION;
-                const basePreset = resolveColorPresetByIndex(b.colorIndex, null) || getNextColor();
+                const basePreset = resolveBandColor(b, COLOR_PRESETS[bandIndex % FIXED_COLOR_COUNT]);
                 const basePhaseRatio = b?.midPhase?.enabled ? normalizePhaseRatio(b.midPhase.triggerRatio, 0.5) : null;
                 const midBandRaw = buildMidPhaseBand(b, CONFIG.VERTEX_COUNT);
                 const basePoints = Array.isArray(b.points) ? b.points : [];
@@ -4954,6 +5215,7 @@
                 derivedBands.push(baseBand);
 
                 if (midBandRaw) {
+                    const midPreset = resolveBandColor(midBandRaw, basePreset);
                     const midPrecisions = midBandRaw.points.map(val => {
                         const s = val.toString();
                         const dotIdx = s.indexOf('.');
@@ -4964,10 +5226,7 @@
                         precisions: midPrecisions,
                         isGoat: mvplist.includes(midBandRaw.name),
                         duration: Math.max(1, baseDuration - baseBand.duration),
-                        colorIndex: baseBand.colorIndex,
-                        color: baseBand.color,
-                        bg1: baseBand.bg1,
-                        bg2: baseBand.bg2
+                        ...midPreset
                     });
                 }
             });
@@ -4991,6 +5250,32 @@
             ANIM_DURATION = CONFIG.ANIM_DURATION;
         }
 
+        function applySpecialPreviewPayload() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('specialPreview') !== '1' || !SpecialProfiles) return false;
+            try {
+                const raw = sessionStorage.getItem('rock-radar-special-preview');
+                const payload = raw ? JSON.parse(raw) : null;
+                const age = Date.now() - Number(payload?.createdAt || 0);
+                if (!payload?.profile || !payload?.role || age < 0 || age > 60 * 60 * 1000) return false;
+                const profile = SpecialProfiles.normalizeProfile(payload.profile);
+                const requestedId = String(params.get('profileId') || '').trim();
+                if (requestedId && requestedId !== profile.id) return false;
+                SPECIAL_PROFILES = [profile];
+                specialProfilesConfigured = true;
+                namelist = [{
+                    ...payload.role,
+                    specialProfileId: profile.id,
+                    points: Array.isArray(payload.role.points) ? [...payload.role.points] : []
+                }];
+                isSpecialPreviewMode = true;
+                return true;
+            } catch (error) {
+                console.warn('专场预览数据无效', error);
+                return false;
+            }
+        }
+
         // 尝试从 API 加载数据，失败则使用内置默认值
         async function loadData() {
             try {
@@ -4999,14 +5284,23 @@
                     const data = await res.json();
                     if (data.CONFIG) Object.assign(CONFIG, data.CONFIG);
                     if (data.COLOR_PRESETS) COLOR_PRESETS = data.COLOR_PRESETS;
+                    if (data.SPECIAL_PROFILES !== undefined) {
+                        SPECIAL_PROFILES = data.SPECIAL_PROFILES;
+                        specialProfilesConfigured = true;
+                    }
                     if (data.mvplist) mvplist = data.mvplist;
+                    if (data.expertlist !== undefined) expertlist = normalizeNameList(data.expertlist);
                     if (data.IMAGE_META) IMAGE_META = data.IMAGE_META;
                     if (data.namelist) namelist = data.namelist;
                 }
             } catch (e) {
                 console.log('未连接到服务器，使用内置数据');
             }
+            applySpecialPreviewPayload();
             rebuildDerivedData();
+            syncPresentationLayout();
+            syncRadarCanvasResolution();
+            resizePhotoFxCanvas(true);
             applyMusicPlaylist();
             applyMusicVolume();
         }
@@ -5068,7 +5362,9 @@
         let lastTimestamp = 0;
 
         let currentThemeColor = "#00ffff";
-        let targetThemeColor = "#00ffff"; 
+        let targetThemeColor = "#00ffff";
+        let currentBgColor1 = "#0f1015";
+        let currentBgColor2 = "#1a1a2e";
         let currentScores = [0, 0, 0, 0, 0, 0];
         let startScores = [0, 0, 0, 0, 0, 0];
         let targetScores = [0, 0, 0, 0, 0, 0];
@@ -5086,8 +5382,23 @@
 
         const radarCanvas = document.getElementById("radarCanvas");
         const ctx = radarCanvas.getContext("2d");
+        const RADAR_LOGICAL_SIZE = 1600;
+        const PRESENTATION_DESIGN_WIDTH = 1920;
+        const PRESENTATION_DESIGN_HEIGHT = 1080;
         const pCanvas = document.getElementById("particles-canvas");
         const pCtx = pCanvas.getContext("2d");
+        const livingFieldCanvas = document.getElementById("living-field-canvas");
+        const livingFieldFallback = document.getElementById("living-field-fallback");
+        const backgroundEffectManager = BackgroundEffects.createManager({
+            canvas: pCanvas,
+            context: pCtx,
+            effectFactories: {
+                'living-field': () => LivingFieldEffect.createEffect({
+                    canvas: livingFieldCanvas,
+                    fallbackElement: livingFieldFallback
+                })
+            }
+        });
         const outroOverlay = document.getElementById("outroOverlay");
         const outroVideo = document.getElementById("outroVideo");
         const outroThanks = document.getElementById("outroThanks");
@@ -5098,10 +5409,6 @@
         const globalBar = document.getElementById("globalBar");
         const globalTimeline = document.getElementById("globalTimeline");
         const timelineTooltip = document.getElementById("timelineTooltip");
-        let particles = [];
-        let backgroundStars = [];
-        let bgRippleTime = 0;
-        let lastBgEffectMode = '';
         let perfFrameEma = 16.7;
         let perfAdaptiveQuality = 1;
         let pCanvasScaleApplied = 1;
@@ -5145,11 +5452,15 @@
         let audioVizTreble = 0;
         let audioVizBeat = 0;
         let audioVizPrevBass = 0;
-        let musicPlaylist = ["music.mp3"];
+        let musicPlaylist = ["/assets/audio/music.mp3"];
         let musicTrackDurations = [];
         let currentMusicTrackIndex = 0;
         let musicPlaybackCycles = 0;
         let musicEndedHandlerBound = false;
+        let musicSessionActive = false;
+        let musicIntroActive = false;
+        let musicPresentationStartedAt = 0;
+        let musicDelayStarted = false;
         let outroActive = false;
         let outroFinished = false;
         let outroVideoLoadToken = 0;
@@ -5158,6 +5469,39 @@
         let outroSceneSuspended = false;
         let gachaAnimationSession = 0;
         let gachaTimerIds = [];
+
+        function getRadarBackingScale() {
+            return Math.max(1, radarCanvas.width / RADAR_LOGICAL_SIZE);
+        }
+
+        function getRadarLogicalMetrics() {
+            const scale = getRadarBackingScale();
+            return {
+                scale,
+                width: radarCanvas.width / scale,
+                height: radarCanvas.height / scale
+            };
+        }
+
+        function syncRadarCanvasResolution() {
+            const rect = radarCanvas.getBoundingClientRect();
+            const deviceScale = clampNumber(window.devicePixelRatio || 1, 1, 2);
+            const renderedSize = Math.max(rect.width, rect.height, RADAR_LOGICAL_SIZE);
+            const backingScale = clampNumber(
+                renderedSize * deviceScale / RADAR_LOGICAL_SIZE,
+                1,
+                3
+            );
+            const targetSize = Math.ceil((RADAR_LOGICAL_SIZE * backingScale) / 64) * 64;
+            if (radarCanvas.width === targetSize && radarCanvas.height === targetSize) return;
+            radarCanvas.width = targetSize;
+            radarCanvas.height = targetSize;
+        }
+
+        function clearRadarCanvas() {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, radarCanvas.width, radarCanvas.height);
+        }
 
         if (outroVideo) {
             outroVideo.addEventListener("ended", () => {
@@ -5178,6 +5522,37 @@
 
         function clampNumber(v, min, max) {
             return Math.max(min, Math.min(max, v));
+        }
+
+        function getPresentationScale() {
+            const configuredScale = Number(CONFIG.PRESENTATION_SCALE);
+            return Number.isFinite(configuredScale)
+                ? clampNumber(configuredScale, 0.8, 1.6)
+                : 1.3;
+        }
+
+        function getViewportFitScale() {
+            const viewportWidth = Math.max(1, window.innerWidth || PRESENTATION_DESIGN_WIDTH);
+            const viewportHeight = Math.max(1, window.innerHeight || PRESENTATION_DESIGN_HEIGHT);
+            return Math.min(
+                viewportWidth / PRESENTATION_DESIGN_WIDTH,
+                viewportHeight / PRESENTATION_DESIGN_HEIGHT
+            );
+        }
+
+        function syncPresentationLayout() {
+            const rootStyle = document.documentElement.style;
+            const presentationScale = getPresentationScale();
+            rootStyle.setProperty('--viewport-scale', getViewportFitScale().toFixed(6));
+            rootStyle.setProperty('--presentation-scale', presentationScale.toFixed(3));
+            rootStyle.setProperty('--presentation-layout-width', `${1700 / presentationScale}px`);
+            rootStyle.setProperty('--presentation-layout-height', `${1015 / presentationScale}px`);
+
+            const responsivePhotoContainer = document.getElementById('photoContainer');
+            if (responsivePhotoContainer) {
+                responsivePhotoContainer.style.height = `${380 * CONFIG.IMAGE_SCALE}px`;
+            }
+            invalidateTimelineRect();
         }
 
         function getRadarVertices(count = CONFIG.VERTEX_COUNT) {
@@ -5256,8 +5631,9 @@
             if (!cleaner || !Array.isArray(vertices) || !vertices.length) return;
 
             const rect = radarCanvas.getBoundingClientRect();
-            const scaleX = rect.width / Math.max(1, radarCanvas.width);
-            const scaleY = rect.height / Math.max(1, radarCanvas.height);
+            const logicalMetrics = getRadarLogicalMetrics();
+            const scaleX = rect.width / Math.max(1, logicalMetrics.width);
+            const scaleY = rect.height / Math.max(1, logicalMetrics.height);
             const points = vertices.map(vertex => {
                 const x = rect.left + (centerX + radius * vertex.cos) * scaleX;
                 const y = rect.top + (centerY + radius * vertex.sin) * scaleY;
@@ -5296,7 +5672,7 @@
             parseBondTags(band.desc || '').forEach(tag => preloadBases.push(`faction_${tag}`));
             if (mvplist.includes(displayName)) preloadBases.push(`${displayName}1`);
             if (shouldPlayGachaForBand(band, index, false)) {
-                preloadBases.push(`best_${displayName || band.name}`, 'gacha_door_left', 'gacha_door_right');
+                preloadBases.push(`best_${displayName || band.name}`);
             }
 
             prewarmNamedImage(preloadBases);
@@ -5380,32 +5756,6 @@
             const baseName = String(band?.name || '').trim();
             if (!baseName) return '';
             return baseName;
-        }
-
-        function normalizeStarLevel(value) {
-            const level = parseInt(value, 10);
-            if (!Number.isFinite(level)) return 5;
-            return Math.max(1, Math.min(5, level));
-        }
-
-        function applyBandStarLevel(band, sessionId = uiTransitionSession) {
-            const img = document.getElementById('bandStarRank');
-            if (!img) return;
-            const level = normalizeStarLevel(band?.starLevel);
-            img.classList.remove('show');
-            img.classList.remove('exit');
-            img.alt = `${level}星`;
-            img.title = `${level}星`;
-            img.src = `./pic/Star${level}.png`;
-            img.onload = () => {
-                if (!isUiTransitionActive(sessionId)) return;
-                img.classList.remove('exit');
-                img.classList.add('show');
-            };
-            img.onerror = () => {
-                if (!isUiTransitionActive(sessionId)) return;
-                img.classList.remove('show');
-            };
         }
 
         function crossfadeBandPhotoVariant(nextPhotoName, sessionId = uiTransitionSession) {
@@ -5548,6 +5898,7 @@
         }
 
         function syncBandPhotoVariant() {
+            if (gachaPlaying) return;
             if (currentIndex < 0 || !bands[currentIndex]) return;
             const photoEl = document.getElementById('bandPhoto');
             const photoContainer = document.getElementById('photoContainer');
@@ -5615,7 +5966,7 @@
             ids.forEach(id => {
                 const img = document.createElement('img');
                 img.className = 'band-equipment-icon';
-                img.src = `./pic/${id}.png`;
+                img.src = `/assets/images/${id}.png`;
                 img.alt = `装备 ${id}`;
                 img.title = `装备 ${id}`;
                 img.onload = () => {
@@ -5646,10 +5997,102 @@
             return clampNumber(raw, 0, 1);
         }
 
+        function getMusicDelaySeconds() {
+            return MusicTimeline.normalizeDelaySeconds(CONFIG.MUSIC_DELAY_SECONDS);
+        }
+
         function applyMusicVolume() {
             const audio = document.getElementById("bgMusic");
             if (!audio) return;
+            if (musicSessionActive && !musicDelayStarted) {
+                audio.volume = 0;
+                return;
+            }
             audio.volume = getMusicVolume();
+        }
+
+        function getCurrentMusicPresentationMs() {
+            if (musicIntroActive) {
+                return Math.max(0, performance.now() - musicPresentationStartedAt);
+            }
+            return MusicTimeline.getPresentationTimeMs(globalCurrentTime, getLeadInDurationMs());
+        }
+
+        function holdMusicAtDelayStart(audio) {
+            if (!audio) return;
+            musicDelayStarted = false;
+            audio.pause();
+            audio.volume = 0;
+            musicPlaybackCycles = 0;
+            setMusicTrack(audio, 0, 0, false);
+        }
+
+        function setMusicToPresentationTime(audio, presentationMs) {
+            if (!audio) return false;
+            const mappedSeconds = MusicTimeline.mapPresentationMsToAudioSeconds(
+                presentationMs,
+                getMusicDelaySeconds()
+            );
+            const delayElapsed = presentationMs >= MusicTimeline.getDelayMs(getMusicDelaySeconds());
+            if (!delayElapsed) {
+                holdMusicAtDelayStart(audio);
+                return false;
+            }
+
+            const cycleDuration = getPlaylistCycleDuration(audio);
+            musicPlaybackCycles = cycleDuration > 0 ? Math.floor(mappedSeconds / cycleDuration) : 0;
+            const pos = mapContentSecondsToPlaylistPosition(mappedSeconds, audio);
+            setMusicTrack(audio, pos.trackIndex, pos.time, false);
+            musicDelayStarted = true;
+            applyMusicVolume();
+            return true;
+        }
+
+        function playMusicForCurrentTimeline() {
+            const audio = document.getElementById("bgMusic");
+            if (!audio) return false;
+            if (!musicSessionActive) {
+                musicSessionActive = true;
+                musicIntroActive = false;
+            }
+
+            if (!musicDelayStarted) {
+                const started = setMusicToPresentationTime(audio, getCurrentMusicPresentationMs());
+                if (!started) return false;
+            }
+
+            audio.play().catch(error => console.log("Audio play failed", error));
+            initAudioVisualizer();
+            return true;
+        }
+
+        function beginMusicPresentation(audio) {
+            if (!audio) return;
+            musicSessionActive = true;
+            musicIntroActive = true;
+            musicPresentationStartedAt = performance.now();
+            musicPlaybackCycles = 0;
+            holdMusicAtDelayStart(audio);
+            if (getMusicDelaySeconds() === 0) {
+                playMusicForCurrentTimeline();
+            }
+        }
+
+        function updateDelayedMusic() {
+            if (!musicSessionActive) return;
+            const audio = document.getElementById("bgMusic");
+            if (!audio) return;
+
+            if (!musicDelayStarted) {
+                const presentationMs = getCurrentMusicPresentationMs();
+                const delayMs = MusicTimeline.getDelayMs(getMusicDelaySeconds());
+                const canStart = musicIntroActive || !isPaused || outroActive;
+                if (canStart && presentationMs >= delayMs) {
+                    setMusicToPresentationTime(audio, presentationMs);
+                    audio.play().catch(error => console.log("Audio play failed", error));
+                    initAudioVisualizer();
+                }
+            }
         }
 
         function getConfiguredMusicPlaylist() {
@@ -5658,7 +6101,7 @@
             if (Array.isArray(raw)) tracks = raw;
             else if (typeof raw === "string") tracks = raw.split(/[,\n;|]/g);
             tracks = tracks.map(s => String(s || "").trim()).filter(Boolean);
-            if (!tracks.length) tracks = ["music.mp3"];
+            if (!tracks.length) tracks = ["/assets/audio/music.mp3"];
             return tracks;
         }
 
@@ -5780,15 +6223,15 @@
                 }
             } else if (!items.length) {
                 items = [
-                    "ending-lite.mp4",
-                    "ending-720p.mp4",
-                    "ending.mp4",
-                    "ending.webm",
-                    "ending.mov",
-                    "outro.mp4",
-                    "outro.webm",
-                    "final.mp4",
-                    "final.webm"
+                    "/assets/video/ending-lite.mp4",
+                    "/assets/video/ending-720p.mp4",
+                    "/assets/video/ending.mp4",
+                    "/assets/video/ending.webm",
+                    "/assets/video/ending.mov",
+                    "/assets/video/outro.mp4",
+                    "/assets/video/outro.webm",
+                    "/assets/video/final.mp4",
+                    "/assets/video/final.webm"
                 ];
             }
             return Array.from(new Set(items));
@@ -6000,10 +6443,24 @@
             return Math.max(24, Math.round(base * (0.72 + perfAdaptiveQuality * 0.28)));
         }
 
+        function getLivingFieldQualityScale() {
+            const preset = CONFIG.PERFORMANCE_MODE || 'balanced';
+            const ceiling = preset === 'high' ? 0.72 : preset === 'smooth' ? 0.5 : 0.58;
+            return clampNumber(ceiling * (0.84 + perfAdaptiveQuality * 0.16), 0.42, ceiling);
+        }
+
         function getBgEffectMode() {
-            return ['particles', 'starfield', 'ripple', 'off'].includes(CONFIG.BG_EFFECT_MODE)
-                ? CONFIG.BG_EFFECT_MODE
-                : 'particles';
+            const specialMode = activeSpecialProfile?.effects?.backgroundEffect;
+            const configuredMode = specialMode && specialMode !== 'inherit' ? specialMode : CONFIG.BG_EFFECT_MODE;
+            return BackgroundEffects.normalizeMode(configuredMode);
+        }
+
+        function getBgEffectConfig() {
+            return BackgroundEffects.resolveConfig(
+                CONFIG.BG_EFFECT_CONFIG,
+                activeSpecialProfile?.effects?.backgroundConfig,
+                CONFIG
+            );
         }
 
         function getRadarAudioFxMode() {
@@ -6573,7 +7030,7 @@
                 const cached = namedImageCache.get(base);
                 if (cached) candidates.push(cached);
                 extensions.forEach(ext => {
-                    const candidate = { base, name: `${base}.${ext}`, url: `./pic/${base}.${ext}` };
+                    const candidate = { base, name: `${base}.${ext}`, url: `/assets/images/${base}.${ext}` };
                     if (cached && cached.name === candidate.name) return;
                     candidates.push(candidate);
                 });
@@ -6793,7 +7250,11 @@
         }
 
         function getAudioTimeForContentMs(contentMs, audioDuration = 0) {
-            const mapped = (getLeadInDurationMs() + Math.max(0, contentMs)) / 1000;
+            const mapped = MusicTimeline.mapContentMsToAudioSeconds(
+                contentMs,
+                getLeadInDurationMs(),
+                getMusicDelaySeconds()
+            );
             if (audioDuration > 0) return mapped % audioDuration;
             return mapped;
         }
@@ -6819,9 +7280,14 @@
         }
 
         function getContentTimeFromAudio(audio) {
+            if (!musicDelayStarted || audio?.paused) return NaN;
             const elapsed = getAudioElapsedSeconds(audio);
             if (!Number.isFinite(elapsed)) return NaN;
-            return Math.max(0, elapsed * 1000 - getLeadInDurationMs());
+            return MusicTimeline.mapAudioSecondsToContentMs(
+                elapsed,
+                getLeadInDurationMs(),
+                getMusicDelaySeconds()
+            );
         }
 
         function syncContentTimeFromAudio() {
@@ -6836,11 +7302,23 @@
         function syncAudioToContentTime(contentMs = globalCurrentTime) {
             const audio = document.getElementById("bgMusic");
             if (!audio) return;
+            musicSessionActive = true;
+            musicIntroActive = false;
+            const presentationMs = MusicTimeline.getPresentationTimeMs(
+                contentMs,
+                getLeadInDurationMs()
+            );
+            if (presentationMs < MusicTimeline.getDelayMs(getMusicDelaySeconds())) {
+                holdMusicAtDelayStart(audio);
+                return;
+            }
             const mappedSeconds = getAudioTimeForContentMs(contentMs, 0);
             const cycleDuration = getPlaylistCycleDuration(audio);
             musicPlaybackCycles = cycleDuration > 0 ? Math.floor(mappedSeconds / cycleDuration) : 0;
             const pos = mapContentSecondsToPlaylistPosition(mappedSeconds, audio);
             setMusicTrack(audio, pos.trackIndex, pos.time, false);
+            musicDelayStarted = true;
+            applyMusicVolume();
         }
 
         function clearGachaTimers() {
@@ -6861,16 +7339,15 @@
             const overlay = document.getElementById('gachaOverlay');
             const panelTop = document.getElementById('gachaPanelTop');
             const panelBottom = document.getElementById('gachaPanelBottom');
-            const panelTopImg = document.getElementById('gachaPanelTopImg');
-            const panelBottomImg = document.getElementById('gachaPanelBottomImg');
             const logo = document.getElementById('gachaLogo');
             const bgImg = document.getElementById('gachaBgImg');
             const nameEl = document.getElementById('gachaName');
-            if (!overlay || !panelTop || !panelBottom || !panelTopImg || !panelBottomImg || !logo || !bgImg || !nameEl) return;
+            if (!overlay || !panelTop || !panelBottom || !logo || !bgImg || !nameEl) return;
 
             overlay.classList.remove('active', 'gacha-fadeout');
             overlay.classList.remove('gacha-type-0', 'gacha-type-1', 'gacha-type-2');
             overlay.classList.remove('gacha-band-silverwolf');
+            overlay.style.removeProperty('--gacha-accent');
             panelTop.classList.remove('open');
             panelBottom.classList.remove('open');
             logo.classList.remove('show');
@@ -6878,8 +7355,6 @@
             bgImg.style.removeProperty('transform');
             bgImg.style.removeProperty('filter');
             bgImg.removeAttribute('src');
-            panelTopImg.removeAttribute('src');
-            panelBottomImg.removeAttribute('src');
             nameEl.classList.remove('show');
             nameEl.className = 'gacha-name';
         }
@@ -6899,7 +7374,9 @@
 
         function getBandGachaPauseDuration(band, index = -1) {
             if (!shouldPlayGachaForBand(band, index, false)) return 0;
-            return Math.max(CONFIG.GACHA_ANIM_DURATION || 4500, 2200) + 800;
+            const profile = getBandSpecialProfile(band);
+            const duration = profile?.transitions?.gachaDuration || CONFIG.GACHA_ANIM_DURATION || 4500;
+            return Math.max(duration, 2200) + 800;
         }
 
         function getBandTimelineDuration(band, index = -1) {
@@ -6988,7 +7465,7 @@
             radarVisible = false;
             radarCanvas.classList.remove("radar-reveal");
             radarCanvas.classList.add("radar-hidden");
-            ctx.clearRect(0, 0, radarCanvas.width, radarCanvas.height);
+            clearRadarCanvas();
         }
 
         function queueRadarReveal(nextStartScores, nextTargetScores, delay) {
@@ -7015,8 +7492,9 @@
         }
 
         function computeRadarLayout(scores) {
-            const w = radarCanvas.width;
-            const h = radarCanvas.height;
+            const logicalMetrics = getRadarLogicalMetrics();
+            const w = logicalMetrics.width;
+            const h = logicalMetrics.height;
             const baseCenterX = w / 2;
             const baseCenterY = h / 2;
             const baseMaxR = 1000 * 0.4 * CONFIG.RADAR_SCALE;
@@ -7084,6 +7562,8 @@
         }
         
         function resizeCanvas() {
+            syncPresentationLayout();
+            syncRadarCanvasResolution();
             const scale = getCurrentRenderScale();
             pCanvasScaleApplied = scale;
             pCanvas.width = Math.max(2, Math.round(window.innerWidth * scale));
@@ -7120,142 +7600,32 @@
             photoFxCornerPulse = 0;
         }
 
-        function ensureBackgroundParticles() {
-            const target = getBgParticleTarget();
-            while (particles.length < target) {
-                particles.push(new Particle(Math.random() < 0.66 ? "normal" : "nebula"));
-            }
-            if (particles.length > target) particles.length = target;
-        }
-
-        function ensureBackgroundStars() {
-            const target = Math.max(36, Math.round(getBgParticleTarget() * 1.45));
-            while (backgroundStars.length < target) {
-                backgroundStars.push({
-                    x: Math.random() * pCanvas.width,
-                    y: Math.random() * pCanvas.height,
-                    z: Math.random() * 0.85 + 0.15,
-                    twinkle: Math.random() * Math.PI * 2,
-                    hueShift: Math.random() * 40 - 20
-                });
-            }
-            if (backgroundStars.length > target) backgroundStars.length = target;
-        }
-
-        function drawParticleBackground() {
-            return;
-        }
-
-        function drawStarfieldBackground(deltaTime) {
-            ensureBackgroundStars();
-            const speed = (0.035 + audioVizBass * 0.08) * (deltaTime || 16.7);
-            const cx = pCanvas.width * 0.5;
-            const cy = pCanvas.height * 0.48;
-            const accent = currentThemeColor || '#63e6ff';
-
-            pCtx.save();
-            pCtx.globalCompositeOperation = 'lighter';
-            for (const star of backgroundStars) {
-                star.z += speed * 0.00042;
-                star.twinkle += 0.018 + star.z * 0.012;
-                if (star.z > 1.18) {
-                    star.x = Math.random() * pCanvas.width;
-                    star.y = Math.random() * pCanvas.height;
-                    star.z = 0.12;
-                    star.twinkle = Math.random() * Math.PI * 2;
-                }
-
-                const dx = star.x - cx;
-                const dy = star.y - cy;
-                const px = cx + dx * (0.72 + star.z * 0.42);
-                const py = cy + dy * (0.72 + star.z * 0.42);
-                const size = (0.8 + star.z * 2.2) * CONFIG.PARTICLE_SIZE_MULT;
-                const alpha = (0.22 + star.z * 0.55 + Math.sin(star.twinkle) * 0.12) * CONFIG.PARTICLE_OPACITY_MULT * 0.55;
-
-                pCtx.fillStyle = hexToRgbA(accent, Math.max(0, Math.min(0.86, alpha)));
-                pCtx.shadowBlur = 5 + star.z * 13;
-                pCtx.shadowColor = hexToRgbA(accent, 0.28 + star.z * 0.3);
-                pCtx.beginPath();
-                pCtx.arc(px, py, size, 0, Math.PI * 2);
-                pCtx.fill();
-
-                if (star.z > 0.72) {
-                    pCtx.strokeStyle = hexToRgbA('#f4fbff', 0.08 + star.z * 0.12);
-                    pCtx.lineWidth = 0.7 + star.z * 0.9;
-                    pCtx.beginPath();
-                    pCtx.moveTo(px - dx * 0.012 * star.z, py - dy * 0.012 * star.z);
-                    pCtx.lineTo(px + dx * 0.018 * star.z, py + dy * 0.018 * star.z);
-                    pCtx.stroke();
-                }
-            }
-            pCtx.restore();
-        }
-
-        function drawRippleBackground(deltaTime) {
-            bgRippleTime += (deltaTime || 16.7) * 0.001;
-            const accent = currentThemeColor || '#63e6ff';
-            const cx = pCanvas.width * 0.5;
-            const cy = pCanvas.height * 0.5;
-            const maxR = Math.hypot(pCanvas.width, pCanvas.height) * 0.54;
-            const pulse = clampNumber(audioVizBeat * 0.7 + audioVizBass * 0.5, 0, 1);
-            const ringCount = Math.max(5, Math.round(8 * getAudioQualityScale()));
-
-            pCtx.save();
-            pCtx.globalCompositeOperation = 'lighter';
-            for (let i = 0; i < ringCount; i++) {
-                const progress = (bgRippleTime * (0.08 + pulse * 0.045) + i / ringCount) % 1;
-                const r = maxR * progress;
-                const alpha = (1 - progress) * (0.09 + pulse * 0.1) * CONFIG.PARTICLE_OPACITY_MULT;
-                pCtx.beginPath();
-                pCtx.arc(cx, cy, r, 0, Math.PI * 2);
-                pCtx.lineWidth = (1.2 + progress * 2.8 + pulse * 2) * Math.max(0.7, CONFIG.PARTICLE_SIZE_MULT * 0.55);
-                pCtx.strokeStyle = hexToRgbA(accent, Math.max(0, Math.min(0.32, alpha)));
-                pCtx.shadowBlur = 12 + pulse * 18;
-                pCtx.shadowColor = hexToRgbA(accent, 0.12 + pulse * 0.18);
-                pCtx.stroke();
-            }
-
-            const waveCount = 4;
-            for (let i = 0; i < waveCount; i++) {
-                const y = pCanvas.height * (0.18 + i * 0.18) + Math.sin(bgRippleTime * 1.2 + i) * pCanvas.height * 0.035;
-                pCtx.beginPath();
-                for (let x = -20; x <= pCanvas.width + 20; x += 28) {
-                    const yy = y + Math.sin(x * 0.008 + bgRippleTime * (1.8 + i * 0.25)) * (14 + pulse * 22);
-                    if (x === -20) pCtx.moveTo(x, yy);
-                    else pCtx.lineTo(x, yy);
-                }
-                pCtx.lineWidth = 1.1 + pulse * 1.5;
-                pCtx.strokeStyle = hexToRgbA('#f3fbff', 0.035 + pulse * 0.055);
-                pCtx.shadowBlur = 8 + pulse * 10;
-                pCtx.shadowColor = hexToRgbA(accent, 0.08 + pulse * 0.12);
-                pCtx.stroke();
-            }
-            pCtx.restore();
-        }
-
         function drawBackgroundEffect(deltaTime) {
-            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-            if (!isParticlesEnabled) return;
-            window.__bgParticleDeltaTime = deltaTime || 16.7;
-
             const mode = getBgEffectMode();
-            const useCoverBg = mode === 'particles';
-            document.body.classList.toggle('cover-bg-active', useCoverBg);
-            if (mode !== lastBgEffectMode) {
-                particles = [];
-                backgroundStars = [];
-                bgRippleTime = 0;
-                lastBgEffectMode = mode;
-            }
-            if (mode === 'off') return;
-            if (useCoverBg) return;
-            if (mode === 'starfield') {
-                drawStarfieldBackground(deltaTime);
-            } else if (mode === 'ripple') {
-                drawRippleBackground(deltaTime);
-            } else {
-                drawParticleBackground();
-            }
+            pCanvas.dataset.effectMode = mode;
+            pCanvas.dataset.effectEnabled = String(isParticlesEnabled);
+            livingFieldCanvas.dataset.effectMode = mode;
+            livingFieldCanvas.dataset.effectEnabled = String(isParticlesEnabled);
+            backgroundEffectManager.render({
+                enabled: isParticlesEnabled,
+                mode,
+                config: getBgEffectConfig(),
+                deltaTime,
+                accent: currentThemeColor,
+                particleTarget: getBgParticleTarget(),
+                qualityScale: getLivingFieldQualityScale(),
+                palette: {
+                    bg1: currentBgColor1,
+                    bg2: currentBgColor2
+                },
+                audio: {
+                    energy: audioVizEnergy,
+                    bass: audioVizBass,
+                    mid: audioVizMid,
+                    treble: audioVizTreble,
+                    beat: audioVizBeat
+                }
+            });
         }
 
         function drawRoundedRectPath(context, x, y, w, h, r) {
@@ -7443,70 +7813,6 @@
             photoFxCtx.restore();
         }
 
-        class Particle {
-            constructor(type = "normal") { 
-                this.type = type; 
-                this.reset(true); 
-            }
-            reset(init = false) {
-                this.x = Math.random() * pCanvas.width;
-                this.baseX = this.x;
-                this.isTop = Math.random() > 0.5;
-                this.y = this.isTop ? -100 : pCanvas.height + 100;
-                if (init) this.y = Math.random() * pCanvas.height;
-                this.wavePhase = Math.random() * Math.PI * 2;
-                this.waveFreq = Math.random() * 0.006 + 0.0035;
-                this.waveAmp = Math.random() * 28 + (this.type === "normal" ? 18 : 34);
-                this.waveDrift = (Math.random() - 0.5) * 0.018;
-                
-                if (this.type === "normal") {
-                    this.vy = (this.isTop ? 1 : -1) * (Math.random() * 1.5 + 0.5);
-                    this.vx = (Math.random() - 0.5) * 1;
-                    this.size = Math.random() * 2 + 1;
-                    this.bloomMult = 10 * CONFIG.PARTICLE_SIZE_MULT; 
-                    this.alphaMult = 0.9 * CONFIG.PARTICLE_OPACITY_MULT;
-                } else {
-                    this.vy = (this.isTop ? 1 : -1) * (Math.random() * 0.4 + 0.2); 
-                    this.vx = (Math.random() - 0.5) * 0.5;
-                    this.size = Math.random() * 5 + 5; 
-                    this.bloomMult = 15 * CONFIG.PARTICLE_SIZE_MULT; 
-                    this.alphaMult = 0.25 * CONFIG.PARTICLE_OPACITY_MULT; 
-                }
-                this.life = 1;
-            }
-            update(deltaTime = 16.7) {
-                this.y += this.vy;
-                this.baseX += this.vx;
-                const waveProgress = this.y * this.waveFreq + performance.now() * this.waveDrift;
-                const waveCurve = Math.sin(waveProgress + this.wavePhase) + Math.sin(waveProgress * 0.52 + this.wavePhase * 1.7) * 0.5;
-                this.x = this.baseX + waveCurve * this.waveAmp;
-                let dist = Math.abs(this.y - pCanvas.height/2) / (pCanvas.height/2);
-                this.life = dist;
-                if (this.life <= 0.05 || this.y < -150 || this.y > pCanvas.height + 150 || this.x < -180 || this.x > pCanvas.width + 180) this.reset();
-            }
-            draw() {
-                pCtx.save();
-                pCtx.globalAlpha = Math.max(0, this.life * this.alphaMult);
-                let gradSize = this.size * this.bloomMult;
-                let gradient = pCtx.createRadialGradient(this.x, this.y, 0, this.x, this.y, gradSize);
-                gradient.addColorStop(0, hexToRgbA(currentThemeColor, 0.7));
-                gradient.addColorStop(0.3, hexToRgbA(currentThemeColor, 0.2));
-                gradient.addColorStop(1, "transparent");
-                pCtx.fillStyle = gradient;
-                pCtx.beginPath();
-                pCtx.arc(this.x, this.y, gradSize, 0, Math.PI * 2);
-                pCtx.fill();
-                if (this.type === "normal") {
-                    pCtx.fillStyle = "#fff";
-                    pCtx.beginPath();
-                    pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    pCtx.fill();
-                }
-                pCtx.restore();
-            }
-        }
-        ensureBackgroundParticles();
-
         function hexToRgbA(hex, alpha) {
             const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})` : `rgba(255,255,255,${alpha})`;
@@ -7575,6 +7881,22 @@
             return getBandDisplayName(band);
         }
 
+        function fadeOutExpertBadge() {
+            const badge = document.getElementById('expertBadge');
+            if (!badge || badge.hidden) return;
+            badge.classList.remove('is-visible');
+            badge.classList.add('fade-out');
+        }
+
+        function syncExpertBadge(displayName) {
+            const badge = document.getElementById('expertBadge');
+            if (!badge) return;
+            const isExpert = expertlist.includes(String(displayName || '').trim());
+            badge.classList.remove('fade-out');
+            badge.classList.toggle('is-visible', isExpert);
+            badge.hidden = !isExpert;
+        }
+
         /**
          * 播放抽卡出金动画
          * @param {Object} band - 即将展示的乐队数据对象
@@ -7588,8 +7910,6 @@
                 const overlay = document.getElementById('gachaOverlay');
                 const panelTop = document.getElementById('gachaPanelTop');
                 const panelBottom = document.getElementById('gachaPanelBottom');
-                const panelTopImg = document.getElementById('gachaPanelTopImg');
-                const panelBottomImg = document.getElementById('gachaPanelBottomImg');
                 const logo = document.getElementById('gachaLogo');
                 const bgImg = document.getElementById('gachaBgImg');
                 const nameEl = document.getElementById('gachaName');
@@ -7598,9 +7918,14 @@
                 const displayIdentityBand = displayName && displayName !== band.name
                     ? { ...band, name: displayName }
                     : band;
-                const isSilverWolfGacha = isSilverwolfBand(displayIdentityBand);
+                const specialProfile = getBandSpecialProfile(displayIdentityBand);
+                const specialGachaStyle = specialProfile?.gacha?.style || 'inherit';
+                const isSilverWolfGacha = specialGachaStyle === 'silverwolf';
                 const overlayTypeClass = `gacha-type-${animType}`;
-                const duration = Math.max(CONFIG.GACHA_ANIM_DURATION || 4500, 2200);
+                const duration = Math.max(
+                    specialProfile?.transitions?.gachaDuration || CONFIG.GACHA_ANIM_DURATION || 4500,
+                    2200
+                );
 
                 const timelineByType = {
                     0: { logoOn: 160, openAt: 1180, bgOn: 1480, nameOn: 2250 },
@@ -7621,27 +7946,12 @@
                 resetGachaOverlayState();
                 overlay.offsetWidth;
 
-                loadNamedImage(`best_${displayName || band.name}`, candidate => {
+                const gachaBackgroundName = specialProfile?.assets?.gachaBackgroundName || `best_${displayName || band.name}`;
+                loadNamedImage(gachaBackgroundName, candidate => {
                     bgImg.src = candidate.url;
                     applyImageMeta(bgImg, candidate.name, { fit: 'cover', x: 50, y: 50, scale: 1 }, true);
                 }, () => {
                     bgImg.src = '';
-                }, () => sessionId === gachaAnimationSession);
-
-                loadNamedImage('gacha_door_left', candidate => {
-                    panelTopImg.src = candidate.url;
-                    applyImageMeta(panelTopImg, candidate.name, { fit: 'cover', x: 50, y: 50, scale: 1 }, true, 'left-half');
-                    setElementUserScale(panelTopImg, 'rotate(18deg)');
-                }, () => {
-                    panelTopImg.removeAttribute('src');
-                }, () => sessionId === gachaAnimationSession);
-
-                loadNamedImage('gacha_door_right', candidate => {
-                    panelBottomImg.src = candidate.url;
-                    applyImageMeta(panelBottomImg, candidate.name, { fit: 'cover', x: 50, y: 50, scale: 1 }, true, 'right-half');
-                    setElementUserScale(panelBottomImg, 'rotate(18deg)');
-                }, () => {
-                    panelBottomImg.removeAttribute('src');
                 }, () => sessionId === gachaAnimationSession);
 
                 // 设置艺术字名称和风格
@@ -7653,6 +7963,11 @@
                 // 显示遮罩
                 overlay.classList.add(overlayTypeClass);
                 overlay.classList.toggle('gacha-band-silverwolf', isSilverWolfGacha);
+                if (specialProfile?.gacha?.accent) {
+                    overlay.style.setProperty('--gacha-accent', specialProfile.gacha.accent);
+                } else {
+                    overlay.style.removeProperty('--gacha-accent');
+                }
                 overlay.classList.add('active');
 
                 // T+logoOn: 显示 logo
@@ -7698,35 +8013,33 @@
             const nameEl = document.getElementById("bandName");
             const containerEl = document.getElementById("bandDetailContainer");
             const photoEl = document.getElementById("bandPhoto");
-            const starEl = document.getElementById("bandStarRank");
-            const shouldCenterReveal = isFirst || bandHasBest(band);
             const prevBand = forcedPrevBand || null;
             const isMidPhase = isMidPhaseTransition(prevBand, band);
 
             // 抽卡出金动画检查
             if (shouldPlayGachaForBand(band, currentIndex, isFirst)) {
+                const gachaTargetBand = band;
+                const gachaTargetIndex = currentIndex;
+                const gachaTargetPrevBand = prevBand;
+
                 hideRadar();
 
                 // 先淡出旧内容
                 nameEl.style.animation = 'none';
                 containerEl.style.animation = 'none';
                 nameEl.classList.add("fade-out");
+                fadeOutExpertBadge();
                 containerEl.classList.add("fade-out");
-                if (starEl) {
-                    starEl.classList.remove("show");
-                    starEl.classList.add("exit");
-                }
                 setPhotoTransform(photoEl, "translate3d(88px, 0, 0) scale(0.92)");
                 photoEl.style.opacity = "0";
 
-                playGachaAnimation(band).then(() => {
+                playGachaAnimation(gachaTargetBand).then(() => {
                     if (!isUiTransitionActive(sessionId)) return;
-                    const currentSegment = getTimeSegmentAt(globalCurrentTime, false);
-                    const resolvedIndex = currentSegment?.bandIndex;
-                    if (!Number.isInteger(resolvedIndex) || !bands[resolvedIndex]) return;
-                    currentIndex = resolvedIndex;
-                    const resolvedPrevBand = getTransitionPrevBandForIndex(resolvedIndex);
-                    performTransition(bands[resolvedIndex], false, sessionId, { postGachaFastReveal: true, prevBand: resolvedPrevBand });
+                    currentIndex = gachaTargetIndex;
+                    performTransition(gachaTargetBand, false, sessionId, {
+                        postGachaFastReveal: true,
+                        prevBand: gachaTargetPrevBand
+                    });
                 });
                 return;
             }
@@ -7742,11 +8055,8 @@
                 nameEl.style.animation = 'none';
                 containerEl.style.animation = 'none';
                 nameEl.classList.add("fade-out");
+                fadeOutExpertBadge();
                 containerEl.classList.add("fade-out");
-                if (starEl) {
-                    starEl.classList.remove("show");
-                    starEl.classList.add("exit");
-                }
                 setPhotoTransform(photoEl, "translate3d(88px, 0, 0) scale(0.92)");
                 photoEl.style.opacity = "0";
 
@@ -7771,25 +8081,35 @@
             const photoContainer = document.querySelector(".band-photo-container");
             const photoEl = document.getElementById("bandPhoto");
             const mvpContainer = document.getElementById("mvpBgContainer");
-            const shouldCenterReveal = isFirst || bandHasBest(band);
-            const shouldUsePostGachaTiming = !!options.postGachaFastReveal && shouldCenterReveal;
             const prevBand = options.prevBand || null;
             const isMidPhase = options.isMidPhase === true || isMidPhaseTransition(prevBand, band);
             const displayName = getBandDisplayName(band);
             const displayIdentityBand = displayName && displayName !== band.name
                 ? { ...band, name: displayName }
                 : band;
-            const isSilverWolf = isSilverwolfBand(displayIdentityBand);
+            const specialProfile = getBandSpecialProfile(displayIdentityBand);
+            const radarTransition = specialProfile?.effects?.radarTransition || 'default';
+            const shouldCenterReveal = radarTransition === 'morph'
+                ? isFirst
+                : isFirst
+                    || bandHasBest(band)
+                    || radarTransition === 'center-reveal'
+                    || radarTransition === 'pulse';
+            const shouldUsePostGachaTiming = !!options.postGachaFastReveal && shouldCenterReveal;
             let centerRevealQueued = false;
 
             // MVP 底图逻辑
             const isMvp = mvplist.includes(displayName);
-            const themeColor = isMvp ? MVP_THEME.color : (isSilverWolf ? SILVERWOLF_THEME.color : band.color);
-            const bgColor1 = isMvp ? MVP_THEME.bg1 : (isSilverWolf ? SILVERWOLF_THEME.bg1 : band.bg1);
-            const bgColor2 = isMvp ? MVP_THEME.bg2 : (isSilverWolf ? SILVERWOLF_THEME.bg2 : band.bg2);
+            const fallbackTheme = isMvp ? MVP_THEME : band;
+            const themeColor = specialProfile?.theme?.color || fallbackTheme.color;
+            const bgColor1 = specialProfile?.theme?.bg1 || fallbackTheme.bg1;
+            const bgColor2 = specialProfile?.theme?.bg2 || fallbackTheme.bg2;
 
+            applySpecialProfile(specialProfile);
+            ANIM_DURATION = Math.max(100, Number(specialProfile?.transitions?.radarDuration) || CONFIG.ANIM_DURATION);
             targetThemeColor = themeColor;
-            document.body.classList.toggle('band-theme-silverwolf', isSilverWolf);
+            currentBgColor1 = bgColor1;
+            currentBgColor2 = bgColor2;
             document.documentElement.style.setProperty('--theme-color', themeColor);
             document.documentElement.style.setProperty('--bg-color-1', bgColor1);
             document.documentElement.style.setProperty('--bg-color-2', bgColor2);
@@ -7800,15 +8120,19 @@
             containerEl.style.display = "none";
             if (equipmentGridEl) equipmentGridEl.innerHTML = '';
             photoContainer.querySelectorAll('.band-photo-variant').forEach(node => node.remove());
-            photoEl.style.filter = 'blur(0)';
+            photoEl.style.filter = specialProfile?.effects?.photoTransition === 'glitch'
+                ? 'blur(8px) hue-rotate(22deg) saturate(1.25)'
+                : specialProfile?.effects?.photoTransition === 'zoom'
+                    ? 'blur(4px)'
+                    : 'blur(0)';
             if (isMidPhase) {
                 photoEl.style.transition = 'none';
                 photoEl.style.opacity = "0";
                 setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
             } else {
-                photoEl.style.transition = 'opacity 0.62s cubic-bezier(0.24, 1, 0.36, 1), transform 0.82s cubic-bezier(0.22, 1, 0.36, 1), filter 0.45s ease';
+                photoEl.style.transition = getSpecialPhotoTransitionCss(specialProfile);
                 photoEl.style.opacity = "0";
-                setPhotoTransform(photoEl, "translate3d(72px, 0, 0) scale(0.94)");
+                setPhotoTransform(photoEl, getSpecialPhotoStartTransform(specialProfile));
             }
             clearPhotoWipeLayer(photoContainer);
 
@@ -7889,11 +8213,11 @@
             }
 
             nameEl.textContent = displayName;
-            applyBandStarLevel(band, sessionId);
+            syncExpertBadge(displayName);
             renderBondIcons(band.desc || '', sessionId);
             
             if (!isMidPhase) {
-                nameEl.style.animation = "nameEntrance 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards";
+                nameEl.style.animation = getSpecialNameAnimation(specialProfile);
                 containerEl.style.animation = "descEntrance 1s ease-out 0.3s both";
             }
 
@@ -7914,7 +8238,7 @@
                             sessionId,
                             () => {
                                 if (!isUiTransitionActive(sessionId)) return;
-                                photoEl.style.transition = 'opacity 0.62s cubic-bezier(0.24, 1, 0.36, 1), transform 0.82s cubic-bezier(0.22, 1, 0.36, 1), filter 0.45s ease';
+                                photoEl.style.transition = getSpecialPhotoTransitionCss(specialProfile);
                             },
                             () => {
                                 if (!isUiTransitionActive(sessionId)) return;
@@ -7923,6 +8247,7 @@
                                 photoEl.dataset.photoBandName = photoName;
                                 applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
                                 photoEl.style.opacity = '1';
+                                photoEl.style.filter = 'blur(0)';
                                 setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
                             }
                         );
@@ -7930,8 +8255,9 @@
                         photoEl.src = candidate.url;
                         photoEl.dataset.photoBandName = photoName;
                         applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
-                        photoEl.style.transition = 'opacity 0.62s cubic-bezier(0.24, 1, 0.36, 1), transform 0.82s cubic-bezier(0.22, 1, 0.36, 1), filter 0.45s ease';
+                        photoEl.style.transition = getSpecialPhotoTransitionCss(specialProfile);
                         photoEl.style.opacity = '1';
+                        photoEl.style.filter = 'blur(0)';
                         setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
                         clearPhotoWipeLayer(photoContainer);
                     }
@@ -7940,6 +8266,7 @@
                     photoEl.dataset.photoBandName = photoName;
                     applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
                     setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
+                    photoEl.style.filter = 'blur(0)';
                     photoEl.style.opacity = "1";
                     clearPhotoWipeLayer(photoContainer);
                 }
@@ -7976,13 +8303,17 @@
          * 负责在 Canvas 上绘制六维雷达图、背景网格、连接线及其光晕特效
          */
         function drawRadar() {
-            const w = radarCanvas.width;   
-            const h = radarCanvas.height;  
-            ctx.clearRect(0, 0, w, h);
+            const logicalMetrics = getRadarLogicalMetrics();
+            const w = logicalMetrics.width;
+            const h = logicalMetrics.height;
+            clearRadarCanvas();
             if (!radarVisible || currentIndex < 0) return;
+            ctx.setTransform(logicalMetrics.scale, 0, 0, logicalMetrics.scale, 0, 0);
 
             const currentBand = bands[currentIndex];
-            const isMvpRadar = !!currentBand?.isGoat;
+            const isMvpRadar = !!currentBand?.isGoat && !activeSpecialProfile;
+            const isJikoMvpRadar = isMvpRadar
+                && getBandDisplayName(currentBand) === '姬子·启行';
             const radarAccentColor = isMvpRadar ? '#ffd86a' : currentThemeColor;
             const radarCoreColor = isMvpRadar ? '#fffaf0' : '#fff';
             const radarLabelColor = isMvpRadar ? '#fff5da' : '#fff';
@@ -8005,7 +8336,11 @@
             const maxR = layout.maxR;
             const vertices = layout.vertices;
 
-            syncRadarBackgroundCleaner(centerX, centerY, maxR, vertices);
+            if (isJikoMvpRadar) {
+                hideRadarBackgroundCleaner();
+            } else {
+                syncRadarBackgroundCleaner(centerX, centerY, maxR, vertices);
+            }
 
             ctx.save();
             ctx.lineWidth = CONFIG.RADAR_GRID_LINE_WIDTH;
@@ -8060,31 +8395,33 @@
                 ctx.stroke();
             }
 
-            // 六边形内部底板遮罩：压掉背景点阵，仅保留外部背景
-            ctx.save();
-            ctx.beginPath();
-            for (let i = 0; i < vertices.length; i++) {
-                const r = maxR;
-                const vertex = vertices[i];
-                const x = centerX + r * vertex.cos;
-                const y = centerY + r * vertex.sin;
-                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            // 六边形内部底板遮罩：姬子·启行 MVP 保持透明，让专属背景透出
+            if (!isJikoMvpRadar) {
+                ctx.save();
+                ctx.beginPath();
+                for (let i = 0; i < vertices.length; i++) {
+                    const r = maxR;
+                    const vertex = vertices[i];
+                    const x = centerX + r * vertex.cos;
+                    const y = centerY + r * vertex.sin;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                const radarInnerBase = ctx.createRadialGradient(
+                    centerX,
+                    centerY,
+                    maxR * 0.06,
+                    centerX,
+                    centerY,
+                    maxR * 1.02
+                );
+                radarInnerBase.addColorStop(0, 'rgba(14, 30, 72, 0.36)');
+                radarInnerBase.addColorStop(0.58, 'rgba(10, 24, 60, 0.22)');
+                radarInnerBase.addColorStop(1, 'rgba(7, 18, 42, 0.14)');
+                ctx.fillStyle = radarInnerBase;
+                ctx.fill();
+                ctx.restore();
             }
-            ctx.closePath();
-            const radarInnerBase = ctx.createRadialGradient(
-                centerX,
-                centerY,
-                maxR * 0.06,
-                centerX,
-                centerY,
-                maxR * 1.02
-            );
-            radarInnerBase.addColorStop(0, 'rgba(14, 30, 72, 0.36)');
-            radarInnerBase.addColorStop(0.58, 'rgba(10, 24, 60, 0.22)');
-            radarInnerBase.addColorStop(1, 'rgba(7, 18, 42, 0.14)');
-            ctx.fillStyle = radarInnerBase;
-            ctx.fill();
-            ctx.restore();
 
             drawRadarAudioFx(centerX, centerY, maxR, radarAccentColor, radarCoreColor);
             drawRadarSweepArcs(centerX, centerY, maxR, radarAccentColor, radarCoreColor, isMvpRadar);
@@ -8613,6 +8950,7 @@
             if (!lastTimestamp) lastTimestamp = timestamp;
             const deltaTime = timestamp - lastTimestamp;
             lastTimestamp = timestamp;
+            updateDelayedMusic();
 
             if (outroActive) {
                 if (!outroSceneSuspended) {
@@ -8620,7 +8958,7 @@
                     if (photoFxCtx && photoFxCanvas) {
                         photoFxCtx.clearRect(0, 0, photoFxCanvas.width, photoFxCanvas.height);
                     }
-                    ctx.clearRect(0, 0, radarCanvas.width, radarCanvas.height);
+                    clearRadarCanvas();
                     outroSceneSuspended = true;
                 }
                 updateTimer();
@@ -8696,11 +9034,12 @@
             invalidateTimelineRect();
 
             if (pageVisualsSuspended) {
+                backgroundEffectManager.dispose();
                 pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
                 if (photoFxCtx && photoFxCanvas) {
                     photoFxCtx.clearRect(0, 0, photoFxCanvas.width, photoFxCanvas.height);
                 }
-                ctx.clearRect(0, 0, radarCanvas.width, radarCanvas.height);
+                clearRadarCanvas();
                 return;
             }
 
@@ -8775,7 +9114,12 @@
             if (!rect) return;
             const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
             const per = x / rect.width;
-            globalCurrentTime = per * totalDuration;
+            const clickedTime = per * totalDuration;
+            const clickedSegment = getTimeSegmentAt(clickedTime, true);
+            const clickedBand = clickedSegment ? bands[clickedSegment.bandIndex] : null;
+            globalCurrentTime = clickedSegment && shouldPlayGachaForBand(clickedBand, clickedSegment.bandIndex, false)
+                ? clickedSegment.start
+                : clickedTime;
             cancelGachaAnimation();
             
             // 同步音频进度
@@ -8793,14 +9137,12 @@
             if (globalCurrentTime < totalDuration) {
                 isPaused = false;
                 if (audio) {
-                    audio.play();
-                    initAudioVisualizer();
+                    playMusicForCurrentTimeline();
                 }
             } else {
                 isPaused = true;
                 if (audio) {
-                    audio.play().catch(() => {});
-                    initAudioVisualizer();
+                    playMusicForCurrentTimeline();
                 }
                 startOutroSequence();
             }
@@ -8833,8 +9175,7 @@
                     if (outroFinished) return;
                     if (audio) {
                         if (audio.paused) {
-                            audio.play().catch(() => {});
-                            initAudioVisualizer();
+                            playMusicForCurrentTimeline();
                             if (outroVideo && outroOverlay?.classList.contains("video-ready")) {
                                 outroVideo.play().catch(() => {});
                             }
@@ -8851,8 +9192,7 @@
                 if (audio) {
                     if (isPaused) audio.pause();
                     else {
-                        audio.play();
-                        initAudioVisualizer();
+                        playMusicForCurrentTimeline();
                     }
                 }
             } else if (e.key === "ArrowLeft") {
@@ -8863,8 +9203,7 @@
                 if (audio) syncAudioToContentTime(globalCurrentTime);
                 isPaused = false;
                 if (audio) {
-                    audio.play();
-                    initAudioVisualizer();
+                    playMusicForCurrentTimeline();
                 }
             } else if (e.key === "ArrowRight") {
                 const nextIdx = Math.min(bands.length - 1, currentIndex + 1);
@@ -8874,8 +9213,7 @@
                 if (audio) syncAudioToContentTime(globalCurrentTime);
                 isPaused = false;
                 if (audio) {
-                    audio.play();
-                    initAudioVisualizer();
+                    playMusicForCurrentTimeline();
                 }
             }
         });
@@ -8899,13 +9237,11 @@
             overlay.style.display = "flex";
             overlay.style.opacity = "1";
             isPaused = true;
-            pCanvas.style.zIndex = "0";
+            pCanvas.style.zIndex = "1";
 
             if (audio) {
-                musicPlaybackCycles = 0;
                 initAudioVisualizer();
-                setMusicTrack(audio, 0, 0, false);
-                audio.play().catch(e => console.log("Audio play failed", e));
+                beginMusicPresentation(audio);
             }
 
             queueIntroSequenceTimer(() => {
@@ -8917,6 +9253,7 @@
             }, exitStart);
 
             queueIntroSequenceTimer(() => {
+                    musicIntroActive = false;
                     globalCurrentTime = 0;
                     if (bands.length) {
                         currentIndex = 0;
@@ -8937,6 +9274,16 @@
             ensureTimelineTooltipStructure();
             prewarmUpcomingBandAssets(0, 2);
             buildIntroRadarGuide();
+
+            if (isSpecialPreviewMode && bands.length) {
+                isStarted = true;
+                isPaused = true;
+                globalCurrentTime = 0;
+                currentIndex = 0;
+                document.body.classList.add('special-preview-mode');
+                document.title = `${SPECIAL_PROFILES[0]?.name || '专场'} - 预览`;
+                updateUI(bands[0], true, null);
+            }
 
             // 在正式播放前就开始渲染粒子和雷达（静态背景）
             requestAnimationFrame(tick);

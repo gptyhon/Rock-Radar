@@ -1,0 +1,183 @@
+:root {
+    --background-base-duration: 28s;
+}
+
+body {
+    background: #050508;
+    animation: none;
+}
+
+#coverBgLayer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.6s ease;
+    background:
+        radial-gradient(circle at 50% 42%, rgba(99, 230, 255, 0.16) 0%, rgba(99, 230, 255, 0) 28%),
+        radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 18%),
+        linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
+    background-size: 140% 140%, 120% 120%, 400% 400%;
+    animation: backgroundBaseDrift var(--background-base-duration) ease-in-out infinite;
+    box-shadow:
+        inset 0 0 160px rgba(0, 0, 0, 0.46),
+        inset 0 0 90px rgba(99, 230, 255, 0.06);
+    will-change: background-position;
+}
+
+#coverBgLayer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgba(99, 230, 255, 0.028) 1px, transparent 1px),
+        linear-gradient(rgba(99, 230, 255, 0.024) 1px, transparent 1px);
+    background-size: 96px 96px;
+    background-position: 0 0;
+    opacity: 0.58;
+    animation: none;
+}
+
+#particles-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+    contain: strict;
+}
+
+#living-field-canvas,
+#living-field-fallback {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0.7;
+    pointer-events: none;
+    opacity: 0;
+    contain: strict;
+}
+
+#living-field-canvas {
+    transition: opacity 0.65s ease;
+    mix-blend-mode: screen;
+}
+
+#living-field-canvas.is-active {
+    opacity: 1;
+}
+
+#living-field-fallback {
+    --living-field-accent: #63e6ff;
+    --living-field-bg-1: #07121c;
+    --living-field-bg-2: #050508;
+    --living-field-speed: 38s;
+    overflow: hidden;
+    mix-blend-mode: screen;
+    filter: saturate(1.08);
+    transition: opacity 0.65s ease;
+}
+
+#living-field-fallback::before,
+#living-field-fallback::after {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    will-change: transform;
+}
+
+#living-field-fallback::before {
+    background:
+        radial-gradient(ellipse at 8% 18%, color-mix(in srgb, var(--living-field-accent) 38%, transparent) 0%, transparent 31%),
+        radial-gradient(ellipse at 92% 22%, color-mix(in srgb, var(--living-field-bg-1) 74%, transparent) 0%, transparent 34%),
+        radial-gradient(ellipse at 88% 82%, color-mix(in srgb, var(--living-field-accent) 26%, transparent) 0%, transparent 32%),
+        radial-gradient(ellipse at 13% 84%, color-mix(in srgb, var(--living-field-bg-2) 78%, transparent) 0%, transparent 35%);
+    filter: blur(42px);
+    animation: livingFieldFallbackDrift var(--living-field-speed) ease-in-out infinite;
+}
+
+#living-field-fallback::after {
+    background:
+        linear-gradient(116deg, transparent 20%, color-mix(in srgb, var(--living-field-accent) 12%, transparent) 48%, transparent 73%);
+    transform: translate3d(-35%, 12%, 0) rotate(-4deg);
+    filter: blur(30px);
+    animation: livingFieldFallbackSweep calc(var(--living-field-speed) * 0.72) ease-in-out infinite;
+}
+
+#living-field-fallback.is-active {
+    opacity: 0.28;
+}
+
+#brandDecor {
+    z-index: 1;
+}
+
+#radarBgCleaner {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+    background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), #050508, #111);
+    background-size: 400% 400%;
+    animation: backgroundBaseDrift var(--background-base-duration) ease-in-out infinite;
+    will-change: clip-path, opacity;
+}
+
+@keyframes backgroundBaseDrift {
+    0% {
+        background-position: 48% 46%, 10% 12%, 0% 50%;
+    }
+
+    50% {
+        background-position: 52% 42%, 24% 18%, 100% 50%;
+    }
+
+    100% {
+        background-position: 48% 46%, 10% 12%, 0% 50%;
+    }
+}
+
+@keyframes livingFieldFallbackDrift {
+    0%,
+    100% {
+        transform: translate3d(-1.5%, 0.8%, 0) scale(1.03) rotate(-1deg);
+    }
+
+    47% {
+        transform: translate3d(1.8%, -1.2%, 0) scale(1.08) rotate(1.4deg);
+    }
+
+    73% {
+        transform: translate3d(0.4%, 1.5%, 0) scale(1.05) rotate(0.2deg);
+    }
+}
+
+@keyframes livingFieldFallbackSweep {
+    0%,
+    100% {
+        transform: translate3d(-38%, 12%, 0) rotate(-4deg);
+        opacity: 0.45;
+    }
+
+    52% {
+        transform: translate3d(34%, -8%, 0) rotate(3deg);
+        opacity: 0.8;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #coverBgLayer {
+        animation: none;
+        background-position: 50% 42%, 18% 22%, 50% 50%;
+    }
+
+    #living-field-fallback::before,
+    #living-field-fallback::after {
+        animation-duration: 90s;
+    }
+}

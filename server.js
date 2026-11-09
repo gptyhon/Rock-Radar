@@ -6,7 +6,9 @@ const fs = require('fs');
 const app = express();
 const PORT = 3003;
 const DATA_FILE = path.join(__dirname, 'data.json');
-const PIC_DIR = path.join(__dirname, 'pic');
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const IMAGE_DIR = path.join(PUBLIC_DIR, 'assets', 'images');
+const IMAGE_URL_PREFIX = '/assets/images';
 const IMAGE_EXT_RE = /\.(jpg|jpeg|png|gif|webp|svg)$/i;
 const INVALID_FILENAME_RE = /[<>:"/\\|?*\x00-\x1F]/g;
 const RESERVED_BASENAMES = new Set(['CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9']);
@@ -15,10 +17,11 @@ const SPECIAL_IMAGE_SLOTS = {
     door_right: 'gacha_door_right'
 };
 
-// 确保 pic 目录存在
-if (!fs.existsSync(PIC_DIR)) fs.mkdirSync(PIC_DIR);
+// 确保图片资源目录存在
+if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR, { recursive: true });
 
 app.use(express.json({ limit: '10mb' }));
+app.use(express.static(PUBLIC_DIR, { index: false }));
 app.use(express.static(__dirname, { index: false }));
 
 function normalizeRequestedFilename(filename, fallbackName = '') {
@@ -46,7 +49,7 @@ function isValidImageName(filename) {
 
 // multer 配置：保留原始扩展名
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, PIC_DIR),
+    destination: (req, file, cb) => cb(null, IMAGE_DIR),
     filename: (req, file, cb) => {
         const slotBaseName = req.params?.slot ? SPECIAL_IMAGE_SLOTS[req.params.slot] : '';
         const requestedName = slotBaseName
@@ -101,7 +104,7 @@ function removeImageMetaKey(name) {
 }
 
 function listMatchingImagesByBase(baseName) {
-    return fs.readdirSync(PIC_DIR).filter(file => {
+    return fs.readdirSync(IMAGE_DIR).filter(file => {
         if (!IMAGE_EXT_RE.test(file)) return false;
         return path.basename(file, path.extname(file)) === baseName;
     });
@@ -142,12 +145,12 @@ app.put('/api/data', (req, res) => {
 // 列出图片
 app.get('/api/images', (req, res) => {
     try {
-        const files = fs.readdirSync(PIC_DIR)
+        const files = fs.readdirSync(IMAGE_DIR)
             .filter(f => IMAGE_EXT_RE.test(f))
             .map(f => ({
                 name: f,
-                size: fs.statSync(path.join(PIC_DIR, f)).size,
-                url: `/pic/${f}`
+                size: fs.statSync(path.join(IMAGE_DIR, f)).size,
+                url: `${IMAGE_URL_PREFIX}/${f}`
             }));
         res.json(files);
     } catch (e) {
@@ -161,7 +164,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     res.json({
         success: true,
         filename: req.file.filename,
-        url: `/pic/${req.file.filename}`
+        url: `${IMAGE_URL_PREFIX}/${req.file.filename}`
     });
 });
 
@@ -177,13 +180,13 @@ app.post('/api/upload-slot/:slot', upload.single('image'), (req, res) => {
     try {
         for (const file of listMatchingImagesByBase(baseName)) {
             if (file === req.file.filename) continue;
-            fs.unlinkSync(path.join(PIC_DIR, file));
+            fs.unlinkSync(path.join(IMAGE_DIR, file));
             removeImageMetaKey(file);
         }
         res.json({
             success: true,
             filename: req.file.filename,
-            url: `/pic/${req.file.filename}`
+            url: `${IMAGE_URL_PREFIX}/${req.file.filename}`
         });
     } catch (e) {
         res.status(500).json({ error: '槽位图片保存失败' });
@@ -205,8 +208,8 @@ app.patch('/api/images/:filename', (req, res) => {
         return res.status(400).json({ error: '新文件名必须包含有效图片扩展名' });
     }
 
-    const oldPath = path.join(PIC_DIR, oldName);
-    const nextPath = path.join(PIC_DIR, nextName);
+    const oldPath = path.join(IMAGE_DIR, oldName);
+    const nextPath = path.join(IMAGE_DIR, nextName);
 
     if (!fs.existsSync(oldPath)) {
         return res.status(404).json({ error: '原文件不存在' });
@@ -221,7 +224,7 @@ app.patch('/api/images/:filename', (req, res) => {
         res.json({
             success: true,
             filename: nextName,
-            url: `/pic/${nextName}`
+            url: `${IMAGE_URL_PREFIX}/${nextName}`
         });
     } catch (e) {
         res.status(500).json({ error: '重命名失败' });
@@ -235,7 +238,7 @@ app.delete('/api/images/:filename', (req, res) => {
     if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
         return res.status(400).json({ error: '无效文件名' });
     }
-    const filePath = path.join(PIC_DIR, filename);
+    const filePath = path.join(IMAGE_DIR, filename);
     if (!fs.existsSync(filePath)) {
         return res.status(404).json({ error: '文件不存在' });
     }
