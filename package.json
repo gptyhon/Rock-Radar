@@ -7,7 +7,14 @@
     "test": "node tests/background-effects.test.js && node tests/role-comparison.test.js && node tests/role-position.test.js && node tests/music-timeline.test.js && node tests/gacha-handoff.test.js"
   },
   "dependencies": {
+    "@pixi/react": "^8.0.5",
+    "@vitejs/plugin-react": "^6.1.0",
     "express": "^4.21.0",
-    "multer": "^1.4.5-lts.1"
+    "gsap": "^3.15.0",
+    "multer": "^1.4.5-lts.1",
+    "pixi.js": "^8.20.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "vite": "^8.2.2"
   }
 }
