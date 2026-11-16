@@ -33,3 +33,9 @@ outro*.webm
 pic/**
 !pic/.gitkeep
 hktv.html
+
+# Local builds and previous experimental runtime (kept during branch migration)
+dist/
+test-results/
+playwright-report/
+workspace/

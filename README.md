@@ -1,5 +1,26 @@
 # Rock Radar
 
+> **当前工作基线：`hktv-new-version @ ba1d92b`。** 已完成 React + TypeScript + Vite 原样迁移，并接入 S2 动态背景预览。默认展示使用 S2 背景，原版画面可通过 `?theme=original` 对比；角色、评分、播放节奏与数据格式沿用该分支。之前基于 `main` 的工作已单独备份。
+
+## React 迁移版入口
+
+```sh
+npm ci
+npm start
+```
+
+- React 管理面板：`http://127.0.0.1:3003/`
+- S2 展示页：`http://127.0.0.1:3003/radar`（管理页的展示按钮也指向这里）
+- 原版画面对比：`http://127.0.0.1:3003/radar?theme=original`
+- 原 HTML 对照：`/legacy/admin` 与 `/legacy/radar`
+- 生产版：`npm run build` 后执行 `npm run start:next`
+- 验证：`npm run check`、`npm run test:replica`
+
+`PORT` 可指定端口。`npm start` 与 `npm run dev` 均启动 React 开发服务，无需手动构建即可看到代码修改。旧单 HTML 服务改为显式执行 `npm run start:legacy`（同样默认 3003，不能与新服务占用同一端口）。两版共享该分支的 `data.json`、`public/assets/` 与原 API；保存会按原行为写入数据。
+
+组件、样式、演出模块和迁移验证边界见 [React 迁移说明](docs/react-migration.md)。以下原功能说明继续保留。
+
+
 `Rock-Radar` 是一个以 `index.html` 为核心展示页的前端雷达图特效项目。
 
 当前版本不是单纯的静态页面，而是由下面三部分组成：

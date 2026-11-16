@@ -1,0 +1,53 @@
+/* S2 mode only. Original stylesheet and presentation geometry stay intact. */
+body.s2-preview #coverBgLayer,
+body.s2-preview #living-field-canvas,
+body.s2-preview #living-field-fallback {
+  display: none;
+  animation: none;
+}
+
+body.s2-preview #radarBgCleaner {
+  background: rgba(12, 9, 36, 0.78);
+  animation: none;
+}
+
+.s2-preview-controls {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10001;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 24px);
+  width: max-content;
+  padding: 8px 12px;
+  border: 1px solid rgba(183, 161, 255, 0.35);
+  border-radius: 8px;
+  background: rgba(16, 12, 37, 0.92);
+  color: #f5f0ff;
+  font:
+    13px/1.4 system-ui,
+    sans-serif;
+}
+
+.s2-preview-controls button,
+.s2-preview-controls select,
+.s2-preview-controls a {
+  border: 1px solid #77629c;
+  border-radius: 4px;
+  background: #2c2145;
+  color: #f5f0ff;
+  font: inherit;
+  padding: 5px 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+body.outro-mode .s2-preview-controls,
+:fullscreen .s2-preview-controls {
+  display: none;
+}

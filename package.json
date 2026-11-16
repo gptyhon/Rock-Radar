@@ -3,11 +3,39 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js",
-    "test": "node tests/background-effects.test.js && node tests/role-comparison.test.js && node tests/role-position.test.js && node tests/music-timeline.test.js && node tests/gacha-handoff.test.js"
+    "start": "tsx src/app/server.ts --dev",
+    "start:legacy": "node server.js",
+    "test": "node tests/background-effects.test.js && node tests/role-comparison.test.js && node tests/role-position.test.js && node tests/music-timeline.test.js && node tests/gacha-handoff.test.js",
+    "dev": "tsx src/app/server.ts --dev",
+    "build": "tsc --noEmit && vite build",
+    "start:next": "tsx src/app/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test:replica": "playwright test --config playwright.replica.config.ts",
+    "test:api": "vitest run --config vitest.config.mts",
+    "check": "npm run typecheck && npm test && npm run test:api && vite build",
+    "format": "prettier --write src app tests/replica *.mts *.ts"
   },
   "dependencies": {
-    "express": "^4.21.0",
-    "multer": "^1.4.5-lts.1"
+    "express": "4.22.3",
+    "multer": "2.5.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/express": "5.0.6",
+    "@types/multer": "2.3.0",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.3.0",
+    "prettier": "3.10.1",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.8",
+    "vitest": "5.1.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

@@ -3,11 +3,11 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+function createLegacyApp(options = {}) {
 const app = express();
-const PORT = 3003;
-const DATA_FILE = path.join(__dirname, 'data.json');
+const DATA_FILE = options.dataFile || path.join(__dirname, 'data.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
-const IMAGE_DIR = path.join(PUBLIC_DIR, 'assets', 'images');
+const IMAGE_DIR = options.imageDir || path.join(PUBLIC_DIR, 'assets', 'images');
 const IMAGE_URL_PREFIX = '/assets/images';
 const IMAGE_EXT_RE = /\.(jpg|jpeg|png|gif|webp|svg)$/i;
 const INVALID_FILENAME_RE = /[<>:"/\\|?*\x00-\x1F]/g;
@@ -21,8 +21,18 @@ const SPECIAL_IMAGE_SLOTS = {
 if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR, { recursive: true });
 
 app.use(express.json({ limit: '10mb' }));
+app.use(IMAGE_URL_PREFIX, express.static(IMAGE_DIR));
 app.use(express.static(PUBLIC_DIR, { index: false }));
-app.use(express.static(__dirname, { index: false }));
+if (options.servePages !== false) app.use(express.static(__dirname, { index: false }));
+else app.use((req, res, next) => {
+    if (!/\.(mp3|wav|ogg|m4a|mp4|webm)$/i.test(req.path)) return next();
+    let filename;
+    try { filename = decodeURIComponent(req.path).replace(/^\/(?:legacy\/)?/, ''); }
+    catch { return res.sendStatus(400); }
+    res.sendFile(filename, { root: __dirname, dotfiles: 'deny' }, error => {
+        if (error && !res.headersSent) res.sendStatus(404);
+    });
+});
 
 function normalizeRequestedFilename(filename, fallbackName = '') {
     let name = String(filename || '').trim().replace(INVALID_FILENAME_RE, '_');
@@ -113,10 +123,12 @@ function listMatchingImagesByBase(baseName) {
 // ===== 路由 =====
 
 // 管理面板
+if (options.servePages !== false) {
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
 // 雷达展示页
 app.get('/radar', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+}
 
 // 获取全部配置数据
 app.get('/api/data', (req, res) => {
@@ -251,7 +263,13 @@ app.delete('/api/images/:filename', (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+return app;
+}
+module.exports = { createLegacyApp };
+if (require.main === module) {
+const PORT = Number(process.env.PORT || 3003);
+createLegacyApp().listen(PORT, () => {
     console.log(`Rock Radar 管理面板: http://localhost:${PORT}`);
     console.log(`雷达展示页: http://localhost:${PORT}/radar`);
 });
+}
