@@ -1,0 +1,35 @@
+/* A direct title → radar opening, on the existing presentation timeline. */
+body.s2-preview #introOverlay.s2-intro {
+  background: radial-gradient(ellipse at 50% 48%, #22163b 0, #110c22 48%, #090711 100%);
+  color: #f3edf9;
+  overflow: hidden;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.s2-intro::after { display: none !important; }
+body.s2-preview #introOverlay.s2-intro.intro-stage-guide { background: #28143e; box-shadow: none; }
+.s2-intro.intro-stage-guide::before { display: none; }
+.s2-opening-stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%) scale(var(--viewport-scale, 1)); transform-origin: center; }
+.s2-opening-hero { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity .4s, transform .4s; }
+.s2-opening-hero h1 { max-width: 1740px; margin: 0; text-align: center; font-size: 112px; font-weight: 800; line-height: 1.4; letter-spacing: 5px; text-shadow: 0 0 40px #af7edc30; }
+.s2-opening-subtitle { margin: 24px 0 0; color: #bda0de; font-size: 36px; line-height: 1.5; letter-spacing: 18px; padding-left: 18px; }
+.s2-start-button { position: absolute; bottom: 148px; pointer-events: auto; background: transparent; border: 0; padding: 14px 24px; color: #aaa0b7; font: 22px/1.5 "Microsoft YaHei", sans-serif; letter-spacing: 4px; cursor: pointer; }
+.s2-start-button:hover, .s2-start-button:focus-visible { color: #f3edf9; outline: 1px solid #bda0de; outline-offset: 4px; }
+.started .s2-start-button { visibility: hidden; }
+.intro-run .s2-opening-hero h1 { animation: s2-title-in .65s ease-out both; }
+.intro-stage-guide .s2-opening-hero { opacity: 0; transform: translateY(-15px); pointer-events: none; visibility: hidden; }
+.s2-average-scene { position: absolute; inset: 80px 200px; opacity: 0; visibility: hidden; transform: translateY(12px); transition: opacity .5s, transform .5s, visibility .5s; }
+.intro-stage-guide .s2-average-scene { opacity: 1; visibility: visible; transform: none; }
+.s2-average-title { margin: 12px 0 0; text-align: center; color: #ff6666; font-size: 32px; line-height: 1.5; font-weight: 500; letter-spacing: 3px; }
+/* Match the SVG viewBox so HTML labels share its coordinates. */
+.s2-chart-wrap { position: absolute; width: 878.75px; height: 740px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.s2-chart-wrap svg, .s2-chart-wrap #introGuideLabels { position: absolute; width: 100%; height: 100%; inset: 0; }
+.s2-radar-label { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; text-align: center; color: #d6c9e5; font-size: 22px; line-height: 1.5; letter-spacing: 1px; }
+.s2-metric-value { display: block; margin-top: 3px; color: #f1e9fa; font: 500 27px/1.25 "Consolas", monospace; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.s2-radar-grid { fill: none; stroke: #ffffff30; stroke-width: 1; }
+.s2-radar-axis { stroke: #ffffff30; stroke-width: 1; }
+.s2-radar-average { fill: none; stroke: #ff4444; stroke-width: 2.5; stroke-linejoin: round; }
+.intro-stage-exit .s2-average-scene { opacity: 0; transform: translateY(-10px); }
+@keyframes s2-title-in { from { opacity: .3; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .s2-intro *, .s2-intro *::before, .s2-intro *::after { animation: none !important; transition: none !important; }
+}

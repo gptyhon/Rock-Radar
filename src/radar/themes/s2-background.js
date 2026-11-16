@@ -1,3 +1,5 @@
+import { drawS2Portrait } from './s2-portrait';
+
 /** S2 preview background. Driven by the existing radar frame loop, never its own RAF. */
 export function createS2Background() {
   const settings = {
@@ -14,6 +16,7 @@ export function createS2Background() {
   let sincePaint = Infinity;
   let dirty = true;
   let disposed = false;
+  const portraits = new WeakMap();
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   let paused = reducedMotion.matches;
   function random(seed) {
@@ -225,69 +228,8 @@ export function createS2Background() {
       );
       bloom(1255, 340, 175, 350, "#5327d5", 0.2);
     } else {
-      // Angled planes and neon rails follow the reference reveal composition.
-      polygon(
-        [
-          [795, 182],
-          [1225, 176],
-          [1225, 612],
-          [795, 620],
-        ],
-        gradient(700, 100, 800, 650, [
-          [0, "#4937be"],
-          [0.5, "#171148"],
-          [1, "#302571"],
-        ]),
-      );
-      polygon(
-        [
-          [810, 196],
-          [1208, 192],
-          [1208, 599],
-          [810, 605],
-        ],
-        "#0a0828",
-      );
-      polygon(
-        [
-          [810, 196],
-          [928, 192],
-          [810, 605],
-        ],
-        "#26205f",
-      );
-      polygon(
-        [
-          [1230, 420],
-          [1330, 455],
-          [1300, 690],
-          [1225, 650],
-        ],
-        "#663bd1",
-      );
-      c.save();
-      c.beginPath();
-      c.moveTo(1230, 420);
-      c.lineTo(1330, 455);
-      c.lineTo(1300, 690);
-      c.lineTo(1225, 650);
-      c.closePath();
-      c.clip();
-      for (let y = 350; y < 640; y += 11)
-        for (let x = 930; x < 1210; x += 11) {
-          c.fillStyle = "rgba(237,192,255,.35)";
-          c.beginPath();
-          c.arc(x + (y % 22 ? 5 : 0), y, 2.1, 0, 7);
-          c.fill();
-        }
-      c.restore();
+      // Portrait framing lives on the DOM container so it follows content layout.
       const rails = [
-        [
-          [790, 180],
-          [1225, 180],
-          [1225, 615],
-          [1170, 634],
-        ],
         [
           [-30, 610],
           [40, 698],
@@ -524,12 +466,24 @@ export function createS2Background() {
         sx = -180 + sweep * 1650,
         g = c.createLinearGradient(sx - 160, 0, sx + 160, 0);
       g.addColorStop(0, "transparent");
-      g.addColorStop(0.45, `rgba(193,230,255,${0.2 * m})`);
-      g.addColorStop(0.5, `rgba(246,246,255,${0.32 * m})`);
+      g.addColorStop(0.45, `rgba(193,230,255,${0.28 * m})`);
+      g.addColorStop(0.5, `rgba(246,246,255,${0.48 * m})`);
       g.addColorStop(0.65, `rgba(154,207,255,${0.12 * m})`);
       g.addColorStop(1, "transparent");
       c.fillStyle = g;
       c.fillRect(0, 0, 1280, 720);
+      c.restore();
+    }
+    // S2 paper confetti follows the hard-edged bottom ribbon.
+    const confettiColors = ['#6bc9e1', '#d76c9c', '#9bcf70', '#dfba65'];
+    for (let i = 0; i < (extra ? 8 : 4); i++) {
+      const u = (time * (extra ? 0.045 : 0.018) + i * 0.618034) % 1;
+      c.save();
+      c.globalAlpha = Math.sin(Math.PI * u) ** 2 * 0.65;
+      c.translate(330 + u * 900, 706 - u * 40);
+      c.rotate(Math.sin(time * 0.7 + i) * 0.35);
+      c.scale(0.6 + Math.abs(Math.cos(time * 0.6 + i)) * 0.4, 1);
+      shape([[-4, 0], [5, -4], [7, 2], [-2, 6]], confettiColors[i % 4]);
       c.restore();
     }
     const rng = random(144);
@@ -551,21 +505,22 @@ export function createS2Background() {
       );
     }
     if (isReveal) {
-      for (let i = 0; i < (extra ? 36 : 22); i++) {
-        const a = rng() * Math.PI * 2,
-          r = rng() * 58,
-          p = rng() * Math.PI * 2,
-          u = (time / 4 + i / 36) % 1;
-        const radius = extra ? 8 + u * 62 * m : r;
-        const alpha = extra
-          ? Math.sin(Math.PI * u) ** 2 * 0.8 * m
-          : 0.15 + 0.55 * (0.5 + 0.5 * Math.sin(phase * 3 + p)) * m;
-        sparkle(
-          80 + Math.cos(a) * radius + Math.sin(phase + p) * 3 * m,
-          665 + Math.sin(a) * radius * 0.7,
-          1.5 + rng() * 4,
-          alpha,
-        );
+      // Comic punctuation: a short staggered burst, then a quiet hold.
+      const cycle = (time / (extra ? 4.8 : 7.2)) % 1;
+      for (let i = 0; i < (extra ? 12 : 6); i++) {
+        const u = (cycle - i * 0.015) / 0.6;
+        if (u < 0 || u > 1) continue;
+        const x = 80 + Math.sin(i * 2.4) * u * 39;
+        const y = 654 - (65 + i % 4 * 14) * (1 - (1-u) ** 2);
+        const alpha = Math.sin(u * Math.PI) ** 1.4 * 0.8;
+        if (i % 3 === 0) {
+          sparkle(x, y, 2.5 + i % 2, alpha);
+        } else {
+          c.save(); c.globalAlpha = alpha;
+          c.translate(x, y); c.rotate(u * 1.5 + i);
+          shape([[-3, 0], [3, -4], [5, 1], [-2, 5]], confettiColors[i % 4]);
+          c.restore();
+        }
       }
     }
     const pieces = isReveal
@@ -637,42 +592,7 @@ export function createS2Background() {
         c.restore();
       }
     }
-    if (isReveal) {
-      const points = [
-        [790, 180],
-        [1225, 180],
-        [1225, 615],
-        [1170, 634],
-      ];
-      const lengths = points
-        .slice(1)
-        .map((p, i) => Math.hypot(p[0] - points[i][0], p[1] - points[i][1]));
-      const total = lengths.reduce((a, b) => a + b, 0),
-        u = (((time / 12) % 1) + 1) % 1;
-      function pointAt(distance) {
-        let d = Math.max(0, Math.min(total, distance));
-        for (let i = 0; i < lengths.length; i++) {
-          if (d <= lengths[i]) {
-            const t = d / lengths[i];
-            return [
-              points[i][0] + (points[i + 1][0] - points[i][0]) * t,
-              points[i][1] + (points[i + 1][1] - points[i][1]) * t,
-            ];
-          }
-          d -= lengths[i];
-        }
-        return points.at(-1);
-      }
-      c.save();
-      c.globalCompositeOperation = "screen";
-      for (let j = 0; j < 18; j++) {
-        const [x, y] = pointAt(u * total - j * 4);
-        const alpha =
-          Math.sin(Math.PI * u) ** 2 * (1 - j / 18) * 0.4 * m * settings.glow;
-        haze(x, y, 8, "#fff0ff", alpha);
-      }
-      c.restore();
-    } else {
+    if (!isReveal) {
       haze(
         99,
         99,
@@ -708,6 +628,31 @@ export function createS2Background() {
     setPaused(value) {
       paused = !!value;
     },
+    renderPortrait({ canvas, context, visible = true, roleKey = '', intensity = 1 }) {
+      if (disposed) return;
+      let state = portraits.get(canvas);
+      if (!state) {
+        state = { roleKey: null, enteredAt: seconds, signature: '' };
+        portraits.set(canvas, state);
+      }
+      if (!visible) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        state.signature = '';
+        state.roleKey = null;
+        return;
+      }
+      if (state.roleKey !== roleKey) {
+        state.roleKey = roleKey;
+        state.enteredAt = seconds;
+      }
+      const signature = [seconds, canvas.width, canvas.height, roleKey, intensity, settings.enhanced, scene].join(':');
+      if (state.signature === signature) return;
+      drawS2Portrait(context, canvas.width, canvas.height, seconds, {
+        enhanced: settings.enhanced, intensity, entryAge: seconds - state.enteredAt, scene,
+      });
+      state.signature = signature;
+      canvas.dataset.effectMode = 's2-comic-stage';
+    },
     render({ canvas, context, deltaTime, enabled = true }) {
       if (disposed) return;
       const dt = Math.max(0, Math.min(50, deltaTime || 0)) / 1000;
@@ -717,27 +662,28 @@ export function createS2Background() {
       if (dirty || (!paused && enabled && sincePaint >= 1 / 30)) {
         draw(frame, seconds);
         dirty = false;
-        sincePaint = 0;
+        sincePaint = Number.isFinite(sincePaint) ? sincePaint % (1 / 30) : 0;
       }
       // Match the two presentation columns across viewport aspect ratios.
       context.save();
       context.setTransform(1, 0, 0, 1, 0, 0);
       context.globalAlpha = 1;
       context.globalCompositeOperation = "source-over";
-      // Presentation geometry scales with viewport width and stays vertically centered.
-      const sceneHeight = canvas.width * 720 / 1280;
+      const scale = Math.min(canvas.width / 1280, canvas.height / 720);
+      const sceneWidth = 1280 * scale;
+      const sceneHeight = 720 * scale;
+      const offsetX = (canvas.width - sceneWidth) / 2;
       const offsetY = (canvas.height - sceneHeight) / 2;
       const fill = context.createLinearGradient(0, offsetY, 0, offsetY + sceneHeight);
       fill.addColorStop(0, scene === 'reveal' ? '#05051f' : '#05051d');
       fill.addColorStop(1, scene === 'reveal' ? '#5141cb' : '#6650c9');
       context.fillStyle = fill;
       context.fillRect(0, 0, canvas.width, canvas.height);
-      // Extend edge colors into taller viewports without moving the content frame.
       if (offsetY > 0) {
-        context.drawImage(frame, 0, 0, 1280, 1, 0, 0, canvas.width, offsetY + 1);
-        context.drawImage(frame, 0, 719, 1280, 1, 0, offsetY + sceneHeight - 1, canvas.width, offsetY + 1);
+        context.drawImage(frame, 0, 0, 1280, 1, offsetX, 0, sceneWidth, offsetY + 1);
+        context.drawImage(frame, 0, 719, 1280, 1, offsetX, offsetY + sceneHeight - 1, sceneWidth, offsetY + 1);
       }
-      context.drawImage(frame, 0, offsetY, canvas.width, sceneHeight);
+      context.drawImage(frame, offsetX, offsetY, sceneWidth, sceneHeight);
       context.restore();
       canvas.dataset.effectMode = "s2-" + scene;
       canvas.dataset.effectEnabled = String(enabled);

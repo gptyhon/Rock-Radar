@@ -7,6 +7,7 @@ import "./themes/s2-preview.css";
 import { BackgroundMusic } from "./components/BackgroundMusic";
 import { OutroOverlay } from "./components/OutroOverlay";
 import { IntroOverlay } from "./components/IntroOverlay";
+import { S2IntroOverlay } from "./themes/S2IntroOverlay";
 import { BrandDecor } from "./components/BrandDecor";
 import { MvpBgContainer } from "./components/MvpBgContainer";
 import { SpecialSceneOverlay } from "./components/SpecialSceneOverlay";
@@ -42,7 +43,7 @@ export default function RadarPage() {
     <>
       <BackgroundMusic />
       <OutroOverlay />
-      <IntroOverlay />
+      {s2Background ? <S2IntroOverlay /> : <IntroOverlay />}
       <BrandDecor />
       <MvpBgContainer />
       <SpecialSceneOverlay />

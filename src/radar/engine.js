@@ -1,8 +1,9 @@
 import { createRuntimeScope } from '../shared/runtimeScope';
 import { createRadarDefaults } from './defaults';
+import { buildS2IntroGuide } from './themes/s2-intro';
 
 // Preserve the original Canvas drawing, timers, transitions and shared animation state.
-/** @param {{backgroundEffect?: {render: Function, dispose: Function} | null}} options */
+/** @param {{backgroundEffect?: {render: Function, renderPortrait?: Function, dispose: Function} | null}} options */
 export function startRadar({ backgroundEffect = null } = {}) {
 const scope = createRuntimeScope();
 const { listen, requestAnimationFrame, setTimeout, clearTimeout, Image, Audio, fetch } = scope;
@@ -2377,6 +2378,12 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             if (!svg || !labels) return;
 
             const count = getNormalizedVertexCount(CONFIG.VERTEX_COUNT);
+            if (document.getElementById('introOverlay')?.classList.contains('s2-intro')) {
+                buildS2IntroGuide({ config: CONFIG, averages: avgScorePerDim,
+                    ratios: Array.from({ length: count }, (_, i) => getRadarRatio(avgScorePerDim[i] ?? 0, i)),
+                    count });
+                return;
+            }
             const center = 300;
             const radius = 160;
             const layers = Math.max(4, Math.min(6, Number(CONFIG.RADAR_GRID_LEVELS) || 5));
@@ -2912,6 +2919,15 @@ const MusicTimeline = window.RockRadarMusicTimeline;
         function updateAndDrawPhotoFx(deltaTime) {
             if (!photoFxCanvas || !photoFxCtx) return;
             if (!photoFxW || !photoFxH) return;
+
+            if (backgroundEffect?.renderPortrait) {
+                backgroundEffect.renderPortrait({
+                    canvas: photoFxCanvas, context: photoFxCtx,
+                    visible: CONFIG.PHOTO_FX_ENABLED && !gachaPlaying && currentIndex >= 0,
+                    roleKey: currentIndex, intensity: getPhotoFxIntensity(),
+                });
+                return;
+            }
 
             if (!CONFIG.PHOTO_FX_ENABLED || gachaPlaying || currentIndex < 0) {
                 photoFxCtx.clearRect(0, 0, photoFxW, photoFxH);

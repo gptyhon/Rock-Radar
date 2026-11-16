@@ -11,6 +11,9 @@ export function BrandTextLayer() {
         <span className={"bg-brand-watermark-cn"} id={"brandWatermarkCn"}>
           {"货币战争"}
         </span>
+        <span className="bg-brand-watermark-cn s2-brand-subtitle">
+          入画奇航
+        </span>
         {"\n            "}
         <span className={"bg-brand-watermark-en"} id={"brandWatermarkEn"}>
           {"CURRENCY WAR"}

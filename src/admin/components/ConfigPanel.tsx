@@ -229,12 +229,12 @@ export function ConfigPanel({ actions }: { actions: AdminActions }) {
             style={{ marginTop: "18px" } as React.CSSProperties}
           >
             <input type={"checkbox"} id={"cfg-PHOTO_FX_ENABLED"} />
-            <label>{"角色图后层粒子"}</label>
+            <label htmlFor="cfg-PHOTO_FX_ENABLED">{"人物框内特效（含 S2 分格、辉光）"}</label>
           </div>
           {"\n                    "}
           <div className={"form-group"}>
             {"\n                        "}
-            <label>{"后层粒子强度"}</label>
+            <label htmlFor="cfg-PHOTO_FX_INTENSITY">{"人物框内特效强度"}</label>
             {"\n                        "}
             <select id={"cfg-PHOTO_FX_INTENSITY"}>
               {"\n                            "}

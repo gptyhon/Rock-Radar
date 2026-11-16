@@ -36,8 +36,8 @@
     },
     "VERTEX_COUNT": 6,
     "INTRO_WAIT_TIME": 6000,
-    "MUSIC_VOLUME": 1,
-    "MUSIC_TRACKS": "/assets/audio/music.mp3,/assets/audio/music2.mp3",
+    "MUSIC_VOLUME": 0.2,
+    "MUSIC_TRACKS": "/assets/audio/foolforyou.mp3,/assets/audio/alone.mp3",
     "DIM_NAMES": [
       "攻坚终结",
       "过渡平滑度",
@@ -88,7 +88,7 @@
     "GACHA_FONT_STYLE": 0,
     "GACHA_LOGO_ON_TIME": 560,
     "GACHA_LOGO_DURATION": 900,
-    "PHOTO_FX_ENABLED": false,
+    "PHOTO_FX_ENABLED": true,
     "PHOTO_FX_INTENSITY": 0.75,
     "REAL_PERCENTAGE": [
       false,
