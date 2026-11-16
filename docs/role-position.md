@@ -29,5 +29,6 @@
 
 - `public/js/role-position.js`：数组移动、插入方向、边缘滚动和 Best 判断。
 - `public/css/role-position.css`：全量网格、拖动状态和 Best 样式。
-- `admin.html`：页面渲染、拖动事件、同步刷新和保存入口。
+- `src/admin/components/RolePositionPanel.tsx`：React 面板结构与保存控件。
+- `src/admin/controller.js`：动态卡片渲染、拖动事件、同步刷新和保存入口。
 - `tests/role-position.test.js`：排序与判断规则测试。

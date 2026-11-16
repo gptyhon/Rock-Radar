@@ -1,20 +1,28 @@
 # 背景特效系统
 
-## 目标
+## 当前模式
+
+默认 `/radar` 使用 `src/radar/themes/s2-background.js`。它在 `engine.js` 的 `drawBackgroundEffect()` 中优先绘制，复用原主帧循环，没有加入 `public/js/background-effects.js` 的模式注册表。
+
+S2 的场景、强度和暂停由展示页工具条在当前会话内控制，刷新恢复默认；它不读取 `BG_EFFECT_MODE`、`BG_EFFECT_CONFIG` 或专场中的粒子／流体参数，也未接入音频响应。其静态层缓存，动态层最多每秒重绘 30 次，始终保留底图；按 `P` 停止／恢复动态。完整说明见 [S2 背景](s2-background-preview.md)。
+
+以下配置与注册流程描述的是原背景系统，可通过 `/radar?theme=original` 查看。管理页仍保留这些配置，保存后原版模式会使用它们。
+
+## 原背景系统
 
 背景特效使用一个共享注册模块连接展示页和管理页：
 
 - `public/js/background-effects.js`：模式定义、字段定义、配置规范化和统一生命周期
 - `public/js/living-field-effect.js`：WebGL 流体折射场、音频包络与自适应分辨率
 - `public/css/background-effects.css`：独立基础渐变背景和背景图层规则
-- `index.html`：提供当前主题色、音频能量、性能档位和唯一动画时钟
-- `admin.html`：根据共享字段定义生成全局与专场配置界面
+- `src/radar/engine.js`：提供当前主题色、音频能量、性能档位和背景更新时钟
+- `src/admin/controller.js`：根据共享字段定义生成全局与专场配置界面
 
-展示页仍然只运行一个 `requestAnimationFrame`。背景特效不能创建自己的动画循环。
+背景由展示页的主 `tick()` 更新；背景模块不能自行创建持续运行的动画循环。
 
 ## 图层
 
-背景被拆成两部分：
+原背景包含以下层次：
 
 1. 基础背景：CSS 渐变和低透明度网格，始终保留。
 2. 2D Canvas 特效：粒子流。

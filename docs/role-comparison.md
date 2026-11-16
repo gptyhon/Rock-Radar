@@ -28,7 +28,8 @@
 
 - `public/js/role-comparison.js`：数值解析、量程换算、雷达几何和 Canvas 绘制。
 - `public/css/role-comparison.css`：对比页布局、编辑器和响应式样式。
-- `admin.html`：角色选择状态、表单绑定和保存入口。
+- `src/admin/components/RoleComparisonPanel.tsx`：React 面板结构与静态控件。
+- `src/admin/controller.js`：角色选择状态、动态表单绑定和保存入口。
 - `tests/role-comparison.test.js`：纯函数与越界绘制比例测试。
 
 ## 边界情况

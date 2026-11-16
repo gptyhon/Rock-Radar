@@ -1,152 +1,75 @@
-# Rock Radar
+# Rock Radar · React S2
 
-> **当前工作基线：`hktv-new-version @ ba1d92b`。** 已完成 React + TypeScript + Vite 原样迁移，并接入 S2 动态背景预览。默认展示使用 S2 背景，原版画面可通过 `?theme=original` 对比；角色、评分、播放节奏与数据格式沿用该分支。之前基于 `main` 的工作已单独备份。
+当前开发分支为 `react-s2`，原样迁移基线为 `hktv-new-version @ ba1d92b`。项目用于编辑角色评分、预览雷达图演出，并组合角色立绘、抽卡、MVP、专场、音乐和片尾。前端采用 React + TypeScript + Vite，演出内核继续使用原 Canvas／DOM／CSS 实现。
 
-## React 迁移版入口
+默认展示已启用 S2 动态背景，支持普通／高光场景、轻微／增强动态和单独暂停。评分、素材命名、数据格式及原播放逻辑沿用基线。通过 `?theme=original` 可对比 React 版的原画面。
+
+## 安装和启动
+
+要求 Node.js ≥ 22.12.0。在项目根目录执行：
 
 ```sh
 npm ci
 npm start
 ```
 
-- React 管理面板：`http://127.0.0.1:3003/`
-- S2 展示页：`http://127.0.0.1:3003/radar`（管理页的展示按钮也指向这里）
-- 原版画面对比：`http://127.0.0.1:3003/radar?theme=original`
-- 原 HTML 对照：`/legacy/admin` 与 `/legacy/radar`
-- 生产版：`npm run build` 后执行 `npm run start:next`
-- 验证：`npm run check`、`npm run test:replica`
+| 地址 | 用途 |
+| --- | --- |
+| `http://localhost:3003/` | React 管理页 |
+| `http://localhost:3003/radar` | S2 雷达展示，按空格开始 |
+| `http://localhost:3003/radar?theme=original` | React 原版画面对比 |
+| `http://localhost:3003/legacy/admin` | 原单 HTML 管理页 |
+| `http://localhost:3003/legacy/radar` | 原单 HTML 展示页 |
 
-`PORT` 可指定端口。`npm start` 与 `npm run dev` 均启动 React 开发服务，无需手动构建即可看到代码修改。旧单 HTML 服务改为显式执行 `npm run start:legacy`（同样默认 3003，不能与新服务占用同一端口）。两版共享该分支的 `data.json`、`public/assets/` 与原 API；保存会按原行为写入数据。
+`npm start` 与 `npm run dev` 均启动开发服务，修改源码会热更新。生产运行使用：
 
-组件、样式、演出模块和迁移验证边界见 [React 迁移说明](docs/react-migration.md)。以下原功能说明继续保留。
-
-
-`Rock-Radar` 是一个以 `index.html` 为核心展示页的前端雷达图特效项目。
-
-当前版本不是单纯的静态页面，而是由下面三部分组成：
-
-- `index.html`：展示端，负责雷达图绘制、数据切换、背景特效、抽卡动画、结尾视频与时间轴控制
-- `admin.html`：本地管理端，负责编辑角色数据、全局配置、颜色方案、图片素材与取景信息
-- `server.js`：本地 Express 服务，提供 `data.json` 读写与图片上传/重命名/删除接口
-
-项目的真正目标是用前端做一套“数据驱动的雷达图变换效果系统”：
-
-- 根据 `data.json` 中的角色列表依次播放
-- 在角色切换时让雷达图在不同分数形态之间平滑变形
-- 叠加图片、粒子、音频可视化、MVP、高光、抽卡开门、结尾视频等演出效果
-
-## 当前项目定位
-
-从代码现状看，这个项目更接近一个“雷达图演示播放器/包装器”，而不是通用图表组件库。
-
-它的核心特点是：
-
-- 数据驱动：雷达维度、满分、最小值、角色分数、时长都来自 `data.json`
-- 强视觉化：雷达图本身带有网格、发光描边、平均值参考层、音频联动外圈效果
-- 强包装感：展示页同时管理角色图、装备图、羁绊图标、MVP 背景、抽卡动画和结尾视频
-- 可运营编辑：通过 `admin.html` 调整配置，不必每次直接改代码
-
-如果后续继续开发，这个项目的主线应该理解为：
-
-1. 用前端 canvas / DOM / CSS animation 驱动雷达图变形
-2. 用本地 JSON 和图片素材组织播放内容
-3. 用管理页降低改配置和换素材的成本
-
-## 运行方式
-
-安装依赖：
-
-```bash
-npm install
+```sh
+npm run build
+npm run start:next
 ```
 
-启动本地服务：
+`PORT` 可覆盖默认端口。旧单 HTML 服务须显式执行 `npm run start:legacy`；它也默认使用 3003，不能与新版同时占用同一端口。React 服务绑定 `127.0.0.1`，开发热更新使用 `PORT + 1`。
 
-```bash
-npm start
-```
+## 使用与素材
 
-默认地址：
+管理页包括角色编辑、角色位置、角色对比、专场、图片和全局配置。编辑暂存在浏览器，保存后通过原 API 写入 `data.json`。新旧页面共享同一份数据；展示页刷新后读取保存结果。
 
-- 管理页：`http://localhost:3003/`
-- 展示页：`http://localhost:3003/radar`
+图片默认放入 `public/assets/images/`，音乐和视频按配置中的 URL 提供，可放在 `public/assets/audio/`、`public/assets/video/`。没有素材时立绘或音视频可能缺失；项目不会自动生成角色图。命名规则与数据字段见下文。
 
-## 真实目录结构
+S2 工具条只改变当前预览，不写入 `data.json`。普通／高光背景为手动切换，不会自动跟随角色或 MVP。管理页的粒子／流体背景参数作用于原版背景模式；S2 使用独立渲染器。完整说明见 [S2 背景](docs/s2-background-preview.md)。
 
-当前仓库里真正和主流程相关的文件主要是：
+## 当前目录与开发入口
 
 ```text
-.
-├─ admin.html          管理页
-├─ index.html          展示页 / 雷达图特效主入口
-├─ server.js           本地 API 与静态资源服务
-├─ data.json           配置、角色数据、图片取景数据
-├─ public/
-│  └─ assets/
-│     ├─ images/       图片素材目录
-│     ├─ audio/        背景音乐
-│     └─ video/        结尾视频（可选）
-├─ package.json
-├─ README.md
-└─ docs/
+app/                     Vite 的管理、展示 HTML 入口
+src/app/                 React 挂载、开发与生产服务
+src/admin/               六个页签的组件、编辑控制器与基础样式
+src/radar/               展示组件、演出引擎、默认配置与基础样式
+src/radar/themes/        S2 背景、预览工具条与主题样式
+src/shared/              生命周期资源回收
+public/js/、public/css/  原背景、专场、角色对比、排序、音乐等公共模块
+public/assets/           本地素材
+data.json                配置、角色、评分、图片取景
+server.js                共享 Express API 与旧版独立启动入口
+index.html、admin.html   原单 HTML 基线与构建依赖
+tests/                   原有规则测试、API／源码检查和浏览器对照
+docs/                    架构、功能和迁移记录
 ```
 
-仓库里还有一些临时脚本、旧页面和导出的 CSV，这些不是当前主流程的一部分：
+日常改动进入 `src/`：展示逻辑位于 `src/radar/engine.js`，管理逻辑位于 `src/admin/controller.js`。React 管理页面结构和生命周期，原动态表单与演出状态尚未全部改为 React 状态。
 
-- `README.old.md`：旧文档，不再作为开发依据
-- `index - cs.html`、`hktv.html`：历史页面/实验文件
-- `_tmp_*`、`tmp_*`、零散 `.csv`：临时或中间文件
+原 HTML 保留对照，并由 Vite 提取公共样式和脚本链接。不要将它们误认作当前默认页面，或在未调整构建配置前删除。`dist/`、`test-results/` 和旧实验 `workspace/` 不参与源码提交。
 
-## 核心架构
+## 本地 API
 
-### 1. 展示页：`index.html`
+`src/app/server.ts` 通过 `server.js` 的 `createLegacyApp()` 复用原接口：
 
-`index.html` 是整个项目的主引擎，主要职责包括：
+- `GET /api/data`、`PUT /api/data`：读取、整体保存数据。
+- `GET /api/images`：枚举图片。
+- `POST /api/upload`、`POST /api/upload-slot/:slot`：上传普通图片或特殊槽位素材。
+- `PATCH /api/images/:filename`、`DELETE /api/images/:filename`：重命名、删除图片并维护 `IMAGE_META`。
 
-- 启动时请求 `/api/data` 并载入 `CONFIG`、`namelist`、`COLOR_PRESETS`、`SPECIAL_PROFILES`、`mvplist`、`expertlist`、`IMAGE_META`
-- 根据角色顺序计算总时间轴和单角色停留时长
-- 在切换角色时更新主题色、角色图、附属素材和目标分数
-- 用 canvas 绘制雷达网格、平均值参考层、当前角色雷达多边形和标签
-- 用音频分析数据驱动雷达周围额外动效
-- 根据配置播放背景粒子或音乐响应式流体折射场
-- 对标记了 `gacha: true` 的角色插入抽卡开门动画
-- 在全部角色结束后播放 `OUTRO_VIDEO`
-
-从实现方式看，展示页是“Canvas 雷达绘制 + DOM 图层 + CSS 动画 + 音频分析”的混合方案。
-
-### 2. 管理页：`admin.html`
-
-`admin.html` 不是简单表单，它已经是一套本地编辑后台，支持：
-
-- 编辑角色列表
-- 编辑每个角色的各维度分数、描述、配色类型、停留时长、是否触发抽卡
-- 在“角色对比”中选择两名不同角色，用红蓝双雷达实时比较、编辑并保存原始维度数据
-- 在“角色位置”中一次查看全部角色，通过拖拽调整顺序并独立保存；Best 角色会以金色高亮
-- 调整维度数量、维度名称、每个维度的满分和最小值
-- 调整雷达图参数、音乐参数、背景特效参数、抽卡参数、品牌文案
-- 维护 MVP 与专家角色名称列表
-- 在独立“专场管理”页面维护角色专属主题、转场、抽卡风格和素材覆盖
-- 在全局配置中维护 5 个固定配色，角色也可使用独立自定义配色
-- 上传图片、重命名图片、删除图片
-- 给普通图片、抽卡背景、门板图片、MVP 图片设置取景参数
-- 导入/导出 CSV 批量编辑角色数据
-
-最后通过 `PUT /api/data` 把内容整体写回 `data.json`。
-
-### 3. 本地服务：`server.js`
-
-`server.js` 很轻，但很关键，主要职责是：
-
-- 提供静态文件访问
-- `/` 返回 `admin.html`
-- `/radar` 返回 `index.html`
-- `/api/data` 读取和保存 `data.json`
-- `/api/images` 枚举 `public/assets/images/` 目录图片
-- `/api/upload` 上传普通图片
-- `/api/upload-slot/:slot` 上传特殊槽位图片
-- `/api/images/:filename` 支持重命名和删除
-
-它同时负责把图片取景元数据和文件名变更保持一致，例如重命名图片时同步迁移 `IMAGE_META`。
+React 服务支持 `RADAR_DATA_FILE` 和 `RADAR_IMAGE_DIR` 环境变量以指定独立数据、素材目录。当前没有数据库或账号体系。
 
 ## 数据模型
 
@@ -282,7 +205,7 @@ npm start
 
 ## 素材命名规则
 
-这部分很重要，因为 `index.html` 里大量素材是按文件名约定自动匹配的。
+这部分很重要，因为 `src/radar/engine.js` 里大量素材是按文件名约定自动匹配的。
 
 ### 角色主图
 
@@ -354,25 +277,21 @@ faction_<标签>.<扩展名>
 6. 如果当前角色开启 `gacha`，先播抽卡动画
 7. 更新角色名、主图、装备、羁绊和 MVP 图层
 8. 将雷达图从上一组分数过渡到下一组分数，或者从中心展开
-9. 按音乐分析结果叠加雷达外圈动效与背景特效
+9. 按音乐分析结果叠加雷达外圈动效；背景由 S2 或原版背景系统独立更新
 10. 全部角色结束后进入结尾视频
 
 这个流程说明了一件事：
 
 项目真正的“主角”不是角色管理，而是雷达图切换时那套前端视效编排。
 
-## 适合继续迭代的方向
+## 验证与当前边界
 
-如果后续想把项目继续往“前端雷达图变换效果”这个目标上推进，建议优先关注这些方向：
+- `npm run check`：类型检查、五组原有测试、API／源码一致性检查及生产构建。
+- `npm run test:replica`：原 HTML 与 React 原版模式的阶段截图、编辑行为，以及 S2 入口和控制检查。
+- 浏览器测试优先使用本机 Google Chrome；其他环境需要安装 Playwright Chromium，例如 `npx playwright install chromium`。
 
-- 把 `index.html` 中大块逻辑拆成模块，降低单文件复杂度
-- 把雷达绘制、音频联动、背景特效、抽卡演出拆成独立子模块
-- 明确区分“数据层”“演出层”“素材层”
-- 补一个真正的配置说明文档，列清每个 `CONFIG` 字段的用途和默认值
-- 如果后续要复用，可以把雷达图绘制抽成纯前端组件，再把运营包装层单独保留
+首次 S2 提交 `00e4f85` 的构建及 S2 交互检查通过；1080p 抽卡像素对照仍有待定位差异。真实素材、音轨、外部字体和整片播放尚需独立验收，不能把测试素材截图等同于完整成片验证。
 
-## 文档说明
+当前未接入 Remotion、直接视频导出或历史实验的 `workspace/project.json`。后续拆分应以 `src/radar/engine.js` 和 `src/admin/controller.js` 为基础，逐步独立时间轴、素材、音频和抽卡模块。
 
-- 本文档基于当前仓库代码重新分析得出
-- `README.old.md` 中的旧描述不再作为当前版本依据
-- 更细的实现拆解请看 [docs/architecture.md](docs/architecture.md)
+文档入口见 [docs/README.md](docs/README.md)，详细结构见 [架构](docs/architecture.md)，迁移与已知验证差异见 [迁移记录](docs/react-migration.md)。

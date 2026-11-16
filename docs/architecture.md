@@ -1,241 +1,84 @@
-# Rock Radar Architecture
+# Rock Radar 架构
 
-## Overview
+适用分支：`react-s2`。更新日期：2026-11-16。原样迁移基线为 `hktv-new-version @ ba1d92b`。
 
-`Rock-Radar` 当前是一套本地运行的前端雷达图演示系统，重点不是通用后台，也不是数据抓取，而是“如何把一组角色分数做成具有包装感的雷达图切换演出”。
+## 当前结构
 
-它由三层组成：
+项目使用 React + TypeScript + Vite 组织页面，继续使用原 JavaScript 演出内核和 Express 文件 API。默认展示已经接入 S2 动态背景；原单 HTML 保留为对照，仍参与构建时的公共脚本与样式链接提取。
 
-- 展示层：`index.html`
-- 编辑层：`admin.html`
-- 本地数据与素材服务层：`server.js`
+| 路径 | 当前职责 |
+| --- | --- |
+| `app/index.html`、`app/radar.html` | 管理、展示两份 Vite 入口 |
+| `src/app/main.tsx` | 按路由加载页面，将 React 挂载到 `body`，保留原 DOM 层级 |
+| `src/app/server.ts` | 开发／生产服务入口、原 HTML 对照路由 |
+| `src/admin/AdminPage.tsx`、`components/` | 六个管理页签、弹窗和页面生命周期 |
+| `src/admin/controller.js` | 原编辑、排序、对比、专场、素材与保存逻辑 |
+| `src/radar/RadarPage.tsx`、`components/` | 舞台、媒体、抽卡、品牌、雷达与时间轴结构 |
+| `src/radar/engine.js` | 配置加载、时间轴、Canvas、角色切换、音频、抽卡和片尾 |
+| `src/radar/defaults.js` | 每次挂载使用的新默认配置副本 |
+| `src/radar/themes/` | S2 背景渲染器、工具条及限定作用域的样式 |
+| `src/shared/runtimeScope.js` | 卸载时回收事件、帧请求、计时器、请求与媒体资源 |
+| `src/admin/styles.css`、`src/radar/styles.css` | 从原 HTML 逐字拆出的基础样式 |
+| `public/js/`、`public/css/` | 原背景、专场、角色对比、角色位置与音乐共享模块 |
+| `server.js` | 导出 `createLegacyApp()`，复用原 API；直接执行时启动旧 HTML 服务 |
+| `index.html`、`admin.html` | 原版基线，不是默认页面的日常修改入口 |
+| `data.json` | 角色、评分、配置和图片取景的持久化数据 |
 
-## Source Of Truth
+React 当前主要管理结构与生命周期。动态表单和演出状态仍由控制器维护，尚未全部迁成 React 状态。静态按钮通过动作引用调用控制器；原动态表单使用受生命周期管理的 `window.__rockRadarAdmin` 桥接。
 
-项目唯一的持久化数据源是根目录的 `data.json`。
+## 启动和路由
 
-展示页和管理页都围绕它工作：
+从项目根目录运行，要求 Node.js ≥ 22.12.0。
 
-- 管理页读取 `data.json`，在浏览器里编辑，然后整体保存回去
-- 展示页启动时再读取 `data.json`，把内容转成运行时状态
+| 命令 | 行为 |
+| --- | --- |
+| `npm start` / `npm run dev` | 启动 React 开发服务，默认 `127.0.0.1:3003`，含热更新 |
+| `npm run build` | 类型检查并构建到 `dist/app/` |
+| `npm run start:next` | 启动 React 生产服务，先运行构建 |
+| `npm run start:legacy` | 启动旧单 HTML 服务，默认也占用 3003 |
 
-这意味着：
+新旧服务不能同时占用相同端口。`PORT` 可覆盖端口，开发热更新端口为 `PORT + 1`。`RADAR_DATA_FILE` 和 `RADAR_IMAGE_DIR` 可分别覆盖 React 服务的数据文件与图片目录。
 
-- 改数据最稳妥的入口是 `admin.html`
-- 想直接批量处理也可以改 `data.json`
-- 当前没有数据库，也没有用户权限体系
+| React 服务地址 | 内容 |
+| --- | --- |
+| `/` | 管理页 |
+| `/radar`、`/radar.html` | 默认 S2 背景的雷达展示 |
+| `/radar?theme=s2` | 与默认 S2 模式一致，兼容之前的预览链接 |
+| `/radar?theme=original` | React 页面使用原版背景 |
+| `/legacy/admin`、`/legacy/radar` | 未修改的原单 HTML 对照 |
 
-## File Responsibilities
+`vite.config.mts` 在首屏解析前注入拆出的基础 CSS，并从原 HTML 提取公共 CSS、脚本链接，保持加载顺序。不要删除原 HTML；后续模块化替换需同时调整此构建依赖和对照测试。
 
-### `index.html`
+## 数据与素材流
 
-展示页承担了大量职责，目前是典型的“大单文件前端引擎”：
+1. 管理页从 `GET /api/data` 读取数据，修改暂存在浏览器。
+2. 保存时通过 `PUT /api/data` 写回完整数据。
+3. 展示页刷新后重新加载数据并计算时间轴；没有自动同步管理页的未保存修改。
+4. 图片通过原上传、枚举、重命名和删除 API 管理，默认目录为 `public/assets/images/`。
+5. 取景保存在 `IMAGE_META`；重命名／删除由 API 同步维护相关元数据。
 
-- 初始化配置和角色数据
-- 加载 MVP 与专家角色名称列表
-- 加载 `SPECIAL_PROFILES` 并按角色的 `specialProfileId` 解析专场
-- 计算时间轴
-- 预加载图片
-- 角色切换编排
-- 雷达图绘制
-- 背景特效
-- 音频分析与音频驱动特效
-- 抽卡动画
-- MVP 特殊分支
-- 结尾视频
+角色使用 `namelist`；MVP、专家、专场分别使用 `mvplist`、`expertlist`、`SPECIAL_PROFILES`。当前没有数据库、账号体系或新的 S2 数据格式。图片命名约定见根目录 [README](../README.md#素材命名规则)。
 
-关键函数可以按下面理解：
+## 展示与背景
 
-- `loadData()`：从 `/api/data` 获取运行数据
-- `updateUI()`：切换到下一个角色时调度界面过渡
-- `performTransition()`：真正应用角色内容、图片、主题色和目标分数
-- `drawRadar()`：绘制当前帧雷达图
-- `drawBackgroundEffect()`：调度 2D 粒子或 WebGL 深空流体折射场
-- `drawRadarAudioFx()`：根据音频能量给雷达外围加动态效果
-- `startOutroSequence()`：角色播放完后的结尾逻辑
+主体设计尺寸为 `1920 × 1080`，窗口适配倍率与 `PRESENTATION_SCALE` 独立。雷达维持 `1600 × 1600` 逻辑坐标，分辨率另按实际尺寸和设备像素比计算。维度和量程由配置决定，保留平均值参考层、超量程绘制、Best、二段形态和原切换逻辑。
 
-### `admin.html`
+`engine.js` 的主 `tick()` 调度背景和雷达。`drawBackgroundEffect()` 优先调用传入的 S2 渲染器；没有传入时才进入原背景管理器。S2 不创建自己的 RAF，静态层缓存，动态画面最多每秒重绘 30 次。页面隐藏、片尾、卸载沿用引擎的相应处理。
 
-管理页本质是一个本地 CMS：
+S2 当前按手动选择的普通／高光场景显示，不会自动根据 MVP 或抽卡切换。它也不读取原背景参数或音频能量。专场的角色样式与转场仍运行，但其粒子／流体背景配置在 S2 模式下不驱动背景。详见 [S2 背景](s2-background-preview.md) 和 [背景系统](background-effects.md)。
 
-- 维护角色列表
-- 维护雷达维度
-- 维护 MVP 与专家角色名称列表
-- 通过独立折叠列表维护角色专场、角色绑定和未保存预览
-- 维护 5 个全局固定配色与角色自定义配色
-- 管理图片素材
-- 调整图片取景
-- 导入导出 CSV
+## 维护入口与边界
 
-关键函数：
+- 角色切换：`src/radar/engine.js` 的 `updateUI()`、`performTransition()`。
+- 雷达与音频绘制：同文件的 `drawRadar()`、`drawRadarAudioFx()`。
+- 抽卡与片尾：同文件的 `playGachaAnimation()`、`startOutroSequence()`。
+- 管理数据规范化与保存：`src/admin/controller.js`。
+- S2 外观、构图与循环：`src/radar/themes/s2-background.js`；不应改原版基础 CSS 来调整 S2。
 
-- `init()`：初始化并读取 `/api/data`
-- `normalizeVertexConfigAndBands()`：把配置和角色分数整理成一致长度
-- `normalizeColorSystem()`：迁移并规范固定/自定义配色数据
-- `normalizeSpecialProfiles()`：规范专场并清理无效角色引用
-- `renderBands()`：渲染角色编辑区
-- `renderConfig()`：渲染全局配置区
-- `renderColors()`：在全局配置中渲染五种固定配色
-- `openImageEditor()`：打开图片取景编辑器
+当前的主要维护边界是体量仍较大的 `engine.js` 和 `controller.js`、素材命名依赖，以及尚未完整类型化的数据模型。后续可按时间轴、素材、音频、抽卡逐步拆分；Remotion、直接导出视频和新的项目数据模型均未接入当前默认流程。
 
-### `server.js`
+## 验证
 
-服务端非常轻量，主要负责：
+`npm run check` 覆盖类型检查、五组原有测试、API／源码一致性测试和构建；`npm run test:replica` 覆盖浏览器对照与 S2 交互。原版对照使用 `?theme=original`。
 
-- 把 HTML 和素材暴露出来
-- 读写 `data.json`
-- 管理 `public/assets/images/` 目录中的图片
-- 在图片重命名/删除时维护 `IMAGE_META`
-
-它不是业务计算中心，更像本地文件中转层。
-
-## Data Flow
-
-当前项目的数据流是单向的：
-
-1. `admin.html` 读取 `/api/data`
-2. 用户在浏览器里修改角色、配置、图片取景
-3. 点击保存后，`PUT /api/data` 覆盖写回 `data.json`
-4. `index.html` 刷新后重新读取 `/api/data`
-5. 展示页用新的配置和数据执行动画；当前展示名称命中 `expertlist` 时显示专家图标
-
-专场配置由 `public/js/special-profiles.js` 在管理页和展示页之间共享。管理页负责编辑和角色绑定，展示页在 `performTransition()` 与抽卡流程中解析当前专场并应用语义 CSS 类、主题变量、转场时间和素材覆盖。详细规范见 `docs/special-profiles.md`。
-
-背景特效由 `public/js/background-effects.js` 统一注册和规范化。管理页使用它生成全局及专场参数表单，展示页把它接入现有唯一动画时钟。基础渐变与 Canvas 动态效果已经分层，详细结构见 `docs/background-effects.md`。
-
-图片相关则走另一条支线：
-
-1. 图片上传到 `public/assets/images/`
-2. 图片名作为素材类型匹配依据
-3. 取景信息保存到 `IMAGE_META`
-4. 展示页按文件名和 `IMAGE_META` 应用图片
-
-## Presentation Layout Model
-
-展示页采用与 Hyperframes 类似的固定构图思路，但保留 Rock Radar 自己的实时动画引擎：
-
-- 主体构图以 `1920 × 1080` 为唯一设计尺寸，由 `#presentationStage` 承载。
-- `viewport-scale = min(viewportWidth / 1920, viewportHeight / 1080)`，只负责让舞台等比适配浏览器窗口。
-- `PRESENTATION_SCALE` 只负责主体内容的视觉倍率，默认 `1.3`，可在管理页调整为 `0.8–1.6`。
-- 主体布局盒会按倍率反向收束，确保放大后的整体边界仍保持在 `1700 × 1015` 的安全构图区内。
-- 背景、装饰、主体、覆盖动画和 HUD 使用 `scene-layer--ambient/core/overlay/hud` 语义分层；背景注册模块已作为第一步拆出。
-- 雷达 Canvas 的绘制坐标始终保持 `1600 × 1600` 逻辑尺寸，清晰度根据实际渲染尺寸和设备像素比单独计算。
-
-这两个缩放维度必须保持独立。窗口适配不能再依赖“物理 4K”媒体查询，主体倍率也不应复制或改写动画关键帧；父层缩放可以让既有的 `transform` / `opacity` 动画继续复用。
-
-## Radar Rendering Model
-
-雷达图并不是简单地把数值等比例画在一个固定 0 到 100 的六边形里，而是做了更灵活的映射：
-
-- 维度数量由 `VERTEX_COUNT` 控制，不一定永远是 6
-- 每个维度有自己的 `BASE_MAX_SCORES`
-- 每个维度还有 `MIN_SCORES`
-- 标签显示时支持百分比和原值两种模式
-- 雷达多边形支持超出“标准满分”范围的视觉表现
-
-实际绘制层次大致是：
-
-1. 网格层
-2. 轴线层
-3. 内部底板遮罩
-4. 平均值参考层
-5. 当前角色雷达面
-6. 外圈音频联动层
-7. 标签与 Best 高亮文本
-
-这使它更像“包装型展示雷达图”，而不是传统 BI 图表。
-
-## Transition Model
-
-角色切换时有两条主要分支：
-
-### 普通切换
-
-- 从上一位角色分数平滑变形到下一位角色分数
-- 同时更换名称、图片、颜色和附属信息
-
-### 中心展开切换
-
-当首次出现，或角色带有 `best_角色名.*` 相关表现时，会采用从中心展开的演出方式：
-
-- 先把雷达设为全 0
-- 再从中心向外展开到目标形态
-- 配合标签延迟出现
-
-### 抽卡分支
-
-对 `gacha: true` 的角色：
-
-- 先隐藏雷达
-- 播放开门动画
-- 读取 `best_角色名.*` 和门板图片
-- 动画结束后再切回正常角色展示
-
-这是当前项目与一般雷达图页面最大的差异点之一。
-
-## Asset Convention
-
-项目大量依赖命名约定而不是显式配置。
-
-这带来两个后果：
-
-- 优点：换图很快，配置成本低
-- 缺点：命名一旦不规范，页面就会静默失效
-
-主要命名规则：
-
-- 角色主图：`<name>.*`
-- 抽卡背景：`best_<name>.*`
-- MVP 图：`<name>1.*`
-- 专家标记：固定使用 `专家.png`
-- 左右门板：`gacha_door_left.*`、`gacha_door_right.*`
-- 羁绊图标：`faction_<tag>.*`
-- 装备图：`1.png`、`2.png` 这类编号图
-
-如果后续要增强稳定性，可以考虑把这些约定逐步收束成显式字段。
-
-## Current Strengths
-
-从工程角度看，这个项目已经具备以下优势：
-
-- 快速改内容：管理页和 JSON 足够直接
-- 本地可运行：没有复杂部署依赖
-- 演出能力强：雷达图、图片、背景、抽卡、音频都能联动
-- 可持续扩展：继续加特效时不需要先改基础架构
-
-## Current Risks
-
-当前代码也有明显的结构性风险：
-
-- `index.html` 体量很大，展示逻辑高度耦合
-- `admin.html` 同样承担了过多表单和状态管理职责
-- 图片素材依赖命名约定，缺乏校验
-- `data.json` 结构较自由，字段约束偏弱
-- 代码中仍残留“band/选手/角色”多种历史命名，语义不够统一
-- 仓库里混有历史文件和临时脚本，容易干扰后续维护
-
-## Recommended Refactor Direction
-
-如果项目接下来要继续朝“前端雷达图变换效果引擎”推进，建议按下面顺序改：
-
-1. 先整理文件边界
-   把展示页逻辑拆成多个 JS 模块，例如 `radar`, `timeline`, `audio`, `gacha`, `assets`。
-
-2. 再整理数据边界
-   明确哪些字段属于雷达数据，哪些属于演出配置，哪些属于素材映射。
-
-3. 最后才整理视觉细节
-   先保证结构清晰，再继续追加特效，否则单文件会越来越难维护。
-
-## Practical Development Advice
-
-如果你后面是围绕“前端雷达图变换效果”继续开发，这里是最值得优先看的代码区域：
-
-- `index.html` 中的 `performTransition()`
-- `index.html` 中的 `drawRadar()`
-- `index.html` 中的 `drawRadarAudioFx()`
-- `index.html` 中的 `drawBackgroundEffect()`
-- `index.html` 中的 `playGachaAnimation()` 相关逻辑
-- `admin.html` 中的 `normalizeVertexConfigAndBands()`
-
-这些函数基本覆盖了“数据如何进入页面”和“页面如何把雷达图做出变形演出”这两条主链路。
+截至首次 `react-s2` 提交 `00e4f85`，构建与 S2 交互通过，1080p 抽卡截图仍有待定位的像素差异。测试截图使用固定数据、测试素材和时钟，不能替代真实音视频整片验收。完整记录见 [迁移与验证记录](react-migration.md)。
