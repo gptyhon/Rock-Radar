@@ -1559,6 +1559,7 @@ function renderBands() {
         <div class="card band-card" data-idx="${idx}">
             <div class="band-index">${idx + 1}</div>
             <div class="band-card-main">
+                ${b.s2 ? `<div style="margin-bottom:10px;color:#9fb6ff;">S2 · ${esc(b.s2.position)} · ${esc(b.s2.costs.join('/'))} 费 · ${esc(b.s2.roles.join(' / '))}${b.s2.forms.length > 1 ? ` · ${esc(b.s2.forms.map(form => `${form.name}（${form.position}）`).join(' / '))}` : ''}${b.s2.scoreSource === 'pending' ? '<br>导入时暂无评分，初始数值为量程下限，请填写评分。' : ''}</div>` : ''}
                 <div class="form-row">
                     <div class="form-group"><label>名称</label><input type="text" value="${esc(b.name)}" onchange="window.__rockRadarAdmin.updateBand(${idx},'name',this.value)"></div>
                     <div class="form-group"><label>描述</label><input type="text" value="${esc(b.desc || '')}" onchange="window.__rockRadarAdmin.updateBand(${idx},'desc',this.value)" style="width:300px;"></div>
