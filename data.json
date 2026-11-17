@@ -221,7 +221,7 @@
   "namelist": [
     {
       "colorMode": "preset",
-      "colorIndex": 1,
+      "colorIndex": 4,
       "duration": 5400,
       "name": "不死途",
       "points": [
@@ -343,7 +343,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 1,
+      "colorIndex": 3,
       "duration": 5200,
       "name": "砂金",
       "points": [
@@ -467,7 +467,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 4,
+      "colorIndex": 1,
       "duration": 5200,
       "name": "云璃",
       "points": [
@@ -589,7 +589,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 2,
       "duration": 5400,
       "name": "大丽花",
       "points": [
@@ -707,7 +707,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 1,
       "duration": 5600,
       "name": "大黑塔",
       "points": [
@@ -827,7 +827,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 1,
       "duration": 5600,
       "name": "万敌",
       "points": [
@@ -951,7 +951,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 4,
+      "colorIndex": 1,
       "duration": 5400,
       "name": "流萤",
       "points": [
@@ -1071,7 +1071,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 2,
       "duration": 5600,
       "name": "符玄",
       "points": [
@@ -1195,7 +1195,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 2,
+      "colorIndex": 4,
       "duration": 5400,
       "name": "白厄",
       "points": [
@@ -1319,7 +1319,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 2,
+      "colorIndex": 0,
       "duration": 5400,
       "name": "忘归人",
       "points": [
@@ -1437,7 +1437,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 2,
       "duration": 5600,
       "name": "赛飞儿",
       "points": [
@@ -1689,7 +1689,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 1,
       "duration": 5600,
       "name": "知更鸟",
       "points": [
@@ -1809,7 +1809,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 2,
+      "colorIndex": 0,
       "duration": 5400,
       "name": "刻律德菈",
       "points": [
@@ -1929,7 +1929,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 2,
+      "colorIndex": 1,
       "duration": 5200,
       "name": "娜塔莎",
       "points": [
@@ -2052,7 +2052,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 1,
+      "colorIndex": 3,
       "duration": 5200,
       "name": "千冶·刃",
       "points": [
@@ -2080,7 +2080,7 @@
         "colorMode": "preset",
         "colorIndex": 2
       },
-      "gacha": true,
+      "gacha": false,
       "equipmentIds": "34,26,7",
       "s2": {
         "name": "千冶·刃",
@@ -2207,7 +2207,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 4,
+      "colorIndex": 0,
       "duration": 5200,
       "name": "黑天鹅",
       "points": [
@@ -2328,7 +2328,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 2,
+      "colorIndex": 3,
       "duration": 5400,
       "name": "黄泉",
       "points": [
@@ -2448,7 +2448,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 1,
+      "colorIndex": 0,
       "duration": 5200,
       "name": "灵砂",
       "points": [
@@ -2571,7 +2571,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 2,
       "duration": 5200,
       "name": "罗刹",
       "points": [
@@ -2812,7 +2812,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 4,
+      "colorIndex": 0,
       "duration": 5200,
       "name": "托帕&账账",
       "points": [
@@ -3052,7 +3052,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 2,
       "duration": 5600,
       "name": "爻光",
       "points": [
@@ -3174,7 +3174,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 2,
       "duration": 5200,
       "name": "乱破",
       "points": [
@@ -3293,7 +3293,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 0,
       "duration": 5400,
       "name": "火花",
       "points": [
@@ -3415,7 +3415,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 1,
+      "colorIndex": 3,
       "duration": 5600,
       "name": "缇宝",
       "points": [
@@ -3537,7 +3537,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 2,
       "duration": 5700,
       "name": "椒丘",
       "points": [
@@ -3781,7 +3781,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 3,
       "duration": 5700,
       "name": "藿藿",
       "points": [
@@ -3905,7 +3905,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 4,
+      "colorIndex": 3,
       "duration": 5700,
       "name": "昔涟",
       "points": [
@@ -4027,7 +4027,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 2,
       "duration": 6000,
       "name": "飞霄",
       "points": [
@@ -4147,7 +4147,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 4,
+      "colorIndex": 0,
       "duration": 6000,
       "name": "景元",
       "points": [
@@ -4267,7 +4267,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 0,
       "duration": 6000,
       "name": "长夜月",
       "points": [
@@ -4391,7 +4391,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 4,
       "duration": 6000,
       "name": "阿格莱雅",
       "points": [
@@ -4513,7 +4513,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 2,
+      "colorIndex": 0,
       "duration": 6000,
       "name": "那刻夏",
       "points": [
@@ -4631,7 +4631,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 0,
       "duration": 6000,
       "name": "波提欧",
       "points": [
@@ -4751,7 +4751,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 4,
       "duration": 6000,
       "name": "翡翠",
       "points": [
@@ -4875,7 +4875,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 1,
       "duration": 6000,
       "name": "海瑟音",
       "points": [
@@ -4993,7 +4993,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 1,
+      "colorIndex": 3,
       "duration": 6000,
       "name": "风堇",
       "points": [
@@ -5119,7 +5119,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 2,
       "duration": 6000,
       "name": "遐蝶",
       "points": [
@@ -5241,7 +5241,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 1,
+      "colorIndex": 4,
       "duration": 6000,
       "name": "卡芙卡",
       "points": [
@@ -5363,7 +5363,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 3,
       "duration": 6000,
       "name": "刃",
       "points": [
@@ -5482,8 +5482,8 @@
       }
     },
     {
-      "colorMode": "custom",
-      "colorIndex": null,
+      "colorMode": "preset",
+      "colorIndex": 3,
       "duration": 5200,
       "name": "姬子·启行",
       "points": [
@@ -5511,7 +5511,7 @@
         "colorMode": "preset",
         "colorIndex": 3
       },
-      "gacha": true,
+      "gacha": false,
       "equipmentIds": "2,8,2",
       "customColor": {
         "color": "#1b83e4",
@@ -5782,7 +5782,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 4,
+      "colorIndex": 0,
       "duration": 6000,
       "name": "瓦尔特",
       "points": [
@@ -5795,7 +5795,7 @@
       ],
       "desc": "开拓银轨 群攻",
       "equipmentIds": "23,27,21",
-      "gacha": true,
+      "gacha": false,
       "gachaText": "Welt",
       "s2": {
         "name": "瓦尔特",
@@ -5906,7 +5906,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 2,
       "duration": 5500,
       "name": "开拓者·欢愉",
       "points": [
@@ -6008,7 +6008,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 1,
+      "colorIndex": 4,
       "duration": 5200,
       "name": "丹恒",
       "points": [
@@ -6188,7 +6188,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 2,
+      "colorIndex": 1,
       "duration": 5400,
       "name": "星期日",
       "points": [
@@ -6339,8 +6339,8 @@
       }
     },
     {
-      "colorMode": "preset",
-      "colorIndex": 0,
+      "colorMode": "custom",
+      "colorIndex": null,
       "duration": 5200,
       "name": "星神★阿哈",
       "points": [
@@ -6429,11 +6429,16 @@
           }
         ]
       },
-      "gachaText": ""
+      "gachaText": "",
+      "customColor": {
+        "color": "#ff2465",
+        "bg1": "#e026e3",
+        "bg2": "#ff3dcb"
+      }
     },
     {
       "colorMode": "preset",
-      "colorIndex": 1,
+      "colorIndex": 4,
       "duration": 5200,
       "name": "克拉拉",
       "points": [
@@ -6526,7 +6531,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 2,
+      "colorIndex": 4,
       "duration": 5200,
       "name": "雪衣",
       "points": [
@@ -6617,7 +6622,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 4,
       "duration": 5200,
       "name": "帕姆王",
       "points": [
@@ -6700,7 +6705,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 3,
       "duration": 5200,
       "name": "希露瓦",
       "points": [
@@ -6789,7 +6794,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 1,
+      "colorIndex": 3,
       "duration": 5200,
       "name": "寒鸦",
       "points": [
@@ -6878,7 +6883,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 2,
+      "colorIndex": 3,
       "duration": 5200,
       "name": "砂金·戏浪",
       "points": [
@@ -6967,7 +6972,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 4,
+      "colorIndex": 1,
       "duration": 5200,
       "name": "知更鸟·晴歌",
       "points": [
@@ -7058,7 +7063,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 0,
+      "colorIndex": 1,
       "duration": 5200,
       "name": "白露",
       "points": [
@@ -7149,7 +7154,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 2,
+      "colorIndex": 0,
       "duration": 5200,
       "name": "桂乃芬",
       "points": [
@@ -7240,7 +7245,7 @@
     },
     {
       "colorMode": "preset",
-      "colorIndex": 3,
+      "colorIndex": 0,
       "duration": 5200,
       "name": "真珠",
       "points": [

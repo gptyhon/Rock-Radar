@@ -2381,7 +2381,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             if (document.getElementById('introOverlay')?.classList.contains('s2-intro')) {
                 buildS2IntroGuide({ config: CONFIG, averages: avgScorePerDim,
                     ratios: Array.from({ length: count }, (_, i) => getRadarRatio(avgScorePerDim[i] ?? 0, i)),
-                    count });
+                    count, scope });
                 return;
             }
             const center = 300;
