@@ -55,7 +55,10 @@ export function RolePositionPanel({ actions }: { actions: AdminActions }) {
               <strong id={"rolePositionCount"}>{"0"}</strong>
             </span>
             {"\n                        "}
-            <span className={"role-position-best-count"}>
+            <span
+              className={"role-position-best-count"}
+              title={"在角色对比中至少有一个维度得分最高的角色数"}
+            >
               {"Best "}
               <strong id={"rolePositionBestCount"}>{"0"}</strong>
             </span>

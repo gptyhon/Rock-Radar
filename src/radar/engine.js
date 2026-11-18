@@ -26,6 +26,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
 
         
         let expertlist = [];
+        let independentBondNames = new Set();
         let SPECIAL_PROFILES = [];
         let specialProfilesConfigured = false;
         let activeSpecialProfile = null;
@@ -513,6 +514,11 @@ const MusicTimeline = window.RockRadarMusicTimeline;
                     if (data.expertlist !== undefined) expertlist = normalizeNameList(data.expertlist);
                     if (data.IMAGE_META) IMAGE_META = data.IMAGE_META;
                     if (data.namelist) namelist = data.namelist;
+                    if (Array.isArray(data.S2_CATALOG?.traits)) {
+                        independentBondNames = new Set(data.S2_CATALOG.traits
+                            .filter(trait => trait?.category === '独立羁绊')
+                            .map(trait => trait.name));
+                    }
                 }
             } catch (e) {
                 console.log('未连接到服务器，使用内置数据');
@@ -1148,6 +1154,9 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             const wrap = document.getElementById('bondIcons');
             if (!wrap) return;
             const tags = parseBondTags(desc);
+            if (backgroundEffect) {
+                tags.sort((left, right) => Number(independentBondNames.has(right)) - Number(independentBondNames.has(left)));
+            }
             wrap.style.animation = 'none';
             wrap.innerHTML = '';
             wrap.style.display = (CONFIG.SHOW_DESC && tags.length) ? 'flex' : 'none';
@@ -1168,6 +1177,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
                     if (!isUiTransitionActive(sessionId)) return;
                     const img = document.createElement('img');
                     img.className = 'bond-icon';
+                    if (independentBondNames.has(tag)) img.classList.add('bond-icon--independent');
                     img.src = candidate.url;
                     img.alt = tag;
                     img.title = tag;

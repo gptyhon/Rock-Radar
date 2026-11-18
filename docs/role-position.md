@@ -13,12 +13,7 @@
 
 ## Best 高亮
 
-满足任意条件的角色使用金色 Best 样式：
-
-1. 名称存在于 `mvplist`。
-2. 图片目录中存在与 `best_<角色名>` 同名的图片，扩展名不限。
-
-图片列表异步加载完成后会自动刷新高亮状态。
+角色位置使用角色对比中的「各维度最高分」结果。基础分在任一维度获得最高分的角色都会显示金色 Best，高分并列时一起标记。同一角色领先多个维度只计一次。在角色对比修改分数后，切回角色位置即可看到更新后的标记。
 
 ## 保存
 
@@ -27,7 +22,8 @@
 
 ## 文件边界
 
-- `public/js/role-position.js`：数组移动、插入方向、边缘滚动和 Best 判断。
+- `public/js/role-position.js`：数组移动、插入方向和边缘滚动。
+- `public/js/role-comparison.js`：按维度计算最高分和并列角色。
 - `public/css/role-position.css`：全量网格、拖动状态和 Best 样式。
 - `src/admin/components/RolePositionPanel.tsx`：React 面板结构与保存控件。
 - `src/admin/controller.js`：动态卡片渲染、拖动事件、同步刷新和保存入口。

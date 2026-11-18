@@ -112,7 +112,7 @@ async function advance(page: Page, ms: number) {
   await page.evaluate((ms) => (window as any).__advance(ms), ms);
 }
 
-async function picture(page: Page, name: string) {
+async function picture(page: Page, name: string, selector?: string) {
   await page.evaluate(() => {
     window.requestAnimationFrame = (window as any).__nativeRaf;
   });
@@ -146,12 +146,18 @@ async function picture(page: Page, name: string) {
     // Let Chromium commit paused pseudo-element/filter layers before capture.
     await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
   });
-  const buffer = await page.screenshot({
+  const options = {
     path: `test-results/${name}.png`,
     animations: page.url().includes("radar") ? "allow" : "disabled",
-    fullPage: !page.url().includes("radar"),
     timeout: 10_000,
-  });
+  } as const;
+  const buffer = selector
+    ? await page.locator(selector).screenshot({
+        ...options,
+        // Fixed page controls can overlap a panel when it scrolls into view.
+        style: ".topbar, #toast { visibility: hidden; }",
+      })
+    : await page.screenshot({ ...options, fullPage: !page.url().includes("radar") });
   await page.evaluate(() => {
     window.requestAnimationFrame = (window as any).__controlledRaf;
   });
@@ -163,9 +169,10 @@ async function comparePictures(
   baseline: Page,
   actualName: string,
   expectedName: string,
+  selector?: string,
 ) {
-  const actual = await picture(replica, actualName);
-  const expected = await picture(baseline, expectedName);
+  const actual = await picture(replica, actualName, selector);
+  const expected = await picture(baseline, expectedName, selector);
   const result = await replica.evaluate(
     async ([left, right]) => {
       const decode = async (data: string) =>
@@ -368,11 +375,21 @@ test("gacha doors, MVP background and outro remain identical at 1080p", async ({
 test("new-version role positioning, comparison and special profiles retain their behavior", async ({
   context,
 }) => {
+  const fixture = structuredClone(original);
+  const [first, second, third] = fixture.namelist;
+  // Align the initial highlights for the screenshot comparison with legacy.
+  fixture.mvplist = [first.name, third.name];
+  for (const [index, role] of fixture.namelist.entries()) {
+    role.points = fixture.CONFIG.BASE_MAX_SCORES.map(
+      (max: number) => max * (index === 2 ? 0.8 : 0.4),
+    );
+    role.points[0] = index === 0 ? 90 : 40;
+  }
   const baseline = await context.newPage();
   const replica = await context.newPage();
   const errors: string[] = [];
   replica.on("pageerror", (error) => errors.push(error.message));
-  for (const page of [baseline, replica]) await prepare(page);
+  for (const page of [baseline, replica]) await prepare(page, fixture);
   await baseline.goto("/legacy/admin");
   await replica.goto("/");
   for (const page of [baseline, replica]) {
@@ -408,9 +425,12 @@ test("new-version role positioning, comparison and special profiles retain their
     baseline,
     "react-position",
     "original-position",
+    "#panel-position",
   );
   for (const page of [baseline, replica]) {
     await page.locator("[data-tab=comparison]").click({ force: true });
+    await page.locator("#comparisonRoleB").selectOption("2");
+    await page.locator("#comparisonRoleA").selectOption("0");
     await advance(page, 160);
     await expect(page.locator("#comparisonRadarCanvas")).toHaveAttribute(
       "data-rendered",
@@ -439,7 +459,27 @@ test("new-version role positioning, comparison and special profiles retain their
     baseline,
     "react-comparison",
     "original-comparison",
+    "#panel-comparison",
   );
+  const editedScore = replica.locator("#comparisonFieldsA input").first();
+  const firstDimensionLeaders = replica.locator(
+    '.comparison-leader-card[data-dimension-index="0"] .comparison-leader-roles',
+  );
+  const bestNames = replica.locator(
+    ".role-position-card.is-best .role-position-name",
+  );
+  await editedScore.fill("90");
+  await expect(firstDimensionLeaders).toHaveText(`${second.name}、${first.name}`);
+  await replica.locator("[data-tab=position]").click({ force: true });
+  await expect(bestNames).toHaveText([second.name, first.name, third.name]);
+  await expect(replica.locator("#rolePositionBestCount")).toHaveText("3");
+  await replica.locator("[data-tab=comparison]").click({ force: true });
+  await editedScore.fill("91");
+  await expect(firstDimensionLeaders).toHaveText(second.name);
+  await replica.locator("[data-tab=position]").click({ force: true });
+  await expect(bestNames).toHaveText([second.name, third.name]);
+  await expect(replica.locator("#rolePositionBestCount")).toHaveText("2");
+
   for (const page of [baseline, replica]) {
     await page.locator("[data-tab=specials]").click({ force: true });
     const cards = page.locator(".special-profile-card");
@@ -462,6 +502,7 @@ test("new-version role positioning, comparison and special profiles retain their
     baseline,
     "react-specials",
     "original-specials",
+    "#panel-specials",
   );
   expect(errors).toEqual([]);
 });

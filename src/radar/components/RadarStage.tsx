@@ -1,3 +1,14 @@
+// The SVG filter uses the original icon's alpha, including its cropped edges.
+const independentBondGradient = `data:image/svg+xml,${encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+    <linearGradient id="warm" x1="20%" x2="80%" y2="100%">
+      <stop stop-color="#ffc580"/>
+      <stop offset="46%" stop-color="#fa8c5a"/>
+      <stop offset="88%" stop-color="#ff83ce"/>
+    </linearGradient>
+    <rect width="32" height="32" fill="url(#warm)"/>
+  </svg>`)}`;
+
 export function RadarStage() {
   return (
     <main
@@ -6,6 +17,28 @@ export function RadarStage() {
       data-design-width={"1920"}
       data-design-height={"1080"}
     >
+      <svg
+        width={0}
+        height={0}
+        aria-hidden="true"
+        style={{ position: "absolute" }}
+      >
+        <filter
+          id="independent-bond-tint"
+          primitiveUnits="objectBoundingBox"
+          colorInterpolationFilters="sRGB"
+        >
+          <feImage
+            href={independentBondGradient}
+            x={0}
+            y={0}
+            width={1}
+            height={1}
+            preserveAspectRatio="none"
+          />
+          <feComposite in2="SourceAlpha" operator="in" />
+        </filter>
+      </svg>
       {"\n        "}
       <div className={"main-layout"}>
         {"\n            "}

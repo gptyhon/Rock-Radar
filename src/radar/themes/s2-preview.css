@@ -38,6 +38,10 @@ body.s2-preview .bond-item {
   background: rgba(20, 15, 51, 0.85);
 }
 
+body.s2-preview .bond-icon--independent {
+  filter: url(#independent-bond-tint) drop-shadow(0 0 0.6px #ffd9f4);
+}
+
 /* Inline sizing uses viewport pixels; this layer must instead fill its transformed parent. */
 body.s2-preview .band-photo-fx-layer {
   width: 100% !important;

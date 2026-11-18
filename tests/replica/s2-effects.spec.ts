@@ -37,7 +37,7 @@ test('S2 portrait effects stay behind the image, follow layout, and share pause 
   data.CONFIG.ADAPTIVE_PERF = false;
   data.namelist = data.namelist.slice(0, 2).map((role: object, index: number) => ({
     ...role, name: `测试角色${index}`, duration: 60000, gacha: false,
-    desc: '巡海游侠 追击 星核猎手 公司 仙舟 击破 治疗 护盾',
+    desc: '追击 巡海游侠 星核猎手 双龙吟 仙舟 击破 治疗 护盾',
   }));
   data.mvplist = [];
   const errors: string[] = [];
@@ -55,6 +55,9 @@ test('S2 portrait effects stay behind the image, follow layout, and share pause 
   await page.keyboard.press('Space');
   await expect(page.locator('#introOverlay')).toHaveCSS('display', 'none', { timeout: 15000 });
   await expect(page.locator('#bandPhoto')).toHaveCSS('opacity', '1');
+  await expect(page.locator('#bondIcons .bond-label')).toHaveText([
+    '巡海游侠', '双龙吟', '追击', '星核猎手', '仙舟', '击破', '治疗', '护盾',
+  ]);
   await page.keyboard.press('Space');
   const fx = page.locator('#photoFxCanvas');
   await expect(fx).toHaveAttribute('data-effect-mode', 's2-comic-stage');

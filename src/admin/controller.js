@@ -993,10 +993,6 @@ function initRolePosition() {
     renderRolePosition();
 }
 
-function isRolePositionBest(role) {
-    return !!RolePosition && RolePosition.isBestRole(role, appData?.mvplist, latestImages);
-}
-
 function renderRolePosition() {
     if (!appData || !RolePosition) return;
     const list = Array.isArray(appData.namelist) ? appData.namelist : [];
@@ -1006,16 +1002,17 @@ function renderRolePosition() {
     const bestCount = document.getElementById('rolePositionBestCount');
     if (!grid) return;
 
-    const bestFlags = list.map(isRolePositionBest);
+    const bestIndices = new Set(getComparisonDimensionLeaders()
+        .flatMap(({ leaders }) => leaders.map(({ index }) => index)));
     if (count) count.textContent = String(list.length);
-    if (bestCount) bestCount.textContent = String(bestFlags.filter(Boolean).length);
+    if (bestCount) bestCount.textContent = String(bestIndices.size);
     if (empty) empty.classList.toggle('is-visible', list.length === 0);
     grid.classList.toggle('is-empty', list.length === 0);
     grid.dataset.roleCount = String(list.length);
-    grid.dataset.bestCount = String(bestFlags.filter(Boolean).length);
+    grid.dataset.bestCount = String(bestIndices.size);
     grid.innerHTML = list.map((role, index) => {
         const name = String(role?.name || '').trim() || `未命名角色 ${index + 1}`;
-        const isBest = bestFlags[index];
+        const isBest = bestIndices.has(index);
         return `
             <div
                 class="role-position-card${isBest ? ' is-best' : ''}"
@@ -1159,11 +1156,16 @@ function renderComparisonPointFields(side, role) {
     `).join('');
 }
 
+function getComparisonDimensionLeaders() {
+    if (!RoleComparison || !appData) return [];
+    const dimensions = RoleComparison.normalizeDimensions(appData.CONFIG);
+    return RoleComparison.calculateDimensionLeaders(appData.namelist, dimensions, 2);
+}
+
 function renderComparisonDimensionLeaders() {
     const container = document.getElementById('comparisonDimensionLeaders');
     if (!container || !RoleComparison || !appData) return;
-    const dimensions = RoleComparison.normalizeDimensions(appData.CONFIG);
-    const leaders = RoleComparison.calculateDimensionLeaders(appData.namelist, dimensions, 2);
+    const leaders = getComparisonDimensionLeaders();
     container.innerHTML = leaders.map(item => {
         const score = item.score === null ? '--' : formatComparisonScore(item.score);
         const roleLabels = item.leaders.map(leader => {
@@ -1923,7 +1925,6 @@ async function loadImages() {
     const images = await refreshLatestImages();
             if (!scope.active) return;
     renderSpecialImages();
-    renderRolePosition();
     const grid = document.getElementById('imageGrid');
     grid.innerHTML = images.map(img => `
         <div class="image-item">
@@ -2474,7 +2475,7 @@ function showToast(msg, type = 'success') {
 }
 
 
-const actions = { get data() { return appData; }, init, normalizeNameList, normalizeSpecialProfiles, normalizeHexColor, normalizeColorObject, cloneColorObject, normalizeColorTarget, normalizeColorSystem, getNormalizedVertexCount, ensureLength, normalizeVertexConfigAndBands, bindBandControls, bindBandCsvTools, bindConfigControls, getBandCsvHeaders, escapeCsvCell, exportBandsCsv, triggerImportBandsCsv, parseCsv, toNumberOrDefault, toOptionalNumber, toBool, importBandsCsv, imageBaseName, getSpecialImages, findSpecialImage, refreshLatestImages, renderSpecialImages, renderBackgroundField, getBackgroundFieldsForMode, renderSpecialBackgroundFields, getSpecialProfile, getSpecialBoundEntries, renderSpecialOptions, specialProfileSwatch, setSpecialOpen, renderSpecialRoleBindings, renderSpecialPreviewRoleOptions, renderSpecialProfiles, filterSpecialRoleOptions, deleteNestedPath, updateSpecialBackgroundOverride, updateSpecialProfile, setSpecialProfilePlugin, toggleSpecialRole, addSpecialProfile, duplicateSpecialProfile, deleteSpecialProfile, previewSpecialProfile, initRolePosition, isRolePositionBest, renderRolePosition, clearRolePositionDropState, markRolePositionDirty, updateRolePositionSaveState, initRoleComparison, isComparisonPanelActive, resolveComparisonSlot, ensureComparisonSelection, getComparisonRoleIndex, getComparisonRoleLabel, renderComparisonRoleOptions, formatComparisonScore, renderComparisonPointFields, renderComparisonDimensionLeaders, renderRoleComparison, selectComparisonRole, updateComparisonPoint, normalizeComparisonPointInput, updateComparisonSaveState, queueComparisonDraw, drawRoleComparison, getFilteredBandEntries, renderBandPager, changeBandPage, isBandSortModalOpen, refreshBandViews, getBandColorTarget, resolveTargetColor, colorPreviewStyle, renderBandColorPicker, selectBandColor, updateBandCustomColor, openBandSortModal, closeBandSortModal, clearBandSortHoverState, renderBandSortTable, reorderBandByDrag, renderBands, updateBand, updatePoint, ensureBandMidPhase, updateMidPhase, updateMidPhasePoint, addBand, removeBand, moveBand, moveBandTo, jumpBandTo, collectBackgroundEffectConfigFields, renderBackgroundEffectConfigFields, renderConfig, setDimPercentMode, renderDimSettings, collectConfig, renderColors, updateFixedColor, loadImages, triggerSpecialUpload, uploadSpecialFile, openSpecialImageEditor, uploadFile, deleteImage, renameImage, getDefaultImageMeta, getImageMeta, getImagePlacement, remapImageMetaForPlacement, openImageEditor, closeImageEditor, resetImageEditor, saveImageEditor, syncImageEditorControls, renderImageEditorPreview, persistAppData, saveComparisonChanges, saveRolePositionOrder, saveAll, esc, escAttr, jsonAttr, jsStringAttr, imageInputKey, clamp, showToast };
+const actions = { get data() { return appData; }, init, normalizeNameList, normalizeSpecialProfiles, normalizeHexColor, normalizeColorObject, cloneColorObject, normalizeColorTarget, normalizeColorSystem, getNormalizedVertexCount, ensureLength, normalizeVertexConfigAndBands, bindBandControls, bindBandCsvTools, bindConfigControls, getBandCsvHeaders, escapeCsvCell, exportBandsCsv, triggerImportBandsCsv, parseCsv, toNumberOrDefault, toOptionalNumber, toBool, importBandsCsv, imageBaseName, getSpecialImages, findSpecialImage, refreshLatestImages, renderSpecialImages, renderBackgroundField, getBackgroundFieldsForMode, renderSpecialBackgroundFields, getSpecialProfile, getSpecialBoundEntries, renderSpecialOptions, specialProfileSwatch, setSpecialOpen, renderSpecialRoleBindings, renderSpecialPreviewRoleOptions, renderSpecialProfiles, filterSpecialRoleOptions, deleteNestedPath, updateSpecialBackgroundOverride, updateSpecialProfile, setSpecialProfilePlugin, toggleSpecialRole, addSpecialProfile, duplicateSpecialProfile, deleteSpecialProfile, previewSpecialProfile, initRolePosition, renderRolePosition, clearRolePositionDropState, markRolePositionDirty, updateRolePositionSaveState, initRoleComparison, isComparisonPanelActive, resolveComparisonSlot, ensureComparisonSelection, getComparisonRoleIndex, getComparisonRoleLabel, renderComparisonRoleOptions, formatComparisonScore, renderComparisonPointFields, renderComparisonDimensionLeaders, renderRoleComparison, selectComparisonRole, updateComparisonPoint, normalizeComparisonPointInput, updateComparisonSaveState, queueComparisonDraw, drawRoleComparison, getFilteredBandEntries, renderBandPager, changeBandPage, isBandSortModalOpen, refreshBandViews, getBandColorTarget, resolveTargetColor, colorPreviewStyle, renderBandColorPicker, selectBandColor, updateBandCustomColor, openBandSortModal, closeBandSortModal, clearBandSortHoverState, renderBandSortTable, reorderBandByDrag, renderBands, updateBand, updatePoint, ensureBandMidPhase, updateMidPhase, updateMidPhasePoint, addBand, removeBand, moveBand, moveBandTo, jumpBandTo, collectBackgroundEffectConfigFields, renderBackgroundEffectConfigFields, renderConfig, setDimPercentMode, renderDimSettings, collectConfig, renderColors, updateFixedColor, loadImages, triggerSpecialUpload, uploadSpecialFile, openSpecialImageEditor, uploadFile, deleteImage, renameImage, getDefaultImageMeta, getImageMeta, getImagePlacement, remapImageMetaForPlacement, openImageEditor, closeImageEditor, resetImageEditor, saveImageEditor, syncImageEditorControls, renderImageEditorPreview, persistAppData, saveComparisonChanges, saveRolePositionOrder, saveAll, esc, escAttr, jsonAttr, jsStringAttr, imageInputKey, clamp, showToast };
 scope.onDispose(() => comparisonResizeObserver?.disconnect());
 const previous = window.__rockRadarAdmin;
 window.__rockRadarAdmin = actions;

@@ -186,7 +186,7 @@ React 服务支持 `RADAR_DATA_FILE` 和 `RADAR_IMAGE_DIR` 环境变量以指定
 
 ### 角色位置
 
-管理页“角色位置”会在响应式网格中一次展示全部角色名称。拖动卡片到目标卡片前后即可调整 `namelist` 顺序，靠近视口上下边缘时会自动滚动；只有点击“保存顺序”后才会写入服务器。MVP 名单成员或存在 `best_<角色名>.*` 图片的角色会显示 Best 高亮。完整规则见 [`docs/role-position.md`](docs/role-position.md)。
+管理页“角色位置”会在响应式网格中一次展示全部角色名称。拖动卡片到目标卡片前后即可调整 `namelist` 顺序，靠近视口上下边缘时会自动滚动；只有点击“保存顺序”后才会写入服务器。角色对比中至少一项维度获得最高分的角色会显示 Best 高亮。完整规则见 [`docs/role-position.md`](docs/role-position.md)。
 
 ### `IMAGE_META`
 
