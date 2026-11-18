@@ -5,6 +5,8 @@ import { buildS2IntroGuide } from './themes/s2-intro';
 // Preserve the original Canvas drawing, timers, transitions and shared animation state.
 /** @param {{backgroundEffect?: {render: Function, renderPortrait?: Function, dispose: Function} | null}} options */
 export function startRadar({ backgroundEffect = null } = {}) {
+const videoCapture = window.rockRadarVideoCapture;
+videoCapture?.installClock();
 const scope = createRuntimeScope();
 const { listen, requestAnimationFrame, setTimeout, clearTimeout, Image, Audio, fetch } = scope;
 let { COLOR_PRESETS, CONFIG, mvplist, IMAGE_META, namelist } = createRadarDefaults(window.RockRadarBackgroundEffects);
@@ -606,6 +608,9 @@ const MusicTimeline = window.RockRadarMusicTimeline;
         const PRESENTATION_DESIGN_HEIGHT = 1080;
         const pCanvas = document.getElementById("particles-canvas");
         const pCtx = pCanvas.getContext("2d");
+        const introOverlay = document.getElementById("introOverlay");
+        const introBackground = introOverlay?.querySelector(".s2-opening-background");
+        const introBackgroundCtx = introBackground?.getContext("2d");
         const livingFieldCanvas = document.getElementById("living-field-canvas");
         const livingFieldFallback = document.getElementById("living-field-fallback");
         const backgroundEffectManager = BackgroundEffects.createManager({
@@ -1503,6 +1508,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
 
         function revealOutroVideoWhenReady(loadToken, useFallbackOnly = false) {
             if (!outroOverlay || loadToken !== outroVideoLoadToken) return;
+            videoCapture?.markOutroReady(useFallbackOnly);
             const elapsed = outroStartedAt ? performance.now() - outroStartedAt : 0;
             const waitMs = Math.max(0, getOutroTransitionMs() - elapsed);
             clearOutroRevealTimer();
@@ -2828,6 +2834,15 @@ const MusicTimeline = window.RockRadarMusicTimeline;
         function drawBackgroundEffect(deltaTime) {
             if (backgroundEffect) {
                 backgroundEffect.render({ canvas: pCanvas, context: pCtx, deltaTime, enabled: isParticlesEnabled });
+                if (introBackgroundCtx && !isSpecialPreviewMode && introOverlay.style.display !== "none") {
+                    // Use the same composited frame on both sides of the opening fade.
+                    if (introBackground.width !== pCanvas.width) introBackground.width = pCanvas.width;
+                    if (introBackground.height !== pCanvas.height) introBackground.height = pCanvas.height;
+                    introBackgroundCtx.drawImage(pCanvas, 0, 0);
+                } else if (introBackground?.width) {
+                    introBackground.width = 0;
+                    introBackground.height = 0;
+                }
                 return;
             }
             const mode = getBgEffectMode();
@@ -4513,6 +4528,14 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             ensureTimelineTooltipStructure();
             prewarmUpcomingBandAssets(0, 2);
             buildIntroRadarGuide();
+            videoCapture?.configure({
+                leadInMs: getLeadInDurationMs(),
+                durationMs: totalDuration,
+                outroTransitionMs: getOutroTransitionMs(),
+                tracks: getConfiguredMusicPlaylist(),
+                musicDelayMs: MusicTimeline.getDelayMs(getMusicDelaySeconds()),
+                musicVolume: getMusicVolume(),
+            }, finishOutroSequence);
 
             if (isSpecialPreviewMode && bands.length) {
                 isStarted = true;

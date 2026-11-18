@@ -13,4 +13,4 @@
 | [角色位置](role-position.md) | 拖动排序、Best 标记与保存规则 |
 | [迁移与验证记录](react-migration.md) | 原样迁移依据、兼容方案和未完成的验证项 |
 
-原 `index.html`、`admin.html` 是保留的基线与构建输入，日常页面修改应进入 `src/`。历史 S2／Remotion 实验记录和本地备份不代表当前实现；当前没有直接视频导出功能。
+原 `index.html`、`admin.html` 是保留的基线与构建输入，日常页面修改应进入 `src/`。当前的逐帧 MP4 导出见 [使用说明](../README.md#导出视频)。

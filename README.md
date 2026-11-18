@@ -38,6 +38,14 @@ npm run start:next
 
 S2 工具条只改变当前预览，不写入 `data.json`。普通／高光背景为手动切换，不会自动跟随角色或 MVP。管理页的粒子／流体背景参数作用于原版背景模式；S2 使用独立渲染器。完整说明见 [S2 背景](docs/s2-background-preview.md)。
 
+## 导出视频
+
+在 React 管理页先保存角色和设置，再点击顶部的 **导出视频**。选择 1080p 30 FPS（默认）、1080p 60 FPS 或 720p 30 FPS 后开始。每次导出使用独立的生产构建。任务在本地服务后台运行，开发页热更新或关闭弹窗后仍会继续。完成后在同一个弹窗下载 MP4，文件也保存在项目的 `workspace/exports/`。
+
+导出需要 PATH 中的 `ffmpeg`（含 H.264 `libx264` 编码器），以及系统 Chrome 或通过 `npx playwright install chromium` 安装的 Chromium。可用 `RADAR_FFMPEG` 和 `RADAR_CHROMIUM_PATH` 指定程序路径。
+
+导出逐帧推进封面、平均值、角色切换、抽卡和片尾。渲染耗时随机器和分辨率变化，成片保持所选帧率。配乐按已保存的顺序、延迟和音量合成，实时音频响应类特效使用静态输入。请把导出所需的素材放在本地服务能访问的位置，缺少的音乐和片尾会在弹窗中提示。片尾素材缺失时使用「感谢观看」。
+
 ## 当前目录与开发入口
 
 ```text
@@ -292,6 +300,6 @@ faction_<标签>.<扩展名>
 
 首次 S2 提交 `00e4f85` 的构建及 S2 交互检查通过；1080p 抽卡像素对照仍有待定位差异。真实素材、音轨、外部字体和整片播放尚需独立验收，不能把测试素材截图等同于完整成片验证。
 
-当前未接入 Remotion、直接视频导出或历史实验的 `workspace/project.json`。后续拆分应以 `src/radar/engine.js` 和 `src/admin/controller.js` 为基础，逐步独立时间轴、素材、音频和抽卡模块。
+视频导出入口位于 `src/app/video-export/`，复用当前演出内核。后续拆分应以 `src/radar/engine.js` 和 `src/admin/controller.js` 为基础，逐步独立时间轴、素材、音频和抽卡模块。
 
 文档入口见 [docs/README.md](docs/README.md)，详细结构见 [架构](docs/architecture.md)，迁移与已知验证差异见 [迁移记录](docs/react-migration.md)。

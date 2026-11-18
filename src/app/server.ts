@@ -1,6 +1,7 @@
 import path from "node:path";
 import { createRequire } from "node:module";
 import express from "express";
+import { registerVideoExport } from "./video-export/routes";
 
 const require = createRequire(import.meta.url);
 const { createLegacyApp } = require("../../server.js");
@@ -15,6 +16,7 @@ async function main() {
     imageDir:
       process.env.RADAR_IMAGE_DIR && path.resolve(process.env.RADAR_IMAGE_DIR),
   });
+  const stopVideoExport = registerVideoExport(app, repo);
   // Serve untouched baseline files for side-by-side verification.
   app.get("/legacy/radar", (_req: express.Request, res: express.Response) =>
     res.sendFile(path.join(repo, "index.html")),
@@ -57,6 +59,7 @@ async function main() {
     console.log(`原版画面对比：http://127.0.0.1:${port}/radar?theme=original`);
   });
   const shutdown = async () => {
+    await stopVideoExport();
     await vite?.close();
     server.close();
   };

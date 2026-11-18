@@ -3,6 +3,7 @@ import "./s2-intro.css";
 export function S2IntroOverlay() {
   return (
     <div id="introOverlay" className="scene-layer scene-layer--overlay s2-intro">
+      <canvas className="s2-opening-background" width={0} height={0} aria-hidden="true" />
       <div className="s2-opening-stage">
         <section className="s2-opening-hero" aria-label="货币战争 S2 开幕">
           <h1 id="introTitleMain">货币战争雷达图</h1>

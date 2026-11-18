@@ -1,0 +1,21 @@
+.video-export-dialog {
+  width: min(500px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #111a30;
+  color: var(--text);
+  box-shadow: 0 20px 60px #0008;
+}
+.video-export-dialog::backdrop { background: #000a; }
+.video-export-dialog h2 { font-size: 1.2rem; color: var(--accent); }
+.video-export-dialog p { font-size: .9rem; line-height: 1.6; }
+.video-export-dialog a { text-decoration: none; }
+.video-export-dialog button:disabled { opacity: .5; cursor: default; }
+.video-export-settings { margin-top: 16px; }
+.video-export-status { margin-top: 16px; }
+.video-export-status progress { width: 100%; margin-block: 6px; accent-color: var(--accent); }
+.video-export-status ul { margin: 6px 0 0 18px; font-size: .83rem; color: #e6cc91; overflow-wrap: anywhere; }
+.video-export-error { color: #ffaeaa; overflow-wrap: anywhere; white-space: pre-wrap; }

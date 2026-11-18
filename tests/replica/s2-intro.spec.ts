@@ -28,14 +28,20 @@ for (const reducedMotion of ['no-preference', 'reduce'] as const) {
     await expect(page.locator('.s2-metric-value')).toHaveText(['40', '40%', '40%', '40', '40', '40', '40', '40']);
     const ratios = (await page.locator('.s2-radar-average').getAttribute('data-ratios'))!.split(',').map(Number);
     expect(ratios).toEqual([.4, .4, .4, .4, .4, .4, .4, 1.6]);
-    const titleBackground = await page.locator('#introOverlay').evaluate(element => getComputedStyle(element).backgroundImage);
+    const openingBackground = page.locator('.s2-opening-background');
+    const sharesBackgroundFrame = () => openingBackground.evaluate((background: HTMLCanvasElement) => {
+      const source = document.querySelector<HTMLCanvasElement>('#particles-canvas')!;
+      return source.dataset.effectMode === 's2-reveal' && background.toDataURL() === source.toDataURL();
+    });
+    await expect(openingBackground).toHaveAttribute('aria-hidden', 'true');
+    await expect(openingBackground).toHaveCSS('pointer-events', 'none');
+    await expect.poll(sharesBackgroundFrame).toBe(true);
     if (reducedMotion === 'reduce') await page.keyboard.press('Space');
     else await page.getByRole('button', { name: '按空格开始' }).click();
     await expect(page.locator('#introOverlay')).toHaveClass(/intro-stage-guide/, { timeout: 8000 });
     await expect(page.locator('.s2-radar-average')).toHaveCSS('stroke', 'rgb(255, 224, 237)');
     await expect(page.locator('.s2-radar-average')).not.toHaveCSS('fill', 'none');
     await expect(page.locator('.s2-average-title')).toHaveText('平均值');
-    await expect(page.locator('#introOverlay')).toHaveCSS('background-image', titleBackground);
     await expect(page.locator('.s2-average-title')).toHaveCSS('font-size', '52px');
     if (reducedMotion === 'no-preference') {
       const frames = await page.evaluate(async () => {
@@ -57,12 +63,15 @@ for (const reducedMotion of ['no-preference', 'reduce'] as const) {
       expect(frames.at(-1)).toEqual(Array(8).fill(1));
       await page.screenshot({ path: 'test-results/s2-average-unfolded.png' });
     } else {
+      const shadeTransition = await page.locator('.s2-opening-stage').evaluate(stage => getComputedStyle(stage, '::before').transitionProperty);
+      expect(shadeTransition).toBe('none');
       await expect(page.locator('.s2-metric-value').last()).toHaveCSS('opacity', '1');
     }
+    await expect.poll(sharesBackgroundFrame).toBe(true);
     await expect(page.locator('.s2-chart-legend, #s2AverageSummary, #introRadarSvg circle')).toHaveCount(0);
     for (const viewport of [{ width: 1500, height: 1000 }, { width: 1920, height: 1080 }, { width: 1920, height: 800 }]) {
       await page.setViewportSize(viewport);
-      const geometry = await page.evaluate(() => {
+      await expect.poll(() => page.evaluate(() => {
         const chart = document.querySelector('.s2-chart-wrap')!.getBoundingClientRect();
         return {
           labelsFit: [...document.querySelectorAll('.s2-radar-label')].every(label => {
@@ -71,13 +80,13 @@ for (const reducedMotion of ['no-preference', 'reduce'] as const) {
           }),
           chartFits: chart.right <= innerWidth && chart.bottom <= innerHeight && chart.left >= 0 && chart.top >= 0,
         };
-      });
-      expect(geometry).toEqual({ labelsFit: true, chartFits: true });
+      })).toEqual({ labelsFit: true, chartFits: true });
     }
     if (reducedMotion === 'reduce') {
       expect(await page.locator('.s2-radar-profile').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
     }
     await expect(page.locator('#introOverlay')).toHaveCSS('display', 'none', { timeout: 15000 });
+    await expect(openingBackground).toHaveJSProperty('width', 0);
     await expect(page.locator('#bandName')).not.toBeEmpty();
     expect(errors).toEqual([]);
   });

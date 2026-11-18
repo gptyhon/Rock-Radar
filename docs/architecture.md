@@ -11,6 +11,7 @@
 | `app/index.html`、`app/radar.html` | 管理、展示两份 Vite 入口 |
 | `src/app/main.tsx` | 按路由加载页面，将 React 挂载到 `body`，保留原 DOM 层级 |
 | `src/app/server.ts` | 开发／生产服务入口、原 HTML 对照路由 |
+| `src/app/video-export/` | 导出任务、逐帧时钟与 FFmpeg 封装 |
 | `src/admin/AdminPage.tsx`、`components/` | 六个管理页签、弹窗和页面生命周期 |
 | `src/admin/controller.js` | 原编辑、排序、对比、专场、素材与保存逻辑 |
 | `src/radar/RadarPage.tsx`、`components/` | 舞台、媒体、抽卡、品牌、雷达与时间轴结构 |
@@ -75,7 +76,7 @@ S2 当前按手动选择的普通／高光场景显示，不会自动根据 MVP 
 - 管理数据规范化与保存：`src/admin/controller.js`。
 - S2 外观、构图与循环：`src/radar/themes/s2-background.js`；不应改原版基础 CSS 来调整 S2。
 
-当前的主要维护边界是体量仍较大的 `engine.js` 和 `controller.js`、素材命名依赖，以及尚未完整类型化的数据模型。后续可按时间轴、素材、音频、抽卡逐步拆分；Remotion、直接导出视频和新的项目数据模型均未接入当前默认流程。
+当前的主要维护边界是体量仍较大的 `engine.js` 和 `controller.js`、素材命名依赖，以及尚未完整类型化的数据模型。后续可按时间轴、素材、音频、抽卡逐步拆分。MP4 导出使用独立的 Chromium 页面与虚拟时钟，读取一次已保存的数据快照，完成后由 FFmpeg 合成音轨。
 
 ## 验证
 
