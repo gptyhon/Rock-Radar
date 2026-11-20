@@ -12,7 +12,7 @@ test.each([['radar', 'index.html'], ['admin', 'admin.html']])(
 );
 
 test.each([
-  'tick', 'playGachaAnimation', 'updateUI', 'performTransition', 'drawRadar',
+  'tick',
   'startIntroSystem', 'syncBandPhotoVariant', 'getBandTimelineDuration',
 ])('%s retains the hktv-new-version algorithm', name => {
   // These top-level functions use the baseline's eight-space indentation.

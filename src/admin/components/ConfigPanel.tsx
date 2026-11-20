@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { DEFAULT_GACHA_WIPE_COLORS } from "../../shared/gacha-wipe";
 import type { AdminActions } from "../types";
 export function ConfigPanel({ actions }: { actions: AdminActions }) {
   return (
@@ -377,6 +378,17 @@ export function ConfigPanel({ actions }: { actions: AdminActions }) {
       <div className={"card"}>
         {"\n                "}
         <h3>{"抽卡出金动画"}</h3>
+        <div className="form-row">
+          {DEFAULT_GACHA_WIPE_COLORS.map((color, index) => {
+            const id = `cfg-gacha-wipe-color-${index + 1}`;
+            return (
+              <div className="form-group" key={id}>
+                <label htmlFor={id}>S2 色带 {index + 1}</label>
+                <input id={id} type="color" defaultValue={color} />
+              </div>
+            );
+          })}
+        </div>
         {"\n                "}
         <div className={"form-row"}>
           {"\n                    "}
@@ -390,7 +402,7 @@ export function ConfigPanel({ actions }: { actions: AdminActions }) {
           </div>
           {"\n                    "}
           <div className={"form-group"}>
-            <label>{"Logo 出现时间(ms)"}</label>
+            <label>{"原版 Logo 出现时间(ms)"}</label>
             <input
               type={"number"}
               id={"cfg-GACHA_LOGO_ON_TIME"}
@@ -400,7 +412,7 @@ export function ConfigPanel({ actions }: { actions: AdminActions }) {
           </div>
           {"\n                    "}
           <div className={"form-group"}>
-            <label>{"Logo 停留时长(ms)"}</label>
+            <label>{"原版 Logo 停留时长(ms)"}</label>
             <input
               type={"number"}
               id={"cfg-GACHA_LOGO_DURATION"}
@@ -415,16 +427,16 @@ export function ConfigPanel({ actions }: { actions: AdminActions }) {
             {"\n                        "}
             <input
               type={"text"}
-              defaultValue={"固定为 故障神启"}
+              defaultValue={"S2 多层斜切 / 原版 故障神启"}
               disabled={true}
-              style={{ width: "180px", opacity: "0.8" } as React.CSSProperties}
+              style={{ width: "224px", opacity: "0.8" } as React.CSSProperties}
             />
             {"\n                    "}
           </div>
           {"\n                    "}
           <div className={"form-group"}>
             {"\n                        "}
-            <label>{"艺术字风格"}</label>
+            <label>{"原版艺术字风格"}</label>
             {"\n                        "}
             <select id={"cfg-GACHA_FONT_STYLE"}>
               {"\n                            "}

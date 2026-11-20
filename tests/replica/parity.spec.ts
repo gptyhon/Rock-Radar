@@ -112,7 +112,7 @@ async function advance(page: Page, ms: number) {
   await page.evaluate((ms) => (window as any).__advance(ms), ms);
 }
 
-async function picture(page: Page, name: string, selector?: string) {
+async function picture(page: Page, name: string, selector?: string, style?: string) {
   await page.evaluate(() => {
     window.requestAnimationFrame = (window as any).__nativeRaf;
   });
@@ -150,12 +150,13 @@ async function picture(page: Page, name: string, selector?: string) {
     path: `test-results/${name}.png`,
     animations: page.url().includes("radar") ? "allow" : "disabled",
     timeout: 10_000,
+    style,
   } as const;
   const buffer = selector
     ? await page.locator(selector).screenshot({
         ...options,
         // Fixed page controls can overlap a panel when it scrolls into view.
-        style: ".topbar, #toast { visibility: hidden; }",
+        style: `${style ?? ""}\n.topbar, #toast { visibility: hidden; }`,
       })
     : await page.screenshot({ ...options, fullPage: !page.url().includes("radar") });
   await page.evaluate(() => {
@@ -170,9 +171,10 @@ async function comparePictures(
   actualName: string,
   expectedName: string,
   selector?: string,
+  style?: string,
 ) {
-  const actual = await picture(replica, actualName, selector);
-  const expected = await picture(baseline, expectedName, selector);
+  const actual = await picture(replica, actualName, selector, style);
+  const expected = await picture(baseline, expectedName, selector, style);
   const result = await replica.evaluate(
     async ([left, right]) => {
       const decode = async (data: string) =>
@@ -301,7 +303,9 @@ test("admin keeps the original layout, filtering, editing, ordering, config and 
       .click({ force: true });
     await expect(page.locator("#toast")).toContainText("保存成功");
   }
-  await comparePictures(replica, baseline, "react-config", "original-config");
+  // The S2 gacha card intentionally has different settings from the legacy UI.
+  await comparePictures(replica, baseline, "react-config", "original-config", undefined,
+    ".card:has(#cfg-GACHA_ANIM_DURATION) { display: none; }");
   for (const page of [baseline, replica]) {
     await page.reload();
     await expect(page.locator("#bandList .band-card").first()).toBeVisible();
@@ -311,6 +315,165 @@ test("admin keeps the original layout, filtering, editing, ordering, config and 
       page.locator("#dimSettings input[type=text]").first(),
     ).toHaveValue("测试维度");
   }
+  expect(errors).toEqual([]);
+});
+
+test("S2 gacha uses saved colors, traces titles together and reveals the prepared grid before the data", async ({ page }) => {
+  const fixture = structuredClone(original);
+  fixture.CONFIG.GACHA_ANIM_DURATION = 3000;
+  delete fixture.CONFIG.GACHA_WIPE_COLORS;
+  fixture.namelist = original.namelist.slice(0, 3).map((band: any, index: number) => ({
+    ...band,
+    name: ["首位角色", "高光角色", "普通角色"][index],
+    duration: 20000,
+    gacha: index !== 2,
+    gachaText: index === 1 ? "高光入场" : "",
+    midPhase: undefined,
+    specialProfileId: undefined,
+  }));
+  fixture.mvplist = ["高光角色"];
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await prepare(page, fixture);
+  await page.route(/\/assets\/images\/best_%E6%99%AE%E9%80%9A/, route => route.abort());
+
+  await page.goto("/");
+  await expect(page.locator("#bandList .band-card").first()).toBeVisible();
+  await page.locator("#bandSearch").fill("普通角色");
+  await page.locator("#bandList").getByText("抽卡出金", { exact: true }).click();
+  await expect(page.locator("#bandList").getByRole("checkbox", { name: "抽卡出金" })).toBeChecked();
+  await page.locator(".tab[data-tab=config]").click({ force: true });
+  const colors = ["#d93c64", "#52df8f", "#25296b"];
+  const defaults = ["#58f4ff", "#ffee00", "#141519"];
+  for (const [index, color] of colors.entries()) {
+    const input = page.getByLabel(`S2 色带 ${index + 1}`);
+    await expect(input).toHaveValue(defaults[index]);
+    await input.fill(color);
+  }
+  await page.getByRole("button", { name: "💾 保存全部" }).click({ force: true });
+  await expect(page.locator("#toast")).toContainText("保存成功");
+
+  await page.goto("/radar");
+  await expect(page.locator("#introGuideLabels")).not.toBeEmpty();
+  await page.keyboard.press("Space");
+  await advance(page, 6500);
+  const overlay = page.locator("#gachaOverlay");
+  const badge = page.locator("#gachaMvp");
+  const name = page.locator("#gachaName");
+  const nameInk = name.locator(".gacha-outline-ink");
+  const bands = overlay.locator(".gacha-wipe-band");
+  const radar = page.locator("#radarCanvas");
+  const portrait = page.locator("#bandPhoto");
+  const radarCenter = () => radar.evaluate((canvas: HTMLCanvasElement) => {
+    const { width, height } = canvas;
+    const pixels = canvas.getContext("2d")!.getImageData(width / 2 - 20, height / 2 - 20, 40, 40).data;
+    return Array.from(pixels);
+  });
+  await expect(overlay).toBeHidden();
+
+  await page.keyboard.press("ArrowRight");
+  await advance(page, 80);
+  await expect(bands.nth(0)).toHaveCSS("background-color", "rgb(217, 60, 100)");
+  await expect(bands.nth(1)).toHaveCSS("background-color", "rgb(82, 223, 143)");
+  await expect(bands.nth(2)).toHaveCSS("background-color", "rgb(37, 41, 107)");
+  const bandScale = (index: number) => bands.nth(index).evaluate(el => {
+    const matrix = new DOMMatrix(getComputedStyle(el).transform);
+    return Math.hypot(matrix.c, matrix.d);
+  });
+  expect(await bandScale(0)).toBeGreaterThan(0);
+  expect(await bandScale(1)).toBe(0);
+  await advance(page, 170);
+  expect(await bandScale(1)).toBeGreaterThan(await bandScale(2));
+  expect(await bandScale(2)).toBeGreaterThan(0);
+  await expect(nameInk).toHaveCSS("opacity", "0");
+
+  await advance(page, 400);
+  await expect(badge).toHaveText("MVP");
+  await expect(badge).toBeVisible();
+  await expect(name).toHaveText("高光入场");
+  expect((await badge.boundingBox())!.y).toBeLessThan((await name.boundingBox())!.y);
+  await expect(page.locator("#gachaBgImg")).toHaveAttribute("src", /best_/);
+  await expect(badge).toHaveCSS("font-size", await name.evaluate(el => getComputedStyle(el).fontSize));
+  await expect(badge.locator(".gacha-outline-ink")).toHaveCount(0);
+  await expect(badge.locator(".gacha-outline-contour").first()).toHaveCSS("stroke", "rgb(255, 214, 107)");
+  await expect(nameInk).toHaveCSS("fill", "rgb(255, 243, 214)");
+
+  const titleTiming = await overlay.locator(".gacha-wipe-title").evaluate(el => {
+    const tracing = el.getAnimations().find(animation =>
+      animation instanceof CSSAnimation && animation.animationName === "gacha-outline-draw");
+    return tracing?.effect?.getTiming().duration;
+  });
+  expect(titleTiming).toBe(1500);
+  const readOutline = () => overlay.locator(".gacha-outline-contour").evaluateAll(paths => paths.map(path => {
+    const style = getComputedStyle(path);
+    return {
+      segment: Number(style.getPropertyValue("--gacha-outline-segment")),
+      progress: Number(style.getPropertyValue("--gacha-outline-progress")),
+      dash: style.strokeDasharray,
+      fill: style.fill,
+    };
+  }));
+  const tracing = await readOutline();
+  expect(tracing.length).toBeGreaterThan(3);
+  expect(tracing.some(path => path.segment < 1)).toBe(true);
+  const inkProgress = await nameInk.evaluate(el => Number(getComputedStyle(el).opacity));
+  expect(inkProgress).toBeCloseTo(tracing[0].progress, 4);
+  for (const path of tracing) {
+    expect(path.fill).toBe("none");
+    expect(path.dash).not.toBe("none");
+    expect(path.progress).toBeGreaterThan(0);
+    expect(path.progress).toBeLessThan(1);
+    expect(path.progress).toBeCloseTo(tracing[0].progress, 4);
+  }
+  await advance(page, 1500);
+  const completed = await readOutline();
+  expect(completed.map(path => path.progress)).toEqual(tracing.map(() => 1));
+  await expect(nameInk).toHaveCSS("opacity", "1");
+
+  await page.keyboard.press("ArrowRight");
+  await advance(page, 650);
+  await expect(overlay).toBeVisible();
+  await expect(badge).toBeHidden();
+  await expect(name).toHaveText("普通角色");
+  await expect(page.locator("#gachaBgImg")).toHaveAttribute("src", /\/普通角色_best\.webp$/);
+  await expect(page.locator("#gachaBgImg")).toHaveCSS("object-fit", "contain");
+  const art = overlay.locator(".gacha-wipe-art");
+  const artScale = () => art.evaluate(el => parseFloat(getComputedStyle(el).scale));
+  const earlyScale = await artScale();
+
+  await advance(page, 2250);
+  expect(await artScale()).toBeGreaterThan(earlyScale + 0.08);
+  await expect(radar).toHaveCSS("opacity", "1");
+  await expect(portrait).toHaveAttribute("src", /\/普通角色\.webp$/);
+  await expect(portrait).toHaveCSS("opacity", "1");
+  const backdrop = await radarCenter();
+  expect(backdrop.some((value, index) => index % 4 === 3 && value > 0)).toBe(true);
+
+  await advance(page, 375);
+  await expect(overlay).toHaveClass(/gacha-return/);
+  await expect(overlay.locator(".gacha-wipe-return-band")).toHaveCSS("background-color", "rgb(82, 223, 143)");
+  await expect(overlay.locator(".gacha-wipe-exit-clip")).not.toHaveCSS("clip-path", "none");
+  await expect(page.locator("#bandName")).toBeHidden();
+  await expect(portrait).toBeVisible();
+  await expect(portrait).toHaveCSS("opacity", "1");
+  const portraitPosition = await portrait.boundingBox();
+  expect(await radarCenter()).toEqual(backdrop);
+
+  await advance(page, 325);
+  await expect(overlay).toBeHidden();
+  await expect(radar).toHaveCSS("opacity", "1");
+  await expect(radar).not.toHaveClass(/radar-reveal/);
+  expect(await radarCenter()).not.toEqual(backdrop);
+  await expect(page.locator("#bandName")).toHaveText("普通角色");
+  await expect(portrait).toHaveCSS("opacity", "1");
+  expect(await portrait.boundingBox()).toEqual(portraitPosition);
+
+  // Clicking the current role's segment replays the S2 gacha from the first wipe.
+  const timeline = (await page.locator("#globalTimeline").boundingBox())!;
+  await page.mouse.click(timeline.x + timeline.width * 0.8, timeline.y + 5);
+  await advance(page, 80);
+  await expect(overlay).toBeVisible();
+  await expect(overlay).not.toHaveClass(/gacha-return/);
   expect(errors).toEqual([]);
 });
 

@@ -112,7 +112,12 @@
     "DETAIL_SWAP_LEAD_MS": 2000,
     "BG_EFFECT_MODE": "living-field",
     "RADAR_AUDIO_FX_MODE": "off",
-    "MUSIC_DELAY_SECONDS": 0
+    "MUSIC_DELAY_SECONDS": 0,
+    "GACHA_WIPE_COLORS": [
+      "#58f4ff",
+      "#ffee00",
+      "#141519"
+    ]
   },
   "COLOR_PRESETS": [
     {
@@ -2462,6 +2467,7 @@
       "desc": "仙舟舰队 群攻 治疗",
       "equipmentIds": "12,24,26",
       "gachaText": "",
+      "gacha": true,
       "s2": {
         "name": "灵砂",
         "traits": [

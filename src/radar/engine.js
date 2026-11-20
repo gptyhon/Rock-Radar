@@ -1,4 +1,6 @@
 import { createRuntimeScope } from '../shared/runtimeScope';
+import { normalizeGachaWipeColors } from '../shared/gacha-wipe';
+import { renderGachaOutlineText } from './themes/gacha-title-outline';
 import { createRadarDefaults } from './defaults';
 import { buildS2IntroGuide } from './themes/s2-intro';
 
@@ -605,6 +607,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
         let startTime = Date.now();
         let gachaPlaying = false; // 抽卡动画正在播放
         let radarVisible = false;
+        let radarBackdropOnly = false;
         let radarRevealTimer = null;
 
         const radarCanvas = document.getElementById("radarCanvas");
@@ -668,6 +671,8 @@ const MusicTimeline = window.RockRadarMusicTimeline;
         const RADAR_FIRST_REVEAL_DELAY = 520;
         const RADAR_POST_GACHA_REVEAL_DELAY = 200;
         const RADAR_POST_GACHA_REVEAL_FALLBACK = 340;
+        const S2_GACHA_ENTRY_DURATION = 570;
+        const GACHA_EXIT_DURATION = backgroundEffect ? 500 : 800;
         const RADAR_LABEL_SLAM_DURATION = 420;
         const RADAR_LABEL_SLAM_STAGGER = 0;
         const RADAR_LABEL_SLAM_OFFSET = 0;
@@ -902,7 +907,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             parseBondTags(band.desc || '').forEach(tag => preloadBases.push(`faction_${tag}`));
             if (mvplist.includes(displayName)) preloadBases.push(`${displayName}1`);
             if (shouldPlayGachaForBand(band, index, false)) {
-                preloadBases.push(`best_${displayName || band.name}`);
+                preloadBases.push(...getGachaArtworkNames(band));
             }
 
             prewarmNamedImage(preloadBases);
@@ -2578,24 +2583,30 @@ const MusicTimeline = window.RockRadarMusicTimeline;
 
         function resetGachaOverlayState() {
             const overlay = document.getElementById('gachaOverlay');
+            const bgImg = document.getElementById('gachaBgImg');
+            const nameEl = document.getElementById('gachaName');
+            if (!overlay || !bgImg || !nameEl) return;
+
+            overlay.classList.remove('active', 'gacha-fadeout', 'gacha-return', 'gacha-wipe-best-portrait');
+            overlay.style.removeProperty('--gacha-accent');
+            bgImg.removeAttribute('src');
+            if (overlay.classList.contains('gacha-wipe')) {
+                nameEl.textContent = '';
+                document.getElementById('gachaMvp').hidden = true;
+                return;
+            }
+
             const panelTop = document.getElementById('gachaPanelTop');
             const panelBottom = document.getElementById('gachaPanelBottom');
             const logo = document.getElementById('gachaLogo');
-            const bgImg = document.getElementById('gachaBgImg');
-            const nameEl = document.getElementById('gachaName');
-            if (!overlay || !panelTop || !panelBottom || !logo || !bgImg || !nameEl) return;
-
-            overlay.classList.remove('active', 'gacha-fadeout');
             overlay.classList.remove('gacha-type-0', 'gacha-type-1', 'gacha-type-2');
             overlay.classList.remove('gacha-band-silverwolf');
-            overlay.style.removeProperty('--gacha-accent');
             panelTop.classList.remove('open');
             panelBottom.classList.remove('open');
             logo.classList.remove('show');
             bgImg.classList.remove('show');
             bgImg.style.removeProperty('transform');
             bgImg.style.removeProperty('filter');
-            bgImg.removeAttribute('src');
             nameEl.classList.remove('show');
             nameEl.className = 'gacha-name';
         }
@@ -2605,6 +2616,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             clearGachaTimers();
             resetGachaOverlayState();
             gachaPlaying = false;
+            if (radarBackdropOnly) hideRadar();
         }
 
         function shouldPlayGachaForBand(band, index = -1, isFirst = false) {
@@ -2615,9 +2627,11 @@ const MusicTimeline = window.RockRadarMusicTimeline;
 
         function getBandGachaPauseDuration(band, index = -1) {
             if (!shouldPlayGachaForBand(band, index, false)) return 0;
-            const profile = getBandSpecialProfile(band);
-            const duration = profile?.transitions?.gachaDuration || CONFIG.GACHA_ANIM_DURATION || 4500;
-            return Math.max(duration, 2200) + 800;
+            return getGachaDuration(getBandSpecialProfile(band)) + GACHA_EXIT_DURATION;
+        }
+
+        function getGachaDuration(profile) {
+            return Math.max(profile?.transitions?.gachaDuration || CONFIG.GACHA_ANIM_DURATION || 4500, 2200);
         }
 
         function getBandTimelineDuration(band, index = -1) {
@@ -2704,6 +2718,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             clearRadarLabelRevealTimer();
             hideRadarBackgroundCleaner();
             radarVisible = false;
+            radarBackdropOnly = false;
             radarCanvas.classList.remove("radar-reveal");
             radarCanvas.classList.add("radar-hidden");
             clearRadarCanvas();
@@ -2948,7 +2963,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             if (backgroundEffect?.renderPortrait) {
                 backgroundEffect.renderPortrait({
                     canvas: photoFxCanvas, context: photoFxCtx,
-                    visible: CONFIG.PHOTO_FX_ENABLED && !gachaPlaying && currentIndex >= 0,
+                    visible: CONFIG.PHOTO_FX_ENABLED && (!gachaPlaying || radarBackdropOnly) && currentIndex >= 0,
                     roleKey: currentIndex, intensity: getPhotoFxIntensity(),
                 });
                 return;
@@ -3144,6 +3159,13 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             return getBandDisplayName(band);
         }
 
+        function getGachaArtworkNames(band) {
+            const name = getBandDisplayName(band) || band.name;
+            const custom = getBandSpecialProfile(band)?.assets?.gachaBackgroundName;
+            if (custom) return [custom];
+            return backgroundEffect ? [`best_${name}`, `${name}_best`] : [`best_${name}`];
+        }
+
         function fadeOutExpertBadge() {
             const badge = document.getElementById('expertBadge');
             if (!badge || badge.hidden) return;
@@ -3160,108 +3182,92 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             badge.hidden = !isExpert;
         }
 
+        function startOriginalGachaVisual(overlay, nameEl, bgImg, text, profile, sessionId) {
+            const panelTop = document.getElementById('gachaPanelTop');
+            const panelBottom = document.getElementById('gachaPanelBottom');
+            const logo = document.getElementById('gachaLogo');
+            const appear = Number(CONFIG.GACHA_LOGO_ON_TIME);
+            const hold = Number(CONFIG.GACHA_LOGO_DURATION);
+            const logoOn = Number.isFinite(appear) && appear >= 0 ? appear : 120;
+            const logoOff = Number.isFinite(hold) && hold > 0 ? logoOn + hold : 520;
+
+            setGachaWaveText(nameEl, text);
+            overlay.classList.add('gacha-type-2');
+            overlay.classList.toggle('gacha-band-silverwolf', profile?.gacha?.style === 'silverwolf');
+            queueGachaTimer(sessionId, () => logo.classList.add('show'), logoOn);
+            queueGachaTimer(sessionId, () => logo.classList.remove('show'), logoOff);
+            queueGachaTimer(sessionId, () => {
+                logo.classList.remove('show');
+                panelTop.classList.add('open');
+                panelBottom.classList.add('open');
+            }, 700);
+            queueGachaTimer(sessionId, () => bgImg.classList.add('show'), 720);
+            queueGachaTimer(sessionId, () => nameEl.classList.add('show'), 1000);
+        }
+
         /**
          * 播放抽卡出金动画
          * @param {Object} band - 即将展示的乐队数据对象
+         * @param {Function} prepareRadar - S2 角色卡片完全遮住画面后准备雷达底图
          * @returns {Promise} 动画完成后 resolve
          */
-        function playGachaAnimation(band) {
+        function playGachaAnimation(band, prepareRadar) {
             return new Promise(resolve => {
                 cancelGachaAnimation();
                 gachaPlaying = true;
                 const sessionId = gachaAnimationSession;
                 const overlay = document.getElementById('gachaOverlay');
-                const panelTop = document.getElementById('gachaPanelTop');
-                const panelBottom = document.getElementById('gachaPanelBottom');
-                const logo = document.getElementById('gachaLogo');
                 const bgImg = document.getElementById('gachaBgImg');
                 const nameEl = document.getElementById('gachaName');
-                const animType = 2;
+                const useWipe = overlay.classList.contains('gacha-wipe');
                 const displayName = getBandDisplayName(band);
-                const displayIdentityBand = displayName && displayName !== band.name
-                    ? { ...band, name: displayName }
-                    : band;
-                const specialProfile = getBandSpecialProfile(displayIdentityBand);
-                const specialGachaStyle = specialProfile?.gacha?.style || 'inherit';
-                const isSilverWolfGacha = specialGachaStyle === 'silverwolf';
-                const overlayTypeClass = `gacha-type-${animType}`;
-                const duration = Math.max(
-                    specialProfile?.transitions?.gachaDuration || CONFIG.GACHA_ANIM_DURATION || 4500,
-                    2200
-                );
+                const specialProfile = getBandSpecialProfile(band);
+                const duration = getGachaDuration(specialProfile);
+                const text = getBandGachaDisplayText(band);
 
-                const timelineByType = {
-                    0: { logoOn: 160, openAt: 1180, bgOn: 1480, nameOn: 2250 },
-                    1: { logoOn: 80, openAt: 520, bgOn: 660, nameOn: 980 },
-                    2: { logoOn: 120, logoOff: 520, openAt: 700, bgOn: 720, nameOn: 1000 }
-                };
-                const timeline = { ...(timelineByType[animType] || timelineByType[0]) };
-                const logoOnOverride = Number(CONFIG.GACHA_LOGO_ON_TIME);
-                if (Number.isFinite(logoOnOverride) && logoOnOverride >= 0) {
-                    timeline.logoOn = logoOnOverride;
-                }
-                const logoDuration = Number(CONFIG.GACHA_LOGO_DURATION);
-                if (Number.isFinite(logoDuration) && logoDuration > 0) {
-                    timeline.logoOff = timeline.logoOn + logoDuration;
-                }
-
-                // 重置状态
-                resetGachaOverlayState();
-                overlay.offsetWidth;
-
-                const gachaBackgroundName = specialProfile?.assets?.gachaBackgroundName || `best_${displayName || band.name}`;
-                loadNamedImage(gachaBackgroundName, candidate => {
+                const artworkNames = getGachaArtworkNames(band);
+                const imageNames = useWipe
+                    ? [...artworkNames.filter(name => !namedImageMissingCache.has(name)), getBandPhotoName(band)]
+                    : artworkNames[0];
+                loadNamedImage(imageNames, candidate => {
+                    const bestPortrait = useWipe && candidate.base === `${displayName}_best`;
+                    const fit = bestPortrait || !artworkNames.includes(candidate.base) ? 'contain' : 'cover';
+                    overlay.classList.toggle('gacha-wipe-best-portrait', bestPortrait);
+                    applyImageMeta(bgImg, candidate.name, { fit }, true);
                     bgImg.src = candidate.url;
-                    applyImageMeta(bgImg, candidate.name, { fit: 'cover', x: 50, y: 50, scale: 1 }, true);
-                }, () => {
-                    bgImg.src = '';
-                }, () => sessionId === gachaAnimationSession);
+                }, null, () => gachaPlaying && sessionId === gachaAnimationSession);
 
-                // 设置艺术字名称和风格
-                setGachaWaveText(nameEl, getBandGachaDisplayText(band));
-                if (animType !== 2) {
-                    nameEl.classList.add(`gacha-font-${CONFIG.GACHA_FONT_STYLE}`);
+                if (useWipe) {
+                    normalizeGachaWipeColors(CONFIG.GACHA_WIPE_COLORS).forEach((color, index) => {
+                        overlay.style.setProperty(`--gacha-wipe-color-${index + 1}`, color);
+                    });
+                    overlay.style.setProperty('--gacha-hold-duration', `${duration - S2_GACHA_ENTRY_DURATION}ms`);
+                    overlay.style.setProperty('--gacha-return-duration', `${GACHA_EXIT_DURATION}ms`);
+                    overlay.style.setProperty('--gacha-title-units', String(Math.max(8, [...text].length)));
+                    renderGachaOutlineText(nameEl, text, { filled: true });
+                    const badge = document.getElementById('gachaMvp');
+                    badge.hidden = !mvplist.includes(displayName);
+                    if (!badge.hidden) renderGachaOutlineText(badge, 'MVP');
+                    queueGachaTimer(sessionId, prepareRadar, S2_GACHA_ENTRY_DURATION + 50);
+                } else {
+                    startOriginalGachaVisual(overlay, nameEl, bgImg, text, specialProfile, sessionId);
                 }
-
-                // 显示遮罩
-                overlay.classList.add(overlayTypeClass);
-                overlay.classList.toggle('gacha-band-silverwolf', isSilverWolfGacha);
                 if (specialProfile?.gacha?.accent) {
                     overlay.style.setProperty('--gacha-accent', specialProfile.gacha.accent);
-                } else {
-                    overlay.style.removeProperty('--gacha-accent');
                 }
+                // Commit the inactive state so seeking back to the same role restarts the CSS animations.
+                void overlay.offsetWidth;
                 overlay.classList.add('active');
 
-                // T+logoOn: 显示 logo
-                queueGachaTimer(sessionId, () => logo.classList.add('show'), timeline.logoOn);
-
-                if (timeline.logoOff != null) {
-                    queueGachaTimer(sessionId, () => logo.classList.remove('show'), timeline.logoOff);
-                }
-
-                // T+openAt: 分屏打开
+                // 保留角色卡片的展示时长，第二次色带结束后交给雷达内容。
                 queueGachaTimer(sessionId, () => {
-                    logo.classList.remove('show');
-                    panelTop.classList.add('open');
-                    panelBottom.classList.add('open');
-                }, timeline.openAt);
-
-                // T+bgOn: 显示背景
-                queueGachaTimer(sessionId, () => bgImg.classList.add('show'), timeline.bgOn);
-
-                // T+nameOn: 显示艺术字名称
-                queueGachaTimer(sessionId, () => nameEl.classList.add('show'), timeline.nameOn);
-
-                // T+GACHA_ANIM_DURATION: 淡出并清理
-                queueGachaTimer(sessionId, () => {
-                    overlay.classList.add('gacha-fadeout');
+                    overlay.classList.add(useWipe ? 'gacha-return' : 'gacha-fadeout');
                     queueGachaTimer(sessionId, () => {
                         clearGachaTimers();
                         resetGachaOverlayState();
                         gachaPlaying = false;
                         resolve();
-                    }, 800);
+                    }, GACHA_EXIT_DURATION);
                 }, duration);
             });
         }
@@ -3296,11 +3302,25 @@ const MusicTimeline = window.RockRadarMusicTimeline;
                 setPhotoTransform(photoEl, "translate3d(88px, 0, 0) scale(0.92)");
                 photoEl.style.opacity = "0";
 
-                playGachaAnimation(gachaTargetBand).then(() => {
+                let preparedTheme;
+                playGachaAnimation(gachaTargetBand, () => {
+                    if (!isUiTransitionActive(sessionId)) return;
+                    preparedTheme = prepareBandTheme(gachaTargetBand, sessionId);
+                    setBandIdentity(gachaTargetBand, preparedTheme.displayName, sessionId);
+                    stageGachaPortrait(gachaTargetBand, photoEl, preparedTheme.specialProfile, sessionId);
+                    currentThemeColor = targetThemeColor;
+                    currentScores = Array(CONFIG.VERTEX_COUNT).fill(0);
+                    animProgress = 1;
+                    radarBackdropOnly = true;
+                    radarVisible = true;
+                    radarCanvas.classList.remove('radar-hidden');
+                    drawRadar();
+                }).then(() => {
                     if (!isUiTransitionActive(sessionId)) return;
                     currentIndex = gachaTargetIndex;
                     performTransition(gachaTargetBand, false, sessionId, {
                         postGachaFastReveal: true,
+                        preparedTheme,
                         prevBand: gachaTargetPrevBand
                     });
                 });
@@ -3331,36 +3351,10 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             }
         }
 
-        /**
-         * 核心的视图与数据切换：更换文字、图片加载、应用主题色及计算雷达图目标分数
-         * @param {Object} band - 即将展示的乐队数据对象
-         * @param {boolean} isFirst - 是否是初始首次加载
-         */
-        function performTransition(band, isFirst, sessionId = uiTransitionSession, options = {}) {
-            if (!isUiTransitionActive(sessionId)) return;
-            const nameEl = document.getElementById("bandName");
-            const containerEl = document.getElementById("bandDetailContainer");
-            const equipmentGridEl = document.getElementById("bandEquipmentGrid");
-            const photoContainer = document.querySelector(".band-photo-container");
-            const photoEl = document.getElementById("bandPhoto");
+        function prepareBandTheme(band, sessionId) {
             const mvpContainer = document.getElementById("mvpBgContainer");
-            const prevBand = options.prevBand || null;
-            const isMidPhase = options.isMidPhase === true || isMidPhaseTransition(prevBand, band);
             const displayName = getBandDisplayName(band);
-            const displayIdentityBand = displayName && displayName !== band.name
-                ? { ...band, name: displayName }
-                : band;
-            const specialProfile = getBandSpecialProfile(displayIdentityBand);
-            const radarTransition = specialProfile?.effects?.radarTransition || 'default';
-            const shouldCenterReveal = radarTransition === 'morph'
-                ? isFirst
-                : isFirst
-                    || bandHasBest(band)
-                    || radarTransition === 'center-reveal'
-                    || radarTransition === 'pulse';
-            const shouldUsePostGachaTiming = !!options.postGachaFastReveal && shouldCenterReveal;
-            let centerRevealQueued = false;
-
+            const specialProfile = getBandSpecialProfile(band);
             // MVP 底图逻辑
             const isMvp = mvplist.includes(displayName);
             const fallbackTheme = isMvp ? MVP_THEME : band;
@@ -3377,35 +3371,9 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             document.documentElement.style.setProperty('--bg-color-1', bgColor1);
             document.documentElement.style.setProperty('--bg-color-2', bgColor2);
 
-            nameEl.classList.remove("fade-out");
-            containerEl.classList.remove("fade-out");
-            setBandDetailMode('hidden');
-            containerEl.style.display = "none";
-            if (equipmentGridEl) equipmentGridEl.innerHTML = '';
-            photoContainer.querySelectorAll('.band-photo-variant').forEach(node => node.remove());
-            photoEl.style.filter = specialProfile?.effects?.photoTransition === 'glitch'
-                ? 'blur(8px) hue-rotate(22deg) saturate(1.25)'
-                : specialProfile?.effects?.photoTransition === 'zoom'
-                    ? 'blur(4px)'
-                    : 'blur(0)';
-            if (isMidPhase) {
-                photoEl.style.transition = 'none';
-                photoEl.style.opacity = "0";
-                setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
-            } else {
-                photoEl.style.transition = getSpecialPhotoTransitionCss(specialProfile);
-                photoEl.style.opacity = "0";
-                setPhotoTransform(photoEl, getSpecialPhotoStartTransform(specialProfile));
-            }
-            clearPhotoWipeLayer(photoContainer);
-
-            // 根据配置调整图片容器高度以改变“外界大小”
-            // 默认 380px 为 1.0 比例的基准高度
-            photoContainer.style.height = `${380 * CONFIG.IMAGE_SCALE}px`;
-            resizePhotoFxCanvas(true);
-
             const oldMvpImg = mvpContainer.querySelector(".mvp-bg-image.active");
             mvpContainer.classList.toggle("mvp-active", isMvp);
+            mvpContainer.querySelectorAll(".mvp-bg-image:not(.active, .exit)").forEach(img => img.remove());
 
             if (oldMvpImg) {
                 oldMvpImg.classList.remove("active");
@@ -3416,7 +3384,6 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             if (isMvp) {
                 const img = document.createElement("img");
                 img.className = "mvp-bg-image";
-                img.src = ""; 
                 mvpContainer.appendChild(img);
                 loadNamedImage(`${displayName}1`, candidate => {
                     if (!isUiTransitionActive(sessionId)) return;
@@ -3427,7 +3394,90 @@ const MusicTimeline = window.RockRadarMusicTimeline;
                         if (!isUiTransitionActive(sessionId)) return;
                         img.classList.add("active");
                     });
-                }, null, () => isUiTransitionActive(sessionId));
+                }, () => img.remove(), () => isUiTransitionActive(sessionId));
+            }
+
+            return { displayName, specialProfile };
+        }
+
+        function setBandIdentity(band, displayName, sessionId) {
+            document.getElementById("bandName").textContent = displayName;
+            syncExpertBadge(displayName);
+            renderBondIcons(band.desc || '', sessionId);
+        }
+
+        function preparePhotoContainer(photoContainer) {
+            photoContainer.querySelectorAll('.band-photo-variant').forEach(node => node.remove());
+            clearPhotoWipeLayer(photoContainer);
+            photoContainer.style.height = `${380 * CONFIG.IMAGE_SCALE}px`;
+            resizePhotoFxCanvas(true);
+        }
+
+        function showBandPhoto(photoEl, photoName, candidate) {
+            photoEl.src = candidate.url;
+            photoEl.dataset.photoBandName = photoName;
+            applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
+            setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
+            photoEl.style.filter = "blur(0)";
+            photoEl.style.opacity = "1";
+        }
+
+        function stageGachaPortrait(band, photoEl, specialProfile, sessionId) {
+            const photoName = getBandPhotoName(band);
+            const gachaSession = gachaAnimationSession;
+            photoEl.style.transition = 'none';
+            photoEl.style.opacity = '0';
+            photoEl.dataset.photoBandName = photoName;
+            preparePhotoContainer(document.getElementById('photoContainer'));
+            loadNamedImage(photoName, candidate => {
+                showBandPhoto(photoEl, photoName, candidate);
+                // Commit the fully visible portrait before restoring its normal transition for later role changes.
+                void photoEl.offsetWidth;
+                photoEl.style.transition = getSpecialPhotoTransitionCss(specialProfile);
+            }, null, () => isUiTransitionActive(sessionId) && gachaSession === gachaAnimationSession);
+        }
+
+        /**
+         * 核心的视图与数据切换：更换文字、图片加载、应用主题色及计算雷达图目标分数
+         * @param {Object} band - 即将展示的乐队数据对象
+         * @param {boolean} isFirst - 是否是初始首次加载
+         */
+        function performTransition(band, isFirst, sessionId = uiTransitionSession, options = {}) {
+            if (!isUiTransitionActive(sessionId)) return;
+            const nameEl = document.getElementById("bandName");
+            const containerEl = document.getElementById("bandDetailContainer");
+            const equipmentGridEl = document.getElementById("bandEquipmentGrid");
+            const photoContainer = document.querySelector(".band-photo-container");
+            const photoEl = document.getElementById("bandPhoto");
+            const prevBand = options.prevBand || null;
+            const isMidPhase = options.isMidPhase === true || isMidPhaseTransition(prevBand, band);
+            const { displayName, specialProfile } = options.preparedTheme || prepareBandTheme(band, sessionId);
+            const radarTransition = specialProfile?.effects?.radarTransition || 'default';
+            const shouldCenterReveal = radarTransition === 'morph'
+                ? isFirst
+                : isFirst
+                    || bandHasBest(band)
+                    || radarTransition === 'center-reveal'
+                    || radarTransition === 'pulse';
+            const shouldUsePostGachaTiming = !options.preparedTheme
+                && !!options.postGachaFastReveal && shouldCenterReveal;
+            let centerRevealQueued = false;
+
+            nameEl.classList.remove("fade-out");
+            containerEl.classList.remove("fade-out");
+            setBandDetailMode('hidden');
+            containerEl.style.display = "none";
+            if (equipmentGridEl) equipmentGridEl.innerHTML = '';
+            if (!options.preparedTheme) {
+                photoEl.style.filter = specialProfile?.effects?.photoTransition === 'glitch'
+                    ? 'blur(8px) hue-rotate(22deg) saturate(1.25)'
+                    : specialProfile?.effects?.photoTransition === 'zoom'
+                        ? 'blur(4px)'
+                        : 'blur(0)';
+                photoEl.style.transition = isMidPhase ? 'none' : getSpecialPhotoTransitionCss(specialProfile);
+                photoEl.style.opacity = "0";
+                setPhotoTransform(photoEl, isMidPhase ? "translate3d(0, 0, 0)" : getSpecialPhotoStartTransform(specialProfile));
+                preparePhotoContainer(photoContainer);
             }
 
             if (!isFirst && !isMidPhase) {
@@ -3451,7 +3501,15 @@ const MusicTimeline = window.RockRadarMusicTimeline;
                     resetRadarLabelRevealState(false, false);
                 }
             };
-            if (shouldCenterReveal) {
+            if (options.preparedTheme) {
+                // Only the score contents animate. The grid is already on screen.
+                radarBackdropOnly = false;
+                startScores = zeroScores;
+                currentScores = [...zeroScores];
+                animProgress = 0;
+                animStartTime = performance.now();
+                queueRadarLabelReveal(Math.max(420, Math.round(ANIM_DURATION * 0.58)), true);
+            } else if (shouldCenterReveal) {
                 if (shouldUsePostGachaTiming) {
                     resetRadarLabelRevealState(true, true);
                     queueUiTransitionTimer(sessionId, () => {
@@ -3475,76 +3533,61 @@ const MusicTimeline = window.RockRadarMusicTimeline;
                 animStartTime = performance.now();
             }
 
-            nameEl.textContent = displayName;
-            syncExpertBadge(displayName);
-            renderBondIcons(band.desc || '', sessionId);
+            if (!options.preparedTheme) setBandIdentity(band, displayName, sessionId);
 
             if (!isMidPhase) {
                 nameEl.style.animation = getSpecialNameAnimation(specialProfile);
                 containerEl.style.animation = "descEntrance 1s ease-out 0.3s both";
             }
 
-            const photoName = getBandPhotoName(band, globalCurrentTime);
-            loadNamedImage(photoName, candidate => {
-                if (!isUiTransitionActive(sessionId)) return;
-                if (isMidPhase && prevBand) {
-                    const oldPhotoName = String(photoEl.dataset.photoBandName || prevBand.photoName || prevBand.name || '').trim() || photoName;
-                    const oldPhotoSrc = photoEl.currentSrc || photoEl.src || '';
-                    const oldCandidate = oldPhotoSrc
-                        ? { url: oldPhotoSrc, name: oldPhotoName }
-                        : null;
-                    if (oldCandidate) {
-                        createPhotoWipeLayer(
-                            photoContainer,
-                            oldCandidate,
-                            candidate,
-                            sessionId,
-                            () => {
-                                if (!isUiTransitionActive(sessionId)) return;
-                                photoEl.style.transition = getSpecialPhotoTransitionCss(specialProfile);
-                            },
-                            () => {
-                                if (!isUiTransitionActive(sessionId)) return;
-                                photoEl.style.transition = 'none';
-                                photoEl.src = candidate.url;
-                                photoEl.dataset.photoBandName = photoName;
-                                applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
-                                photoEl.style.opacity = '1';
-                                photoEl.style.filter = 'blur(0)';
-                                setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
-                            }
-                        );
+            if (!options.preparedTheme) {
+                const photoName = getBandPhotoName(band, globalCurrentTime);
+                loadNamedImage(photoName, candidate => {
+                    if (!isUiTransitionActive(sessionId)) return;
+                    if (isMidPhase && prevBand) {
+                        const oldPhotoName = String(photoEl.dataset.photoBandName || prevBand.photoName || prevBand.name || '').trim() || photoName;
+                        const oldPhotoSrc = photoEl.currentSrc || photoEl.src || '';
+                        const oldCandidate = oldPhotoSrc
+                            ? { url: oldPhotoSrc, name: oldPhotoName }
+                            : null;
+                        if (oldCandidate) {
+                            createPhotoWipeLayer(
+                                photoContainer,
+                                oldCandidate,
+                                candidate,
+                                sessionId,
+                                () => {
+                                    if (!isUiTransitionActive(sessionId)) return;
+                                    photoEl.style.transition = getSpecialPhotoTransitionCss(specialProfile);
+                                },
+                                () => {
+                                    if (!isUiTransitionActive(sessionId)) return;
+                                    photoEl.style.transition = 'none';
+                                    showBandPhoto(photoEl, photoName, candidate);
+                                }
+                            );
+                        } else {
+                            photoEl.style.transition = getSpecialPhotoTransitionCss(specialProfile);
+                            showBandPhoto(photoEl, photoName, candidate);
+                            clearPhotoWipeLayer(photoContainer);
+                        }
                     } else {
-                        photoEl.src = candidate.url;
-                        photoEl.dataset.photoBandName = photoName;
-                        applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
-                        photoEl.style.transition = getSpecialPhotoTransitionCss(specialProfile);
-                        photoEl.style.opacity = '1';
-                        photoEl.style.filter = 'blur(0)';
-                        setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
+                        showBandPhoto(photoEl, photoName, candidate);
                         clearPhotoWipeLayer(photoContainer);
                     }
-                } else {
-                    photoEl.src = candidate.url;
-                    photoEl.dataset.photoBandName = photoName;
-                    applyImageMeta(photoEl, candidate.name, { fit: 'contain', x: 50, y: 50, scale: 1 }, true);
-                    setPhotoTransform(photoEl, "translate3d(0, 0, 0)");
-                    photoEl.style.filter = 'blur(0)';
-                    photoEl.style.opacity = "1";
-                    clearPhotoWipeLayer(photoContainer);
-                }
 
-                if (shouldUsePostGachaTiming) {
-                    startCenterReveal(RADAR_POST_GACHA_REVEAL_DELAY);
-                }
-            }, () => {
-                if (!isUiTransitionActive(sessionId)) return;
-                photoEl.style.opacity = "0";
-                clearPhotoWipeLayer(photoContainer);
-                if (shouldUsePostGachaTiming) {
-                    startCenterReveal(RADAR_POST_GACHA_REVEAL_DELAY);
-                }
-            }, () => isUiTransitionActive(sessionId));
+                    if (shouldUsePostGachaTiming) {
+                        startCenterReveal(RADAR_POST_GACHA_REVEAL_DELAY);
+                    }
+                }, () => {
+                    if (!isUiTransitionActive(sessionId)) return;
+                    photoEl.style.opacity = "0";
+                    clearPhotoWipeLayer(photoContainer);
+                    if (shouldUsePostGachaTiming) {
+                        startCenterReveal(RADAR_POST_GACHA_REVEAL_DELAY);
+                    }
+                }, () => isUiTransitionActive(sessionId));
+            }
 
             // 获取当前乐队相对于当前总进度的剩余时间
             const segment = getTimeSegmentByBandIndex(currentIndex);
@@ -3707,6 +3750,8 @@ const MusicTimeline = window.RockRadarMusicTimeline;
                 ctx.fillStyle = haloGradient;
                 ctx.fill();
             }
+
+            if (radarBackdropOnly) return;
 
             // 全角色平均值：红色参考层，位于当前角色雷达图之下
             if (avgScorePerDim && avgScorePerDim.length) {
@@ -4380,9 +4425,8 @@ const MusicTimeline = window.RockRadarMusicTimeline;
             const clickedTime = per * totalDuration;
             const clickedSegment = getTimeSegmentAt(clickedTime, true);
             const clickedBand = clickedSegment ? bands[clickedSegment.bandIndex] : null;
-            globalCurrentTime = clickedSegment && shouldPlayGachaForBand(clickedBand, clickedSegment.bandIndex, false)
-                ? clickedSegment.start
-                : clickedTime;
+            const playsGacha = clickedSegment && shouldPlayGachaForBand(clickedBand, clickedSegment.bandIndex, false);
+            globalCurrentTime = playsGacha ? clickedSegment.start : clickedTime;
             cancelGachaAnimation();
 
             // 同步音频进度
@@ -4392,7 +4436,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
 
             // 立即检查并切换
             const currentSegment = getTimeSegmentAt(globalCurrentTime, true);
-            if (currentSegment && currentSegment.bandIndex !== currentIndex) {
+            if (currentSegment && (currentSegment.bandIndex !== currentIndex || (backgroundEffect && playsGacha))) {
                 const prevBand = getTransitionPrevBandForIndex(currentSegment.bandIndex);
                 currentIndex = currentSegment.bandIndex;
                 updateUI(bands[currentIndex], false, prevBand);
@@ -4470,6 +4514,7 @@ const MusicTimeline = window.RockRadarMusicTimeline;
                 }
             } else if (e.key === "ArrowRight") {
                 const nextIdx = Math.min(bands.length - 1, currentIndex + 1);
+                if (backgroundEffect && nextIdx === currentIndex && gachaPlaying) return;
                 globalCurrentTime = timeSegments[nextIdx].start;
                 cancelGachaAnimation();
                 resetOutroSequence();

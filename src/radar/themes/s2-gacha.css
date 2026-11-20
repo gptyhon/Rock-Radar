@@ -1,0 +1,277 @@
+#gachaOverlay.gacha-wipe {
+  --gacha-accent: #ffd66b;
+  --gacha-wipe-angle: 31deg;
+  --gacha-wipe-size: calc(hypot(100vw, 100vh) + 16px);
+  /* Samples of the reference's t^1.85 expansion curve. */
+  --gacha-wipe-ease: linear(0, .014, .051, .108, .184, .277, .389, .517, .662, .823, 1);
+}
+
+.gacha-wipe-exit-clip,
+.gacha-wipe-band,
+.gacha-wipe-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--gacha-wipe-size);
+  height: var(--gacha-wipe-size);
+}
+
+.gacha-wipe-exit-clip {
+  transform: translate(-50%, -50%) rotate(var(--gacha-wipe-angle));
+}
+
+.gacha-wipe-layers {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 100vh;
+  transform: translate(-50%, -50%) rotate(calc(-1 * var(--gacha-wipe-angle)));
+}
+
+.gacha-wipe-band {
+  transform: translate(-50%, -50%) rotate(var(--gacha-wipe-angle)) scaleY(0);
+}
+
+.gacha-wipe-band-first {
+  background-color: var(--gacha-wipe-color-1);
+  opacity: .8;
+  --band-delay: 0ms;
+  --band-duration: 460ms;
+}
+
+.gacha-wipe-band-second {
+  background-color: var(--gacha-wipe-color-2);
+  --band-delay: 95ms;
+  --band-duration: 440ms;
+}
+
+.gacha-wipe-band-third {
+  background-color: var(--gacha-wipe-color-3);
+  --band-delay: 190ms;
+  --band-duration: 365ms;
+}
+
+.gacha-wipe.active .gacha-wipe-band {
+  animation: gacha-wipe-expand var(--band-duration) var(--gacha-wipe-ease) var(--band-delay) both;
+}
+
+.gacha-wipe.gacha-return .gacha-wipe-return-band {
+  background-color: var(--gacha-wipe-color-2);
+  animation: gacha-wipe-expand calc(var(--gacha-return-duration) - 30ms) var(--gacha-wipe-ease) both;
+}
+
+.gacha-wipe.gacha-return .gacha-wipe-exit-clip {
+  animation: gacha-wipe-cutout calc(var(--gacha-return-duration) - 58ms) var(--gacha-wipe-ease) 58ms both;
+}
+
+#gachaOverlay.gacha-return ~ #presentationStage .right-panel {
+  visibility: hidden;
+}
+
+#gachaOverlay.gacha-return ~ #presentationStage #photoContainer {
+  visibility: visible;
+}
+
+#gachaOverlay.gacha-return ~ #presentationStage :is(.band-name, .bond-icons, .expert-badge, #bandDetailContainer) {
+  visibility: hidden !important;
+  transition: none;
+  animation: none;
+}
+
+.gacha-wipe-window {
+  clip-path: inset(50% 0);
+  transform: translate(-50%, -50%) rotate(var(--gacha-wipe-angle));
+  background-color: #0a0c10;
+}
+
+.gacha-wipe.active .gacha-wipe-window {
+  animation: gacha-wipe-reveal 250ms var(--gacha-wipe-ease) 320ms both;
+}
+
+.gacha-wipe-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 24%, #e6eef2, #9ca8b3 26%, #181b22 62%, #07080b);
+}
+
+.gacha-wipe.active .gacha-wipe-card {
+  animation: gacha-wipe-straighten 250ms cubic-bezier(.33, 1, .68, 1) 320ms both;
+}
+
+.gacha-wipe-art,
+.gacha-wipe-art img,
+.gacha-wipe-card::after {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.gacha-wipe-art {
+  transform-origin: center bottom;
+}
+
+.gacha-wipe-art img {
+  transform: scale(var(--user-image-scale, 1));
+}
+
+.gacha-wipe-art img:not([src]) {
+  visibility: hidden;
+}
+
+.gacha-wipe-card::after {
+  content: "";
+  background: radial-gradient(ellipse at 50% 56%, rgb(0 0 0 / 48%), transparent 73%),
+    linear-gradient(0deg, rgb(0 0 0 / 55%), transparent 65%);
+}
+
+.gacha-wipe-title {
+  --gacha-outline-color: var(--gacha-accent);
+  --gacha-ink-color: #fff3d6;
+  position: absolute;
+  z-index: 1;
+  top: 56%;
+  inset-inline: 8%;
+  translate: 0 -50%;
+  display: grid;
+  justify-items: center;
+  gap: .12em;
+  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: clamp(1rem, min(15vmin, calc(82vw / var(--gacha-title-units, 8))), 12rem);
+  font-weight: 900;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.gacha-wipe-title [hidden] {
+  display: none;
+}
+
+#gachaMvp {
+  --gacha-outline-color: #ffd66b;
+  color: transparent;
+  letter-spacing: .06em;
+}
+
+#gachaMvp,
+.gacha-wipe-name {
+  -webkit-text-stroke: .032em var(--gacha-outline-color);
+}
+
+.gacha-wipe-name {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: color-mix(in srgb, var(--gacha-ink-color) calc(var(--gacha-outline-progress) * 100%), transparent);
+}
+
+.gacha-outline-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.gacha-outline {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 .035em .07em rgb(0 0 0 / 80%));
+}
+
+@property --gacha-outline-progress {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+.gacha-outline-ink {
+  fill: var(--gacha-ink-color);
+  opacity: var(--gacha-outline-progress);
+}
+
+.gacha-outline-contour {
+  fill: none;
+  stroke: var(--gacha-outline-color);
+  stroke-width: var(--gacha-outline-width);
+  stroke-linejoin: round;
+  stroke-dasharray:
+    calc(var(--gacha-outline-segment) * var(--gacha-outline-progress))
+    calc(var(--gacha-outline-segment) * (1 - var(--gacha-outline-progress)));
+}
+
+.gacha-wipe.active .gacha-wipe-art {
+  animation: gacha-wipe-push var(--gacha-hold-duration) linear 570ms both;
+}
+
+.gacha-wipe.active .gacha-wipe-title {
+  animation:
+    gacha-wipe-push var(--gacha-hold-duration) linear 570ms both,
+    gacha-outline-draw 1500ms cubic-bezier(.35, .1, .45, 1) 570ms both;
+}
+
+.gacha-wipe-art { --gacha-push-scale: 1.04; }
+.gacha-wipe-best-portrait .gacha-wipe-art { --gacha-push-scale: 1.12; }
+.gacha-wipe-title { --gacha-push-scale: 1.025; }
+
+.gacha-wipe-hatches {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(48px, 8vw, 120px);
+  height: clamp(8px, 1.5vw, 16px);
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(var(--gacha-wipe-angle)) skewX(45deg);
+  background: repeating-linear-gradient(90deg, currentColor 0 2px, transparent 2px 14%);
+}
+
+.gacha-wipe.active .gacha-wipe-hatches {
+  animation: gacha-wipe-hatch-flash 570ms step-end both;
+}
+
+@keyframes gacha-wipe-expand {
+  to { transform: translate(-50%, -50%) rotate(var(--gacha-wipe-angle)) scaleY(1); }
+}
+
+@keyframes gacha-wipe-cutout {
+  /* The two outer strips remain visible as the center opens onto the radar. */
+  from {
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%, 0 0, 0 50%, 100% 50%, 100% 100%, 0 100%, 0 50%);
+  }
+  to {
+    clip-path: polygon(0 0, 100% 0, 100% 0, 0 0, 0 0, 0 100%, 100% 100%, 100% 100%, 0 100%, 0 100%);
+  }
+}
+
+@keyframes gacha-wipe-reveal {
+  to { clip-path: inset(0); }
+}
+
+@keyframes gacha-wipe-straighten {
+  from { transform: translate(-50%, -50%) scale(1.06); }
+  to { transform: translate(-50%, -50%) rotate(calc(-1 * var(--gacha-wipe-angle))); }
+}
+
+@keyframes gacha-wipe-push {
+  from { scale: 1; }
+  to { scale: var(--gacha-push-scale); }
+}
+
+@keyframes gacha-outline-draw {
+  from { --gacha-outline-progress: 0; }
+  to { --gacha-outline-progress: 1; }
+}
+
+@keyframes gacha-wipe-hatch-flash {
+  0%, 25.44%, 41.23%, 100% { opacity: 0; }
+  14.91% { opacity: 1; color: var(--gacha-wipe-color-2); }
+  31.58% { opacity: 1; color: var(--gacha-wipe-color-3); }
+}

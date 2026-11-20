@@ -1,4 +1,5 @@
 import { createRuntimeScope } from '../shared/runtimeScope';
+import { DEFAULT_GACHA_WIPE_COLORS, normalizeGachaWipeColors } from '../shared/gacha-wipe';
 
 // Original editor behavior. React owns the static layout; this controller owns its dynamic lists.
 export function startAdmin() {
@@ -1568,7 +1569,7 @@ function renderBands() {
                     <div class="form-group"><label>装备图</label><input type="text" value="${esc(b.equipmentIds || '')}" onchange="window.__rockRadarAdmin.updateBand(${idx},'equipmentIds',this.value)" placeholder="3,4 或 3,8,16" style="width:180px;"></div>
                     ${renderBandColorPicker(b, idx, 'base', '角色配色')}
                     <div class="form-group"><label>时长(ms)</label><input type="number" value="${b.duration || ''}" step="500" onchange="window.__rockRadarAdmin.updateBand(${idx},'duration',this.value?+this.value:undefined)" style="width:100px;"></div>
-                    <div class="checkbox-row" style="margin-top:18px;"><input type="checkbox" ${b.gacha ? 'checked' : ''} onchange="window.__rockRadarAdmin.updateBand(${idx},'gacha',this.checked)"><label>抽卡出金</label></div>
+                    <div class="checkbox-row" style="margin-top:18px;"><input id="band-gacha-${idx}" type="checkbox" ${b.gacha ? 'checked' : ''} onchange="window.__rockRadarAdmin.updateBand(${idx},'gacha',this.checked)"><label for="band-gacha-${idx}">抽卡出金</label></div>
                     <div class="form-group"><label>抽卡艺术字</label><input type="text" value="${esc(b.gachaText || '')}" onchange="window.__rockRadarAdmin.updateBand(${idx},'gachaText',this.value)" placeholder="留空则使用角色名" style="width:220px;"></div>
                 </div>
                 <div class="card" style="margin-top:14px;padding:14px 16px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);">
@@ -1768,6 +1769,9 @@ function renderConfig() {
     // 颜色
     const bestColorEl = document.getElementById('cfg-BEST_COLOR');
     if (bestColorEl) bestColorEl.value = C.BEST_COLOR || '#fff2a6';
+    normalizeGachaWipeColors(C.GACHA_WIPE_COLORS).forEach((color, index) => {
+        document.getElementById(`cfg-gacha-wipe-color-${index + 1}`).value = color;
+    });
     // 下拉
     const gachaStyle = document.getElementById('cfg-GACHA_FONT_STYLE');
     if (gachaStyle) gachaStyle.value = C.GACHA_FONT_STYLE || 0;
@@ -1871,6 +1875,9 @@ function collectConfig() {
     C.RADAR_AUDIO_FX_MODE = document.getElementById('cfg-RADAR_AUDIO_FX_MODE').value || 'tech';
     C.GACHA_ANIM_TYPE = 2;
     C.GACHA_FONT_STYLE = parseInt(document.getElementById('cfg-GACHA_FONT_STYLE').value);
+    C.GACHA_WIPE_COLORS = DEFAULT_GACHA_WIPE_COLORS.map((_, index) =>
+        document.getElementById(`cfg-gacha-wipe-color-${index + 1}`).value
+    );
     // MVP list
     appData.mvplist = document.getElementById('cfg-mvplist').value.split(',').map(s => s.trim()).filter(Boolean);
     // 专家 list

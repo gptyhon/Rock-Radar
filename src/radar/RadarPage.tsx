@@ -8,6 +8,7 @@ import { BackgroundMusic } from "./components/BackgroundMusic";
 import { OutroOverlay } from "./components/OutroOverlay";
 import { IntroOverlay } from "./components/IntroOverlay";
 import { S2IntroOverlay } from "./themes/S2IntroOverlay";
+import { S2GachaOverlay } from "./themes/S2GachaOverlay";
 import { BrandDecor } from "./components/BrandDecor";
 import { MvpBgContainer } from "./components/MvpBgContainer";
 import { SpecialSceneOverlay } from "./components/SpecialSceneOverlay";
@@ -47,7 +48,7 @@ export default function RadarPage() {
       <BrandDecor />
       <MvpBgContainer />
       <SpecialSceneOverlay />
-      <GachaOverlay />
+      {s2Background ? <S2GachaOverlay /> : <GachaOverlay />}
       <CoverBgLayer />
       <LivingFieldFallback />
       <LivingFieldCanvas />
